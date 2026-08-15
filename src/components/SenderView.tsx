@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, MediaAttachment } from '../types';
 import { NGL_60_TEMPLATES } from '../lib/templates';
 import { captureRealDeviceHints } from '../lib/deviceHints';
-import { Paperclip, X, Send, CheckCircle2, ArrowRight, Music, Video, FileText, Image as ImageIcon } from 'lucide-react';
+import { Paperclip, X, Send, CheckCircle2, ArrowRight, Music, Video, FileText, Image as ImageIcon, Crown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface SenderViewProps {
@@ -274,10 +274,16 @@ export const SenderView: React.FC<SenderViewProps> = ({
 
           {/* Recipient Handle & Prompt */}
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-white text-sm sm:text-base font-bold tracking-tight truncate">
-              @{recipientProfile.username || 'username'}
-            </p>
-            <h2 className="text-white font-black text-lg sm:text-xl leading-snug tracking-tight">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-white text-sm sm:text-base font-bold tracking-tight truncate">
+                @{recipientProfile.username || 'username'}
+              </p>
+              <div className="flex items-center gap-1 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 px-2.5 py-0.5 rounded-full text-[10px] font-black shadow-xs border border-amber-300/40 select-none shrink-0 ml-auto">
+                <Crown className="w-3 h-3 fill-slate-950 text-slate-950" />
+                <span className="tracking-wider">PRO</span>
+              </div>
+            </div>
+            <h2 className="text-white font-black text-xl sm:text-2xl leading-snug tracking-tight mt-1 drop-shadow-xs">
               {recipientProfile.prompt || "Send me an anonymous message"}
             </h2>
           </div>
@@ -294,7 +300,7 @@ export const SenderView: React.FC<SenderViewProps> = ({
               placeholder="Waiting for messages..."
               maxLength={500}
               rows={4}
-              className="w-full text-base font-bold text-slate-800 placeholder:text-[#a0abbd] placeholder:font-medium bg-transparent border-0 focus:border-0 outline-none focus:outline-none focus:ring-0 shadow-none resize-none p-1 transition-all leading-relaxed"
+              className="w-full text-lg sm:text-xl font-bold text-slate-800 placeholder:text-base sm:placeholder:text-lg placeholder:text-[#a0abbd] placeholder:font-medium bg-transparent border-0 focus:border-0 outline-none focus:outline-none focus:ring-0 shadow-none resize-none p-1 transition-all leading-relaxed"
             />
 
             {/* Loading Indicator when compressing files */}

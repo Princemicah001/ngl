@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile } from '../types';
-import { Link2, Dices, Check, PlusCircle, Sparkles } from 'lucide-react';
+import { Link2, Dices, Check, PlusCircle, Sparkles, Download } from 'lucide-react';
 import { NGL_60_TEMPLATES } from '../lib/templates';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 interface PlayViewProps {
   profile: UserProfile | null;
@@ -23,6 +24,7 @@ export const PlayView: React.FC<PlayViewProps> = ({
 }) => {
   const [isRolling, setIsRolling] = useState(false);
   const [diceRotation, setDiceRotation] = useState(0);
+  const { isInstalled, isIOS, installPWA } = usePWAInstall();
 
   const handleRollPrompt = async () => {
     if (isRolling) return;

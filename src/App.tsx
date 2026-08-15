@@ -559,7 +559,13 @@ export default function App() {
             onOpenMyInbox={() => setCurrentView('inbox')}
             onGetOwnLink={() => {
               window.history.pushState({}, '', window.location.pathname);
-              setHasOnboarded(false);
+              if (hasOnboarded && myProfile.username) {
+                setRecipientProfile(myProfile);
+                setCurrentView('play');
+              } else {
+                setHasOnboarded(false);
+                setCurrentView('play');
+              }
             }}
             appUrl={window.location.origin}
           />
