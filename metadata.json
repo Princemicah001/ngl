@@ -1,0 +1,6 @@
+{
+  "name": "NGL - Anonymous Q&A",
+  "description": "Send anonymous messages and receive honest feedback on www.nogl.online with custom links and media attachments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

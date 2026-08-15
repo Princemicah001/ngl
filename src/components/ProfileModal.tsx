@@ -1,0 +1,220 @@
+import React, { useState, useRef } from 'react';
+import { UserProfile } from '../types';
+import { X, Camera, Check, User, Trash2 } from 'lucide-react';
+
+interface ProfileModalProps {
+  profile: UserProfile | null;
+  onClose: () => void;
+  onSave: (updates: Partial<UserProfile>) => Promise<void>;
+  onResetAccount?: () => void;
+}
+
+const PRESET_AVATARS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80'
+];
+
+export const ProfileModal: React.FC<ProfileModalProps> = ({
+  profile,
+  onClose,
+  onSave,
+  onResetAccount
+}) => {
+  const [username, setUsername] = useState(profile?.username || '');
+  const [photoURL, setPhotoURL] = useState(profile?.photoURL || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 8 * 1024 * 1024) {
+      alert("Image is too large (max 8MB).");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setPhotoURL(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username.trim()) return;
+
+    setIsSaving(true);
+    try {
+      await onSave({
+        username: username.trim().toLowerCase().replace(/[@\s]/g, ''),
+        photoURL
+      });
+      onClose();
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      alert('Failed to save profile changes.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 select-none">
+      <div className="w-full max-w-sm bg-white rounded-[36px] p-7 shadow-2xl flex flex-col gap-6 relative">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            Edit Profile
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Bold Fluffy Avatar Circle Picker */}
+          <div className="flex flex-col items-center justify-center gap-3">
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="relative w-24 h-24 rounded-full cursor-pointer group p-1 bg-gradient-to-tr from-[#fa0f5c] via-[#f70a59] to-[#fc6320] shadow-xl hover:scale-105 transition-all"
+              title="Tap to choose photo"
+            >
+              <div className="w-full h-full rounded-full overflow-hidden bg-slate-100 flex items-center justify-center relative">
+                {photoURL ? (
+                  <img
+                    src={photoURL}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-900 flex items-center justify-center text-white font-black text-2xl">
+                    {username.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
+                
+                {/* Camera Overlay on Hover/Tap */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                  <Camera className="w-6 h-6" />
+                </div>
+              </div>
+
+              {/* Plump Camera Badge Button */}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shadow-lg border-2 border-white">
+                <Camera className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs font-black text-[#fa0f5c] hover:underline cursor-pointer"
+              >
+                Upload Photo
+              </button>
+
+              {photoURL && (
+                <button
+                  type="button"
+                  onClick={() => setPhotoURL('')}
+                  className="text-xs font-bold text-slate-400 hover:text-red-500 flex items-center gap-1 cursor-pointer"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  <span>Remove</span>
+                </button>
+              )}
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              className="hidden"
+            />
+
+            {/* Quick Preset Avatars */}
+            <div className="flex items-center gap-2 pt-1">
+              {PRESET_AVATARS.map((url, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setPhotoURL(url)}
+                  className={`w-7 h-7 rounded-full overflow-hidden transition-all cursor-pointer ${
+                    photoURL === url ? 'ring-2 ring-[#fa0f5c] scale-110' : 'opacity-70 hover:opacity-100'
+                  }`}
+                >
+                  <img src={url} alt={`preset-${i}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Username Handle Input */}
+          <div className="flex flex-col gap-2 text-left">
+            <label className="text-xs font-black text-slate-700 tracking-wide uppercase">
+              Username
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-4 text-slate-400 font-black text-base">
+                @
+              </span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="your_handle"
+                maxLength={28}
+                required
+                className="w-full bg-slate-100 rounded-2xl pl-9 pr-4 py-3.5 text-base font-extrabold text-slate-900 border-none outline-none focus:ring-2 focus:ring-[#fa0f5c] transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Action Button: Bold Black Pill */}
+          <button
+            type="submit"
+            disabled={isSaving || !username.trim()}
+            className="w-full bg-black hover:bg-slate-900 text-white font-black text-base py-4 rounded-full active:scale-95 shadow-xl disabled:opacity-50 transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer"
+          >
+            {isSaving ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <Check className="w-4 h-4" />
+                <span>Save Profile</span>
+              </>
+            )}
+          </button>
+
+          {onResetAccount && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm("Go to NGL welcome screen?")) {
+                  onResetAccount();
+                  onClose();
+                }
+              }}
+              className="w-full py-1 text-xs font-bold text-slate-400 hover:text-red-500 transition-colors cursor-pointer text-center"
+            >
+              Sign out / Switch Account
+            </button>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+};

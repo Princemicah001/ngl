@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile containing public display name, avatar, and custom NGL prompt.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string", "maxLength": 50 },
+        "prompt": { "type": "string", "maxLength": 150 },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "username"]
+    },
+    "NglMessage": {
+      "title": "NglMessage",
+      "description": "Anonymous message sent to a user's NGL inbox.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "recipientId": { "type": "string" },
+        "senderUid": { "type": "string" },
+        "text": { "type": "string", "maxLength": 1000 },
+        "promptTitle": { "type": "string", "maxLength": 200 },
+        "file": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "type": { "type": "string" },
+            "size": { "type": "number" },
+            "dataURL": { "type": "string" }
+          }
+        },
+        "read": { "type": "boolean" },
+        "reply": { "type": "string", "maxLength": 1000 },
+        "repliedAt": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["recipientId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document indexed by Auth UID."
+    },
+    "/users/{userId}/messages/{messageId}": {
+      "schema": "NglMessage",
+      "description": "Anonymous messages received by the host user."
+    }
+  }
+}

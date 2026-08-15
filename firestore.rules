@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // Anonymous messages subcollection
+      match /messages/{messageId} {
+        // Only the inbox owner can read or list their messages
+        allow get, list: if isOwner(userId);
+        
+        // Any authenticated (including anonymous) user can submit a message to an existing inbox
+        allow create: if isSignedIn();
+        
+        // Only inbox owner can mark read, reply, or delete
+        allow update, delete: if isOwner(userId);
+      }
+    }
+
+    // Username handle index
+    match /handles/{handle} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isSignedIn();
+      allow delete: if isSignedIn();
+    }
+  }
+}
