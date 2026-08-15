@@ -109,7 +109,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
                       <div className="relative w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-2xl flex-shrink-0 group-hover:scale-105 transition-transform shadow-xs">
                         <span>💌</span>
                         {isUnread && (
-                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#fa0f5c] ring-2 ring-white animate-pulse" />
+                          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#fa0f5c] ring-2 ring-white" />
                         )}
                       </div>
 

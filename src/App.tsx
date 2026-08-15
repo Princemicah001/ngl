@@ -318,9 +318,18 @@ export default function App() {
       } catch (e) {
         console.warn('Error deleting user profile from database:', e);
       }
-    } else {
+    }
+
+    // Completely clear all browser client caches and storage
+    try {
       localStorage.clear();
       sessionStorage.clear();
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      }
+    } catch (e) {
+      console.warn('Error wiping client caches:', e);
     }
 
     // Reset React state to fresh uninitialized state
@@ -330,7 +339,7 @@ export default function App() {
       id: 'local_user',
       username: newHandle,
       shortCode: newCode,
-      prompt: 'Send me an anonymous message',
+      prompt: 'send me anonymous messages!',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -345,7 +354,7 @@ export default function App() {
     setIsProfileModalOpen(false);
     setIsSwitchAccountModalOpen(false);
 
-    // Reset URL to clean root
+    // Reset URL to clean root without query params
     window.history.replaceState({}, '', window.location.pathname);
   };
 
@@ -495,7 +504,11 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-[#e60067] via-[#fa0f5c] to-[#ff6600] text-slate-900 flex flex-col items-center relative overflow-x-hidden selection:bg-white selection:text-[#fa0f5c]">
+    <div className={`min-h-screen w-full flex flex-col items-center relative overflow-x-hidden ${
+      currentView === 'sender'
+        ? 'bg-gradient-to-b from-[#e60067] via-[#fa0f5c] to-[#ff6600] text-slate-900 selection:bg-white selection:text-[#fa0f5c]'
+        : 'bg-[#fafafc] text-slate-900 selection:bg-[#fa0f5c] selection:text-white'
+    }`}>
       
       {/* Top Navigation Bar with gradient backdrop */}
       <Navbar

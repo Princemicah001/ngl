@@ -1,5 +1,14 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import {
+  initializeAuth,
+  browserLocalPersistence,
+  browserSessionPersistence,
+  inMemoryPersistence,
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged,
+  User
+} from 'firebase/auth';
 import {
   initializeFirestore,
   getFirestore,
@@ -31,7 +40,20 @@ export const firebaseConfig = {
 
 // Initialize Firebase safely
 export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-export const auth = getAuth(app);
+
+// Use initializeAuth with browserLocalPersistence to prevent "Database is closing/hidden"
+// IndexedDB errors that occur in sandboxed iframes, private browsing, and background tab transitions
+function createAuthInstance() {
+  try {
+    return initializeAuth(app, {
+      persistence: [browserLocalPersistence, browserSessionPersistence, inMemoryPersistence]
+    });
+  } catch (e) {
+    return getAuth(app);
+  }
+}
+
+export const auth = createAuthInstance();
 
 // Use initializeFirestore with experimentalAutoDetectLongPolling & experimentalForceLongPolling
 // to prevent [code=unavailable] WebChannel disconnects in sandboxed preview / iframe environments
@@ -72,18 +94,59 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 /**
- * Ensures the client is authenticated anonymously
+ * Ensures the client is authenticated anonymously with resilient state detection & retry
  */
 export async function ensureAnonymousAuth(): Promise<User> {
   if (auth.currentUser) {
     return auth.currentUser;
   }
+
+  // Check if existing persisted session is loading
+  const persistedUser = await new Promise<User | null>((resolve) => {
+    let resolved = false;
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!resolved) {
+        resolved = true;
+        unsub();
+        resolve(user);
+      }
+    }, () => {
+      if (!resolved) {
+        resolved = true;
+        resolve(null);
+      }
+    });
+
+    setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        unsub();
+        resolve(auth.currentUser);
+      }
+    }, 400);
+  });
+
+  if (persistedUser) {
+    return persistedUser;
+  }
+  if (auth.currentUser) {
+    return auth.currentUser;
+  }
+
   try {
     const cred = await signInAnonymously(auth);
     return cred.user;
   } catch (err) {
-    console.error('Failed to sign in anonymously:', err);
-    throw err;
+    console.warn('Initial anonymous sign-in attempt warning:', err);
+    // Transient retry
+    try {
+      await new Promise((r) => setTimeout(r, 250));
+      const retryCred = await signInAnonymously(auth);
+      return retryCred.user;
+    } catch (secondErr) {
+      console.warn('Second anonymous sign-in attempt warning:', secondErr);
+      throw secondErr;
+    }
   }
 }
 
@@ -485,12 +548,22 @@ export async function deleteUserProfileCompletely(
     console.warn('Error signing out during profile deletion:', e);
   }
 
-  // 6. Completely wipe localStorage & sessionStorage to leave it fresh as new
+  // 6. Completely wipe localStorage, sessionStorage, and Cache Storage to leave it fresh as new
   try {
     localStorage.clear();
     sessionStorage.clear();
   } catch (e) {
     console.warn('Error clearing storage:', e);
+  }
+
+  // 7. Purge Cache Storage API caches if supported
+  if (typeof window !== 'undefined' && 'caches' in window) {
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((name) => caches.delete(name)));
+    } catch (e) {
+      console.warn('Error clearing cache storage:', e);
+    }
   }
 }
 

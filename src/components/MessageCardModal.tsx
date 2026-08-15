@@ -168,8 +168,8 @@ export const MessageCardModal: React.FC<MessageCardModalProps> = ({
           <AlertTriangle className="w-5 h-5" />
         </button>
 
-        {/* Center Glowing Status Dot */}
-        <div className="w-3.5 h-3.5 rounded-full bg-white shadow-md animate-pulse" />
+        {/* Center Status Dot */}
+        <div className="w-3 h-3 rounded-full bg-white/90 shadow-sm" />
 
         <button
           onClick={onClose}

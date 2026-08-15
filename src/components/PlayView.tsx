@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile } from '../types';
-import { Link2, Dices, Check, Camera, Palette } from 'lucide-react';
+import { Link2, Dices, Check, PlusCircle, Sparkles } from 'lucide-react';
 import { NGL_60_TEMPLATES } from '../lib/templates';
 
 interface PlayViewProps {
@@ -27,9 +27,9 @@ export const PlayView: React.FC<PlayViewProps> = ({
   const handleRollPrompt = async () => {
     if (isRolling) return;
     setIsRolling(true);
-    setDiceRotation(prev => prev + 360);
+    setDiceRotation((prev) => prev + 360);
 
-    const otherPrompts = NGL_60_TEMPLATES.filter(p => p !== profile?.prompt);
+    const otherPrompts = NGL_60_TEMPLATES.filter((p) => p !== profile?.prompt);
     const nextPrompt = otherPrompts[Math.floor(Math.random() * otherPrompts.length)] || NGL_60_TEMPLATES[0];
 
     try {
@@ -41,140 +41,111 @@ export const PlayView: React.FC<PlayViewProps> = ({
     }
   };
 
-  const usernameHandle = profile?.username?.toUpperCase() || 'USER';
-  const displayPrompt = profile?.prompt || 'Send me an anonymous message';
+  const usernameHandle = profile?.username?.toUpperCase() || 'F_LAHOZ';
+  const displayPrompt = profile?.prompt || 'send me anonymous messages!';
 
   return (
-    <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-2 sm:py-6 flex flex-col md:flex-row md:items-center md:justify-center md:gap-10 lg:gap-16 flex-1 select-none">
+    <div className="w-full max-w-sm sm:max-w-md mx-auto px-4 py-2 flex flex-col items-center select-none">
       
-      {/* Left Column (Wide) / Center Card (Mobile): Center Question Card */}
+      {/* 1. Main Anonymous Question Card matching Screen 3 */}
       <motion.div
         initial={{ scale: 0.96, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.2 }}
-        className="w-full md:w-1/2 max-w-sm mx-auto relative my-auto py-2 flex flex-col items-center flex-shrink-0"
+        className="w-full relative rounded-[32px] sm:rounded-[36px] bg-gradient-to-b from-[#f70a59] via-[#fa0f5c] to-[#ff581f] p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-xl overflow-hidden text-white"
       >
-        <div className="w-full bg-white rounded-[32px] sm:rounded-[36px] shadow-2xl flex flex-col overflow-hidden">
-          
-          {/* Top Gradient Header */}
-          <div className="w-full bg-gradient-to-r from-[#fa0f5c] via-[#f70a59] to-[#fc6320] px-6 py-6 sm:py-7 flex items-center justify-between relative text-center">
-            <h2 className="w-full text-white font-black text-xl sm:text-2xl leading-tight tracking-tight drop-shadow-sm px-4">
-              {displayPrompt}
-            </h2>
-            
-            {/* Quick Roll Dice Button */}
-            <motion.button
-              onClick={handleRollPrompt}
-              animate={{ rotate: diceRotation }}
-              transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              title="Shuffle prompt question"
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 active:scale-90 text-white flex items-center justify-center backdrop-blur-md transition-all shadow-sm cursor-pointer"
-            >
-              <Dices className={`w-5 h-5 text-white ${isRolling ? 'animate-spin' : ''}`} />
-            </motion.button>
-          </div>
+        {/* Dice Shuffle Button in Corner */}
+        <motion.button
+          onClick={handleRollPrompt}
+          animate={{ rotate: diceRotation }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          title="Shuffle prompt"
+          className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 active:scale-90 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer z-10"
+        >
+          <Dices className={`w-4 h-4 ${isRolling ? 'animate-spin' : ''}`} />
+        </motion.button>
 
-          {/* Bottom Pure White Body with Question / Handle Content */}
-          <div className="w-full bg-white px-6 py-8 sm:py-10 flex flex-col items-center justify-center text-center">
-            
-            {/* User Avatar + Handle (Only @username and photo) */}
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-[#fa0f5c] to-[#fc6320]">
-                {profile?.photoURL ? (
-                  <img src={profile.photoURL} alt={profile.username} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-xs">
-                    {profile?.username?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                )}
-              </div>
-              <span className="text-xs font-black text-slate-400 tracking-wider">
-                @{profile?.username || 'user'}
-              </span>
+        {/* User Circular Avatar with Thick White Ring */}
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full ring-4 ring-white/95 shadow-lg overflow-hidden bg-slate-900 flex items-center justify-center mb-4 z-10">
+          {profile?.photoURL ? (
+            <img
+              src={profile.photoURL}
+              alt={profile.username}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-slate-900 flex items-center justify-center text-white font-black text-2xl">
+              {profile?.username?.charAt(0).toUpperCase() || 'U'}
             </div>
-
-            {/* Main Prompt typography */}
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={displayPrompt}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.15 }}
-                className="text-slate-900 font-black text-2xl sm:text-[26px] leading-snug tracking-tight max-w-[280px]"
-              >
-                {displayPrompt}
-              </motion.p>
-            </AnimatePresence>
-
-            <button
-              onClick={handleRollPrompt}
-              className="mt-4 text-[11px] font-bold text-slate-400 hover:text-slate-700 flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <Dices className="w-3.5 h-3.5" />
-              <span>Tap dice to switch question</span>
-            </button>
-          </div>
+          )}
         </div>
 
-        {/* Decorative Tools & Attribution */}
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-cyan-400 p-[2px] shadow-md flex items-center justify-center cursor-pointer hover:scale-105 transition-transform" onClick={handleRollPrompt} title="Shuffle prompt question">
-            <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
-              <Palette className="w-3.5 h-3.5 text-slate-700" />
-            </div>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-md shadow-md flex items-center justify-center cursor-pointer hover:scale-105 transition-transform" onClick={onOpenStoryShare} title="Create Instagram Story Sticker">
-            <Camera className="w-4 h-4 text-white" />
-          </div>
-        </div>
-
-        <p className="text-[11px] font-bold text-white/90 text-center mt-2.5 drop-shadow-sm">
-          Sent with ❤️ from team NGL
-        </p>
+        {/* Question Text in Bold White Font */}
+        <AnimatePresence mode="wait">
+          <motion.h2
+            key={displayPrompt}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="text-white font-black text-2xl sm:text-[26px] leading-tight tracking-tight max-w-[260px] drop-shadow-sm z-10"
+          >
+            {displayPrompt}
+          </motion.h2>
+        </AnimatePresence>
       </motion.div>
 
-      {/* Right Column (Wide) / Bottom Steps (Mobile): Action Steps Section */}
-      <div className="w-full md:w-1/2 max-w-sm mx-auto flex flex-col gap-3.5 pb-3 z-10 my-auto">
+      {/* 2. Section Heading matching Screen 3: "Get anonymous messages!" */}
+      <h3 className="text-[#f70a59] font-black text-xl sm:text-2xl text-center my-4 tracking-tight">
+        Get anonymous messages!
+      </h3>
+
+      {/* 3. Steps Container */}
+      <div className="w-full flex flex-col gap-3">
         
-        {/* Step 1: Copy Link Box */}
-        <div className="w-full bg-white/95 backdrop-blur-md rounded-[28px] sm:rounded-3xl p-5 flex flex-col items-center justify-center text-center shadow-lg">
-          <span className="text-sm font-black text-slate-900 tracking-tight">
+        {/* Step 1: Copy your link */}
+        <div className="w-full bg-[#fdf2f4] rounded-[24px] p-4 sm:p-5 flex flex-col items-center justify-center text-center border border-pink-100/60 shadow-sm">
+          <span className="text-black font-black text-base sm:text-lg">
             Step 1: Copy your link
           </span>
-          <span className="text-xs font-black text-slate-400 uppercase tracking-wider my-1.5 truncate max-w-[260px]">
+          <span className="text-slate-400 font-bold text-xs sm:text-sm tracking-wider uppercase my-1 truncate max-w-[260px]">
             NGL.LINK/{usernameHandle}
           </span>
           
           <button
             onClick={onCopyLink}
-            className={`w-full max-w-[220px] py-2.5 px-4 rounded-full text-xs font-black transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer mt-1 ${
+            className={`w-full max-w-[200px] py-2.5 px-6 rounded-full border-2 border-[#fa0f5c] text-sm font-black transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer mt-1 ${
               copied
-                ? 'text-green-600 bg-green-50'
-                : 'text-slate-900 bg-slate-100 hover:bg-pink-50 shadow-sm'
+                ? 'bg-[#fa0f5c] text-white'
+                : 'bg-white hover:bg-pink-50 text-[#fa0f5c]'
             }`}
           >
             {copied ? (
               <>
-                <Check className="w-3.5 h-3.5 text-green-600" />
-                <span>Copied!</span>
+                <Check className="w-4 h-4" />
+                <span>copied!</span>
               </>
             ) : (
               <>
-                <Link2 className="w-3.5 h-3.5 text-[#fa0f5c]" />
+                <Link2 className="w-4 h-4" />
                 <span>copy link</span>
               </>
             )}
           </button>
         </div>
 
-        {/* Step 2: Share on Story Button */}
-        <div className="w-full flex flex-col items-center justify-center">
+        {/* Step 2 : Share link on your Instagram Story */}
+        <div className="w-full bg-[#fdf2f4] rounded-[24px] p-4 sm:p-5 flex flex-col items-center justify-center text-center border border-pink-100/60 shadow-sm">
+          <span className="text-black font-black text-base sm:text-lg mb-3">
+            Step 2 : Share link on your Instagram Story
+          </span>
+          
           <button
             onClick={onOpenStoryShare}
-            className="w-full bg-black hover:bg-slate-900 text-white font-black text-base sm:text-lg py-4 rounded-full shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-4 px-6 rounded-full bg-[#fa0f5c] hover:bg-[#e00a50] text-white font-black text-lg sm:text-xl shadow-lg shadow-pink-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Share on Story!</span>
+            <PlusCircle className="w-5 h-5" />
+            <span>Share!</span>
           </button>
         </div>
 
