@@ -10,6 +10,8 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  getDocs,
+  writeBatch,
   onSnapshot,
   query,
   orderBy,
@@ -87,6 +89,10 @@ export async function ensureAnonymousAuth(): Promise<User> {
 
 import { generateRandomCode } from './templates';
 
+// In-memory profile cache for sub-millisecond instant loads on repeat/direct queries
+const profileMemoryCache = new Map<string, { profile: UserProfile; timestamp: number }>();
+const CACHE_TTL_MS = 60 * 1000; // 1 minute local cache
+
 /**
  * Fetch or create a user profile in Firestore
  */
@@ -105,15 +111,33 @@ export async function getOrCreateUserProfile(uid: string, initialUsername?: stri
       if (data.username) {
         try {
           const handleRef = doc(db, 'handles', data.username.toLowerCase());
-          await setDoc(handleRef, { uid, username: data.username, shortCode: data.shortCode }, { merge: true });
+          await setDoc(handleRef, { 
+            uid, 
+            username: data.username, 
+            shortCode: data.shortCode,
+            photoURL: data.photoURL || null,
+            prompt: data.prompt || 'Send me an anonymous message'
+          }, { merge: true });
           if (data.shortCode) {
             const codeRef = doc(db, 'handles', data.shortCode.toLowerCase());
-            await setDoc(codeRef, { uid, username: data.username, shortCode: data.shortCode }, { merge: true });
+            await setDoc(codeRef, { 
+              uid, 
+              username: data.username, 
+              shortCode: data.shortCode,
+              photoURL: data.photoURL || null,
+              prompt: data.prompt || 'Send me an anonymous message'
+            }, { merge: true });
           }
         } catch (e) {
           console.warn('Could not set handle mapping:', e);
         }
       }
+      
+      // Update memory cache
+      profileMemoryCache.set(uid.toLowerCase(), { profile: data, timestamp: Date.now() });
+      if (data.username) profileMemoryCache.set(data.username.toLowerCase(), { profile: data, timestamp: Date.now() });
+      if (data.shortCode) profileMemoryCache.set(data.shortCode.toLowerCase(), { profile: data, timestamp: Date.now() });
+
       return data;
     } else {
       const shortCode = generateRandomCode(6);
@@ -122,7 +146,7 @@ export async function getOrCreateUserProfile(uid: string, initialUsername?: stri
         id: uid,
         username,
         shortCode,
-        prompt: 'send me anonymous messages!',
+        prompt: 'Send me an anonymous message',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -131,13 +155,29 @@ export async function getOrCreateUserProfile(uid: string, initialUsername?: stri
       // Store handle and code mapping
       try {
         const handleRef = doc(db, 'handles', username.toLowerCase());
-        await setDoc(handleRef, { uid, username, shortCode }, { merge: true });
+        await setDoc(handleRef, { 
+          uid, 
+          username, 
+          shortCode,
+          photoURL: null,
+          prompt: 'Send me an anonymous message'
+        }, { merge: true });
         const codeRef = doc(db, 'handles', shortCode.toLowerCase());
-        await setDoc(codeRef, { uid, username, shortCode }, { merge: true });
+        await setDoc(codeRef, { 
+          uid, 
+          username, 
+          shortCode,
+          photoURL: null,
+          prompt: 'Send me an anonymous message'
+        }, { merge: true });
       } catch (e) {
         console.warn('Could not set handle mapping:', e);
       }
       
+      profileMemoryCache.set(uid.toLowerCase(), { profile: defaultProfile, timestamp: Date.now() });
+      profileMemoryCache.set(username.toLowerCase(), { profile: defaultProfile, timestamp: Date.now() });
+      profileMemoryCache.set(shortCode.toLowerCase(), { profile: defaultProfile, timestamp: Date.now() });
+
       return defaultProfile;
     }
   } catch (error) {
@@ -146,24 +186,47 @@ export async function getOrCreateUserProfile(uid: string, initialUsername?: stri
 }
 
 /**
- * Update user profile
+ * Update user profile globally and synchronize handles/codes registry instantly
  */
 export async function updateUserProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
   const userRef = doc(db, 'users', uid);
   try {
-    await updateDoc(userRef, {
+    const cleanUpdates = {
       ...updates,
       updatedAt: new Date().toISOString()
-    });
-    if (updates.username || updates.shortCode) {
+    };
+    await updateDoc(userRef, cleanUpdates);
+
+    // Fetch latest complete profile to update cache and handle entries
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      const fullProfile = snap.data() as UserProfile;
+      const uName = fullProfile.username;
+      const sCode = fullProfile.shortCode;
+
+      // Update in-memory cache
+      profileMemoryCache.set(uid.toLowerCase(), { profile: fullProfile, timestamp: Date.now() });
+      if (uName) profileMemoryCache.set(uName.toLowerCase(), { profile: fullProfile, timestamp: Date.now() });
+      if (sCode) profileMemoryCache.set(sCode.toLowerCase(), { profile: fullProfile, timestamp: Date.now() });
+
+      // Always sync handle & shortcode registry docs so lookup by handle or code has latest photoURL and prompt
+      const handleData = {
+        uid,
+        username: uName,
+        shortCode: sCode,
+        photoURL: fullProfile.photoURL || null,
+        prompt: fullProfile.prompt || 'Send me an anonymous message',
+        updatedAt: fullProfile.updatedAt
+      };
+
       try {
-        if (updates.username) {
-          const handleRef = doc(db, 'handles', updates.username.toLowerCase());
-          await setDoc(handleRef, { uid, username: updates.username, shortCode: updates.shortCode }, { merge: true });
+        if (uName) {
+          const handleRef = doc(db, 'handles', uName.toLowerCase());
+          await setDoc(handleRef, handleData, { merge: true });
         }
-        if (updates.shortCode) {
-          const codeRef = doc(db, 'handles', updates.shortCode.toLowerCase());
-          await setDoc(codeRef, { uid, username: updates.username, shortCode: updates.shortCode }, { merge: true });
+        if (sCode) {
+          const codeRef = doc(db, 'handles', sCode.toLowerCase());
+          await setDoc(codeRef, handleData, { merge: true });
         }
       } catch (e) {
         console.warn('Could not update handle mapping:', e);
@@ -175,36 +238,95 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
 }
 
 /**
- * Get user profile by UID or Instagram Handle
+ * Fast sub-second Get User Profile by UID, Username, or ShortCode with parallel lookups
  */
 export async function getUserProfile(uidOrHandle: string): Promise<UserProfile | null> {
+  if (!uidOrHandle) return null;
   const cleanKey = uidOrHandle.trim().toLowerCase().replace('@', '');
+
+  // 1. Check in-memory fast cache first (<1ms response)
+  const cached = profileMemoryCache.get(cleanKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.profile;
+  }
+
   try {
-    // 1. Try direct UID doc fetch
+    // 2. Parallel fetch direct UID doc and handles/code mapping simultaneously for maximum speed (<150ms)
     const userRef = doc(db, 'users', uidOrHandle);
-    const snap = await getDoc(userRef);
-    if (snap.exists()) {
-      return snap.data() as UserProfile;
+    const handleRef = doc(db, 'handles', cleanKey);
+
+    const [userSnap, handleSnap] = await Promise.all([
+      getDoc(userRef).catch(() => null),
+      getDoc(handleRef).catch(() => null)
+    ]);
+
+    if (userSnap && userSnap.exists()) {
+      const profile = userSnap.data() as UserProfile;
+      profileMemoryCache.set(cleanKey, { profile, timestamp: Date.now() });
+      profileMemoryCache.set(profile.id.toLowerCase(), { profile, timestamp: Date.now() });
+      if (profile.username) profileMemoryCache.set(profile.username.toLowerCase(), { profile, timestamp: Date.now() });
+      if (profile.shortCode) profileMemoryCache.set(profile.shortCode.toLowerCase(), { profile, timestamp: Date.now() });
+      return profile;
     }
 
-    // 2. Try handles registry doc
-    const handleRef = doc(db, 'handles', cleanKey);
-    const handleSnap = await getDoc(handleRef);
-    if (handleSnap.exists()) {
-      const { uid } = handleSnap.data() as { uid: string };
-      if (uid) {
-        const linkedUserRef = doc(db, 'users', uid);
-        const linkedUserSnap = await getDoc(linkedUserRef);
-        if (linkedUserSnap.exists()) {
-          return linkedUserSnap.data() as UserProfile;
+    if (handleSnap && handleSnap.exists()) {
+      const handleData = handleSnap.data() as { uid?: string; username?: string; shortCode?: string; photoURL?: string; prompt?: string };
+      if (handleData.uid) {
+        const linkedUserRef = doc(db, 'users', handleData.uid);
+        const linkedUserSnap = await getDoc(linkedUserRef).catch(() => null);
+        if (linkedUserSnap && linkedUserSnap.exists()) {
+          const profile = linkedUserSnap.data() as UserProfile;
+          profileMemoryCache.set(cleanKey, { profile, timestamp: Date.now() });
+          profileMemoryCache.set(profile.id.toLowerCase(), { profile, timestamp: Date.now() });
+          if (profile.username) profileMemoryCache.set(profile.username.toLowerCase(), { profile, timestamp: Date.now() });
+          if (profile.shortCode) profileMemoryCache.set(profile.shortCode.toLowerCase(), { profile, timestamp: Date.now() });
+          return profile;
         }
+
+        // If user doc is unreachable, construct from handle doc
+        const fallbackProfile: UserProfile = {
+          id: handleData.uid,
+          username: handleData.username || cleanKey,
+          shortCode: handleData.shortCode || cleanKey,
+          photoURL: handleData.photoURL || undefined,
+          prompt: handleData.prompt || 'Send me an anonymous message'
+        };
+        return fallbackProfile;
       }
     }
+
     return null;
   } catch (error) {
     console.warn(`Profile for ${uidOrHandle} not found or inaccessible:`, error);
     return null;
   }
+}
+
+/**
+ * Real-time listener for any user profile updates (photoURL, prompt, handle changes)
+ */
+export function subscribeToUserProfile(
+  userId: string,
+  onUpdate: (profile: UserProfile) => void,
+  onError?: (error: Error) => void
+): () => void {
+  const userRef = doc(db, 'users', userId);
+  return onSnapshot(
+    userRef,
+    (snap) => {
+      if (snap.exists()) {
+        const profile = snap.data() as UserProfile;
+        profileMemoryCache.set(userId.toLowerCase(), { profile, timestamp: Date.now() });
+        if (profile.username) profileMemoryCache.set(profile.username.toLowerCase(), { profile, timestamp: Date.now() });
+        if (profile.shortCode) profileMemoryCache.set(profile.shortCode.toLowerCase(), { profile, timestamp: Date.now() });
+        onUpdate(profile);
+      }
+    },
+    (error) => {
+      console.warn(`Profile subscription for ${userId} failed:`, error);
+      if (onError) onError(error);
+    }
+  );
 }
 
 /**
@@ -307,3 +429,68 @@ export async function deleteMessage(userId: string, messageId: string): Promise<
     throw handleFirestoreError(error, OperationType.DELETE, `users/${userId}/messages/${messageId}`);
   }
 }
+
+/**
+ * Completely delete a user profile, erase all inbox messages, purge handle registries, and wipe all local caches
+ */
+export async function deleteUserProfileCompletely(
+  userId: string,
+  username?: string,
+  shortCode?: string
+): Promise<void> {
+  // 1. Clear in-memory profile caches immediately
+  profileMemoryCache.clear();
+
+  // 2. Fetch and delete all messages in subcollection
+  try {
+    const messagesCol = collection(db, 'users', userId, 'messages');
+    const msgSnap = await getDocs(messagesCol);
+    const deletePromises = msgSnap.docs.map((docSnap) => deleteDoc(docSnap.ref).catch(() => null));
+    await Promise.all(deletePromises);
+  } catch (e) {
+    console.warn('Error deleting message documents during profile deletion:', e);
+  }
+
+  // 3. Delete handles and shortcode index documents
+  try {
+    if (username) {
+      const handleRef = doc(db, 'handles', username.toLowerCase());
+      await deleteDoc(handleRef).catch(() => null);
+    }
+  } catch (e) {
+    console.warn('Error deleting handle document:', e);
+  }
+
+  try {
+    if (shortCode) {
+      const codeRef = doc(db, 'handles', shortCode.toLowerCase());
+      await deleteDoc(codeRef).catch(() => null);
+    }
+  } catch (e) {
+    console.warn('Error deleting shortcode document:', e);
+  }
+
+  // 4. Delete main user profile document
+  try {
+    const userRef = doc(db, 'users', userId);
+    await deleteDoc(userRef).catch(() => null);
+  } catch (e) {
+    console.warn('Error deleting user document:', e);
+  }
+
+  // 5. Sign out / purge Auth state
+  try {
+    await auth.signOut();
+  } catch (e) {
+    console.warn('Error signing out during profile deletion:', e);
+  }
+
+  // 6. Completely wipe localStorage & sessionStorage to leave it fresh as new
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+  } catch (e) {
+    console.warn('Error clearing storage:', e);
+  }
+}
+

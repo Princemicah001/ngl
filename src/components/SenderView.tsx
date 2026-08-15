@@ -266,11 +266,9 @@ export const SenderView: React.FC<SenderViewProps> = ({
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-                alt={recipientProfile.username}
-                className="w-full h-full rounded-full object-cover"
-              />
+              <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center text-white font-black text-xl sm:text-2xl">
+                {recipientProfile.username ? recipientProfile.username.charAt(0).toUpperCase() : 'U'}
+              </div>
             )}
           </div>
 
@@ -280,7 +278,7 @@ export const SenderView: React.FC<SenderViewProps> = ({
               @{recipientProfile.username || 'username'}
             </p>
             <h2 className="text-white font-black text-lg sm:text-xl leading-snug tracking-tight">
-              {recipientProfile.prompt || "send me an anonymous message"}
+              {recipientProfile.prompt || "Send me an anonymous message"}
             </h2>
           </div>
         </div>

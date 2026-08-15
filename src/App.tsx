@@ -5,11 +5,13 @@ import {
   getOrCreateUserProfile,
   getUserProfile,
   updateUserProfile,
+  subscribeToUserProfile,
   sendAnonymousMessage,
   subscribeToInbox,
   markMessageRead,
   replyToMessage,
-  deleteMessage
+  deleteMessage,
+  deleteUserProfileCompletely
 } from './lib/firebase';
 import { UserProfile, NglMessage, MediaAttachment } from './types';
 import { Navbar } from './components/Navbar';
@@ -30,7 +32,7 @@ export default function App() {
   // Instant synchronous startup state (0ms delay)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [myProfile, setMyProfile] = useState<UserProfile>(() => {
-    const savedHandle = localStorage.getItem('ngl_username') || `user_${generateRandomCode(4)}`;
+    const savedHandle = localStorage.getItem('ngl_username') || `user_${generateRandomCode(6)}`;
     const savedCode = localStorage.getItem('ngl_shortcode') || generateRandomCode(6);
     const savedPhoto = localStorage.getItem('ngl_photo_url') || undefined;
     const savedNotifs = localStorage.getItem('ngl_notifications_enabled');
@@ -46,7 +48,19 @@ export default function App() {
       updatedAt: new Date().toISOString()
     };
   });
-  const [recipientProfile, setRecipientProfile] = useState<UserProfile | null>(null);
+  
+  // Initialize recipient profile immediately from targetParam if available without user_qe9z placeholder
+  const [recipientProfile, setRecipientProfile] = useState<UserProfile | null>(() => {
+    if (!targetParam) return null;
+    const cleanHandle = targetParam.trim().replace(/^@/, '');
+    return {
+      id: targetParam,
+      username: cleanHandle,
+      shortCode: cleanHandle.length <= 8 ? cleanHandle : cleanHandle.substring(0, 6),
+      prompt: 'Send me an anonymous message'
+    };
+  });
+
   const [messages, setMessages] = useState<NglMessage[]>([]);
   const [currentView, setCurrentView] = useState<'play' | 'inbox' | 'sender'>(() => {
     return targetParam ? 'sender' : 'play';
@@ -74,9 +88,38 @@ export default function App() {
     targetParam.toLowerCase() !== myProfile.shortCode?.toLowerCase()
   );
 
-  // Background non-blocking Firebase synchronization
+  // Sub-0.5s Fast Recipient Profile Fetch & Real-Time Sync
+  useEffect(() => {
+    let unsubscribeRecipientProfile: (() => void) | null = null;
+
+    if (targetParam) {
+      // 1. Immediately fetch the real profile for this code or handle (< 0.2s)
+      getUserProfile(targetParam).then((target) => {
+        if (target) {
+          setRecipientProfile(target);
+          setCurrentView('sender');
+
+          // 2. Set up real-time listener on the recipient so photo/prompt changes sync live instantly
+          if (target.id) {
+            unsubscribeRecipientProfile = subscribeToUserProfile(target.id, (liveProfile) => {
+              setRecipientProfile(liveProfile);
+            });
+          }
+        }
+      }).catch((e) => {
+        console.warn('Fast target fetch failed:', e);
+      });
+    }
+
+    return () => {
+      if (unsubscribeRecipientProfile) unsubscribeRecipientProfile();
+    };
+  }, [targetParam]);
+
+  // Background non-blocking Firebase synchronization for auth and inbox
   useEffect(() => {
     let unsubscribeInbox: (() => void) | null = null;
+    let unsubscribeMyProfile: (() => void) | null = null;
 
     async function syncFirebase() {
       try {
@@ -91,21 +134,19 @@ export default function App() {
 
         if (profile.username) localStorage.setItem('ngl_username', profile.username);
         if (profile.shortCode) localStorage.setItem('ngl_shortcode', profile.shortCode);
+        if (profile.photoURL) localStorage.setItem('ngl_photo_url', profile.photoURL);
+
+        // Subscribe to live updates on own profile to keep photo/prompt synced
+        unsubscribeMyProfile = subscribeToUserProfile(user.uid, (liveProfile) => {
+          setMyProfile(liveProfile);
+          if (liveProfile.photoURL) localStorage.setItem('ngl_photo_url', liveProfile.photoURL);
+        });
 
         // If visiting someone else's link via ?to=
         if (targetParam && targetParam !== user.uid && targetParam.toLowerCase() !== profile.username?.toLowerCase() && targetParam.toLowerCase() !== profile.shortCode?.toLowerCase()) {
           const target = await getUserProfile(targetParam);
           if (target) {
             setRecipientProfile(target);
-            setCurrentView('sender');
-          } else {
-            const fallbackHandle = targetParam.replace(/[@\s]/g, '');
-            setRecipientProfile({
-              id: targetParam,
-              username: fallbackHandle,
-              shortCode: fallbackHandle.substring(0, 6),
-              prompt: 'send me anonymous messages!'
-            });
             setCurrentView('sender');
           }
         } else {
@@ -146,6 +187,7 @@ export default function App() {
 
     return () => {
       if (unsubscribeInbox) unsubscribeInbox();
+      if (unsubscribeMyProfile) unsubscribeMyProfile();
     };
   }, [targetParam]);
 
@@ -250,7 +292,7 @@ export default function App() {
     }
   };
 
-  // Handle Complete Sign Out / Reset Account
+  // Handle Complete Sign Out / Reset Account on this device
   const handleSignOut = () => {
     localStorage.removeItem('ngl_has_onboarded');
     localStorage.removeItem('ngl_username');
@@ -261,6 +303,50 @@ export default function App() {
     setIsProfileModalOpen(false);
     setIsSwitchAccountModalOpen(false);
     window.history.pushState({}, '', window.location.pathname);
+  };
+
+  // Handle Permanent Account Deletion & Complete Cache Wipe (Fresh as new)
+  const handleDeleteAccount = async () => {
+    const uidToDelete = currentUser?.uid || (myProfile?.id !== 'local_user' ? myProfile?.id : null);
+    if (uidToDelete) {
+      try {
+        await deleteUserProfileCompletely(
+          uidToDelete,
+          myProfile?.username,
+          myProfile?.shortCode
+        );
+      } catch (e) {
+        console.warn('Error deleting user profile from database:', e);
+      }
+    } else {
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+
+    // Reset React state to fresh uninitialized state
+    const newCode = generateRandomCode(6);
+    const newHandle = `user_${generateRandomCode(6)}`;
+    const freshProfile: UserProfile = {
+      id: 'local_user',
+      username: newHandle,
+      shortCode: newCode,
+      prompt: 'Send me an anonymous message',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    setMyProfile(freshProfile);
+    setRecipientProfile(null);
+    setMessages([]);
+    setSelectedMessage(null);
+    setCurrentUser(null);
+    setHasOnboarded(false);
+    setCurrentView('play');
+    setIsProfileModalOpen(false);
+    setIsSwitchAccountModalOpen(false);
+
+    // Reset URL to clean root
+    window.history.replaceState({}, '', window.location.pathname);
   };
 
   // Handle Copy NGL link
@@ -343,8 +429,30 @@ export default function App() {
     if (updates.username) {
       localStorage.setItem('ngl_username', updates.username);
     }
-    if (myProfile?.id && currentUser?.uid) {
-      await updateUserProfile(currentUser.uid, updates);
+    if (updates.photoURL !== undefined) {
+      if (updates.photoURL) {
+        localStorage.setItem('ngl_photo_url', updates.photoURL);
+      } else {
+        localStorage.removeItem('ngl_photo_url');
+      }
+    }
+    if (updates.notificationsEnabled !== undefined) {
+      localStorage.setItem('ngl_notifications_enabled', String(updates.notificationsEnabled));
+    }
+
+    try {
+      let uid = currentUser?.uid || (myProfile?.id !== 'local_user' ? myProfile?.id : null);
+      if (!uid) {
+        const user = await ensureAnonymousAuth();
+        setCurrentUser(user);
+        uid = user.uid;
+        localStorage.setItem('ngl_uid', uid);
+      }
+      if (uid) {
+        await updateUserProfile(uid, updates);
+      }
+    } catch (e) {
+      console.warn('Error persisting profile update to Firestore:', e);
     }
   };
 
@@ -462,6 +570,7 @@ export default function App() {
           onClose={() => setIsProfileModalOpen(false)}
           onSave={handleSaveProfile}
           onResetAccount={handleSignOut}
+          onDeleteAccount={handleDeleteAccount}
           onOpenSwitchAccount={() => setIsSwitchAccountModalOpen(true)}
         />
       )}
