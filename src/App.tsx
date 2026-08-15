@@ -11,7 +11,8 @@ import {
   markMessageRead,
   replyToMessage,
   deleteMessage,
-  deleteUserProfileCompletely
+  deleteUserProfileCompletely,
+  auth
 } from './lib/firebase';
 import { UserProfile, NglMessage, MediaAttachment } from './types';
 import { Navbar } from './components/Navbar';
@@ -31,12 +32,16 @@ export default function App() {
 
   // Instant synchronous startup state (0ms delay)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [hasOnboarded, setHasOnboarded] = useState<boolean>(() => {
+    return localStorage.getItem('ngl_has_onboarded') === 'true';
+  });
+
   const [myProfile, setMyProfile] = useState<UserProfile>(() => {
-    const savedHandle = localStorage.getItem('ngl_username') || `user_${generateRandomCode(6)}`;
-    const savedCode = localStorage.getItem('ngl_shortcode') || generateRandomCode(6);
+    const savedHandle = localStorage.getItem('ngl_username') || '';
+    const savedCode = localStorage.getItem('ngl_shortcode') || '';
     const savedPhoto = localStorage.getItem('ngl_photo_url') || undefined;
     const savedNotifs = localStorage.getItem('ngl_notifications_enabled');
-    const savedPrompt = localStorage.getItem('ngl_user_prompt') || 'Send me an anonymous message';
+    const savedPrompt = localStorage.getItem('ngl_user_prompt') || 'send me anonymous messages!';
     return {
       id: localStorage.getItem('ngl_uid') || 'local_user',
       username: savedHandle,
@@ -48,8 +53,7 @@ export default function App() {
       updatedAt: new Date().toISOString()
     };
   });
-  
-  // Initialize recipient profile immediately from targetParam if available without user_qe9z placeholder
+
   const [recipientProfile, setRecipientProfile] = useState<UserProfile | null>(() => {
     if (!targetParam) return null;
     const cleanHandle = targetParam.trim().replace(/^@/, '');
@@ -57,7 +61,7 @@ export default function App() {
       id: targetParam,
       username: cleanHandle,
       shortCode: cleanHandle.length <= 8 ? cleanHandle : cleanHandle.substring(0, 6),
-      prompt: 'Send me an anonymous message'
+      prompt: 'send me anonymous messages!'
     };
   });
 
@@ -70,9 +74,6 @@ export default function App() {
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const [isSwitchAccountModalOpen, setIsSwitchAccountModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [hasOnboarded, setHasOnboarded] = useState<boolean>(() => {
-    return localStorage.getItem('ngl_has_onboarded') === 'true' || Boolean(localStorage.getItem('ngl_username'));
-  });
 
   const prevMessagesCountRef = useRef<number | null>(null);
   const myProfileRef = useRef(myProfile);
@@ -122,61 +123,68 @@ export default function App() {
     let unsubscribeMyProfile: (() => void) | null = null;
 
     async function syncFirebase() {
+      // DO NOT auto-sign in anonymously and DO NOT auto-create a profile if user hasn't onboarded and is not visiting a link
+      if (!hasOnboarded && !targetParam) {
+        return;
+      }
+
       try {
         const user = await ensureAnonymousAuth();
         setCurrentUser(user);
         localStorage.setItem('ngl_uid', user.uid);
 
-        // Fetch or create profile for current user
-        const storedHandle = localStorage.getItem('ngl_username') || myProfile.username;
-        const profile = await getOrCreateUserProfile(user.uid, storedHandle);
-        setMyProfile(profile);
+        // Fetch or create profile for current user if onboarded
+        if (hasOnboarded) {
+          const storedHandle = localStorage.getItem('ngl_username') || myProfile.username;
+          if (storedHandle) {
+            const profile = await getOrCreateUserProfile(user.uid, storedHandle);
+            setMyProfile(profile);
 
-        if (profile.username) localStorage.setItem('ngl_username', profile.username);
-        if (profile.shortCode) localStorage.setItem('ngl_shortcode', profile.shortCode);
-        if (profile.photoURL) localStorage.setItem('ngl_photo_url', profile.photoURL);
+            if (profile.username) localStorage.setItem('ngl_username', profile.username);
+            if (profile.shortCode) localStorage.setItem('ngl_shortcode', profile.shortCode);
+            if (profile.photoURL) localStorage.setItem('ngl_photo_url', profile.photoURL);
 
-        // Subscribe to live updates on own profile to keep photo/prompt synced
-        unsubscribeMyProfile = subscribeToUserProfile(user.uid, (liveProfile) => {
-          setMyProfile(liveProfile);
-          if (liveProfile.photoURL) localStorage.setItem('ngl_photo_url', liveProfile.photoURL);
-        });
+            // Subscribe to live updates on own profile to keep photo/prompt synced
+            unsubscribeMyProfile = subscribeToUserProfile(user.uid, (liveProfile) => {
+              setMyProfile(liveProfile);
+              if (liveProfile.photoURL) localStorage.setItem('ngl_photo_url', liveProfile.photoURL);
+            });
+
+            // Real-time inbox subscription
+            unsubscribeInbox = subscribeToInbox(user.uid, (newMessages) => {
+              if (prevMessagesCountRef.current !== null && newMessages.length > prevMessagesCountRef.current) {
+                const latestMsg = newMessages[0];
+                const notifsActive = myProfileRef.current?.notificationsEnabled !== false && localStorage.getItem('ngl_notifications_enabled') !== 'false';
+                
+                if (notifsActive && 'Notification' in window && Notification.permission === 'granted') {
+                  try {
+                    const notif = new Notification('New Anonymous Message! 💌', {
+                      body: latestMsg?.text ? (latestMsg.text.length > 50 ? `${latestMsg.text.substring(0, 50)}...` : latestMsg.text) : 'You received a new secret message on NGL',
+                      icon: 'https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png',
+                      tag: 'ngl-new-message'
+                    });
+                    notif.onclick = () => {
+                      window.focus();
+                      setCurrentView('inbox');
+                    };
+                  } catch (e) {
+                    console.warn('Could not show browser notification:', e);
+                  }
+                }
+              }
+              prevMessagesCountRef.current = newMessages.length;
+              setMessages(newMessages);
+            });
+          }
+        }
 
         // If visiting someone else's link via ?to=
-        if (targetParam && targetParam !== user.uid && targetParam.toLowerCase() !== profile.username?.toLowerCase() && targetParam.toLowerCase() !== profile.shortCode?.toLowerCase()) {
+        if (targetParam && (!user || (targetParam !== user.uid && targetParam.toLowerCase() !== myProfile.username?.toLowerCase() && targetParam.toLowerCase() !== myProfile.shortCode?.toLowerCase()))) {
           const target = await getUserProfile(targetParam);
           if (target) {
             setRecipientProfile(target);
             setCurrentView('sender');
           }
-        } else {
-          setRecipientProfile(profile);
-          // Real-time inbox subscription
-          unsubscribeInbox = subscribeToInbox(user.uid, (newMessages) => {
-            // Check if a new message arrived
-            if (prevMessagesCountRef.current !== null && newMessages.length > prevMessagesCountRef.current) {
-              const latestMsg = newMessages[0];
-              const notifsActive = myProfileRef.current?.notificationsEnabled !== false && localStorage.getItem('ngl_notifications_enabled') !== 'false';
-              
-              if (notifsActive && 'Notification' in window && Notification.permission === 'granted') {
-                try {
-                  const notif = new Notification('New Anonymous Message! 💌', {
-                    body: latestMsg?.text ? (latestMsg.text.length > 50 ? `${latestMsg.text.substring(0, 50)}...` : latestMsg.text) : 'You received a new secret message on NGL',
-                    icon: 'https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png',
-                    tag: 'ngl-new-message'
-                  });
-                  notif.onclick = () => {
-                    window.focus();
-                    setCurrentView('inbox');
-                  };
-                } catch (e) {
-                  console.warn('Could not show browser notification:', e);
-                }
-              }
-            }
-            prevMessagesCountRef.current = newMessages.length;
-            setMessages(newMessages);
-          });
         }
       } catch (err) {
         console.warn('Background sync note:', err);
@@ -189,7 +197,7 @@ export default function App() {
       if (unsubscribeInbox) unsubscribeInbox();
       if (unsubscribeMyProfile) unsubscribeMyProfile();
     };
-  }, [targetParam]);
+  }, [targetParam, hasOnboarded]);
 
   // Helper to persist account into local multi-account storage
   const saveAccountToList = (username: string, photoURL?: string) => {
@@ -293,16 +301,38 @@ export default function App() {
   };
 
   // Handle Complete Sign Out / Reset Account on this device
-  const handleSignOut = () => {
-    localStorage.removeItem('ngl_has_onboarded');
-    localStorage.removeItem('ngl_username');
-    localStorage.removeItem('ngl_photo_url');
-    localStorage.removeItem('ngl_display_name');
+  const handleSignOut = async () => {
+    try {
+      await auth.signOut();
+    } catch (e) {
+      console.warn('Sign out error:', e);
+    }
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      }
+    } catch (e) {
+      console.warn('Storage clear error:', e);
+    }
+    setCurrentUser(null);
     setHasOnboarded(false);
+    setMessages([]);
+    setMyProfile({
+      id: 'local_user',
+      username: '',
+      shortCode: '',
+      prompt: 'send me anonymous messages!',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    setRecipientProfile(null);
     setSelectedMessage(null);
     setIsProfileModalOpen(false);
     setIsSwitchAccountModalOpen(false);
-    window.history.pushState({}, '', window.location.pathname);
+    window.history.replaceState({}, '', window.location.pathname);
   };
 
   // Handle Permanent Account Deletion & Complete Cache Wipe (Fresh as new)
@@ -333,12 +363,10 @@ export default function App() {
     }
 
     // Reset React state to fresh uninitialized state
-    const newCode = generateRandomCode(6);
-    const newHandle = `user_${generateRandomCode(6)}`;
     const freshProfile: UserProfile = {
       id: 'local_user',
-      username: newHandle,
-      shortCode: newCode,
+      username: '',
+      shortCode: '',
       prompt: 'send me anonymous messages!',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

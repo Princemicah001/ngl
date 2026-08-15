@@ -61,9 +61,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
             >
               {/* Giant Bubbly 3D NGL Logo */}
               <div className="my-6">
-                <h1 className="ngl-landing-logo text-7xl sm:text-8xl tracking-tight leading-none">
-                  NGL
-                </h1>
+                <img
+                  src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                  className="h-14 mb-1 drop-shadow-md mx-auto object-contain"
+                  alt="NGL Logo"
+                />
               </div>
 
               {/* Tagline matching reference photo */}
@@ -95,9 +97,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
             >
               {/* Top NGL Bubbly Logo */}
               <div className="mb-8">
-                <h2 className="ngl-landing-logo text-5xl sm:text-6xl tracking-tight leading-none">
-                  NGL
-                </h2>
+                <img
+                  src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                  className="h-14 mb-1 drop-shadow-md mx-auto object-contain"
+                  alt="NGL Logo"
+                />
               </div>
 
               {/* Question Heading */}
