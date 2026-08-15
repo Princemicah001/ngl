@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { UserProfile } from '../types';
-import { X, Camera, Check, User, Trash2, Bell, BellOff, AlertTriangle, LogOut, ArrowRight, Download, Smartphone, Share } from 'lucide-react';
-import { usePWAInstall } from '../hooks/usePWAInstall';
+import { X, Camera, Check, Trash2, Bell, BellOff } from 'lucide-react';
 
 interface ProfileModalProps {
   profile: UserProfile | null;
@@ -11,15 +10,6 @@ interface ProfileModalProps {
   onDeleteAccount?: () => Promise<void>;
   onOpenSwitchAccount?: () => void;
 }
-
-const PRESET_AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80'
-];
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({
   profile,
@@ -41,9 +31,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showIOSInstallGuide, setShowIOSInstallGuide] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { isInstallable, isInstalled, isIOS, installPWA } = usePWAInstall();
 
   const handleToggleNotifications = async () => {
     const nextState = !notificationsEnabled;
@@ -181,22 +169,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               onChange={handlePhotoUpload}
               className="hidden"
             />
-
-            {/* Quick Preset Avatars */}
-            <div className="flex items-center gap-2 pt-1">
-              {PRESET_AVATARS.map((url, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setPhotoURL(url)}
-                  className={`w-7 h-7 rounded-full overflow-hidden transition-all cursor-pointer ${
-                    photoURL === url ? 'ring-2 ring-[#fa0f5c] scale-110' : 'opacity-70 hover:opacity-100'
-                  }`}
-                >
-                  <img src={url} alt={`preset-${i}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Username Handle Input */}
@@ -268,29 +240,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             )}
           </button>
 
-          {/* Account Management: Install PWA, Switch, Sign Out & Delete */}
+          {/* Account Management: Switch, Sign Out & Delete */}
           <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-            {/* PWA Download / Install Button */}
-            {!isInstalled && (
-              <button
-                type="button"
-                onClick={async () => {
-                  if (isIOS) {
-                    setShowIOSInstallGuide(true);
-                  } else {
-                    const success = await installPWA();
-                    if (!success && !isInstallable) {
-                      alert("To install NGL: Tap your browser's menu (⋮ or Share) and select 'Install app' or 'Add to Home screen'.");
-                    }
-                  }
-                }}
-                className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-[#fa0f5c] to-[#fc6320] hover:opacity-95 text-white font-black text-xs transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm active:scale-95"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download / Install NGL App</span>
-              </button>
-            )}
-
             {onOpenSwitchAccount && (
               <button
                 type="button"
@@ -333,42 +284,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
           </div>
         </form>
-
-        {/* iOS Install Instructions Modal */}
-        {showIOSInstallGuide && (
-          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-xs bg-white rounded-3xl p-6 text-slate-900 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-150">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#fa0f5c] to-[#fc6320] text-white flex items-center justify-center mb-3 shadow-md">
-                <Smartphone className="w-6 h-6" />
-              </div>
-              <h3 className="text-lg font-black text-slate-900">
-                Install on iPhone / iPad
-              </h3>
-              <div className="text-xs text-slate-600 font-medium mt-3 mb-5 text-left flex flex-col gap-2.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
-                <p className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black text-[10px] flex items-center justify-center shrink-0">1</span>
-                  <span>Tap the <strong className="text-slate-900">Share</strong> button <Share className="w-3.5 h-3.5 inline mx-0.5" /> in Safari</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black text-[10px] flex items-center justify-center shrink-0">2</span>
-                  <span>Scroll down and tap <strong className="text-slate-900">Add to Home Screen</strong></span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-800 font-black text-[10px] flex items-center justify-center shrink-0">3</span>
-                  <span>Tap <strong className="text-slate-900">Add</strong> in top right corner</span>
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowIOSInstallGuide(false)}
-                className="w-full py-3 rounded-full bg-black hover:bg-slate-900 text-white font-black text-xs transition-colors cursor-pointer"
-              >
-                Got It!
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Clean Confirm Delete Profile Popup Modal */}
         {showDeleteConfirm && (
