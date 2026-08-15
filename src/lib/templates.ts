@@ -7,7 +7,7 @@ export interface NglTemplateQuestion {
 
 export const NGL_60_TEMPLATES: string[] = [
   // 1-10: Classic & Crushes
-  "send me anonymous messages!",
+  "Send me an anonymous message",
   "do you like anyone right now? 👀",
   "confess your crush anonymously",
   "what's a secret you've never told me?",

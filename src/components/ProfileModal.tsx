@@ -1,12 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile } from '../types';
-import { X, Camera, Check, User, Trash2 } from 'lucide-react';
+import { X, Camera, Check, User, Trash2, Bell, BellOff } from 'lucide-react';
 
 interface ProfileModalProps {
   profile: UserProfile | null;
   onClose: () => void;
   onSave: (updates: Partial<UserProfile>) => Promise<void>;
   onResetAccount?: () => void;
+  onOpenSwitchAccount?: () => void;
 }
 
 const PRESET_AVATARS = [
@@ -22,12 +23,39 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   profile,
   onClose,
   onSave,
-  onResetAccount
+  onResetAccount,
+  onOpenSwitchAccount
 }) => {
   const [username, setUsername] = useState(profile?.username || '');
   const [photoURL, setPhotoURL] = useState(profile?.photoURL || '');
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    if (typeof profile?.notificationsEnabled === 'boolean') {
+      return profile.notificationsEnabled;
+    }
+    const saved = localStorage.getItem('ngl_notifications_enabled');
+    return saved !== null ? saved === 'true' : true;
+  });
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleToggleNotifications = async () => {
+    const nextState = !notificationsEnabled;
+    if (nextState && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          setNotificationsEnabled(false);
+          localStorage.setItem('ngl_notifications_enabled', 'false');
+          return;
+        }
+      } else if (Notification.permission === 'denied') {
+        alert('Notifications are blocked by your browser settings. Please enable them in your browser URL bar or settings.');
+        return;
+      }
+    }
+    setNotificationsEnabled(nextState);
+    localStorage.setItem('ngl_notifications_enabled', String(nextState));
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,9 +81,11 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
     setIsSaving(true);
     try {
+      localStorage.setItem('ngl_notifications_enabled', String(notificationsEnabled));
       await onSave({
         username: username.trim().toLowerCase().replace(/[@\s]/g, ''),
-        photoURL
+        photoURL,
+        notificationsEnabled
       });
       onClose();
     } catch (err) {
@@ -68,7 +98,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200 select-none">
-      <div className="w-full max-w-sm bg-white rounded-[36px] p-7 shadow-2xl flex flex-col gap-6 relative">
+      <div className="w-full max-w-sm bg-white rounded-[36px] p-7 shadow-2xl flex flex-col gap-5 relative max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -83,12 +113,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Bold Fluffy Avatar Circle Picker */}
-          <div className="flex flex-col items-center justify-center gap-3">
+          <div className="flex flex-col items-center justify-center gap-2.5">
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="relative w-24 h-24 rounded-full cursor-pointer group p-1 bg-gradient-to-tr from-[#fa0f5c] via-[#f70a59] to-[#fc6320] shadow-xl hover:scale-105 transition-all"
+              className="relative w-22 h-22 rounded-full cursor-pointer group p-1 bg-gradient-to-tr from-[#fa0f5c] via-[#f70a59] to-[#fc6320] shadow-xl hover:scale-105 transition-all"
               title="Tap to choose photo"
             >
               <div className="w-full h-full rounded-full overflow-hidden bg-slate-100 flex items-center justify-center relative">
@@ -111,8 +141,8 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               </div>
 
               {/* Plump Camera Badge Button */}
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shadow-lg border-2 border-white">
-                <Camera className="w-4 h-4" />
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-black text-white flex items-center justify-center shadow-lg border-2 border-white">
+                <Camera className="w-3.5 h-3.5" />
               </div>
             </div>
 
@@ -163,7 +193,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
 
           {/* Username Handle Input */}
-          <div className="flex flex-col gap-2 text-left">
+          <div className="flex flex-col gap-1.5 text-left">
             <label className="text-xs font-black text-slate-700 tracking-wide uppercase">
               Username
             </label>
@@ -178,41 +208,89 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 placeholder="your_handle"
                 maxLength={28}
                 required
-                className="w-full bg-slate-100 rounded-2xl pl-9 pr-4 py-3.5 text-base font-extrabold text-slate-900 border-none outline-none focus:ring-2 focus:ring-[#fa0f5c] transition-all"
+                className="w-full bg-slate-100 rounded-2xl pl-9 pr-4 py-3 text-base font-extrabold text-slate-900 border-none outline-none focus:ring-2 focus:ring-[#fa0f5c] transition-all"
               />
             </div>
+          </div>
+
+          {/* Browser Push Notifications Toggle */}
+          <div className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl ${notificationsEnabled ? 'bg-pink-100 text-[#fa0f5c]' : 'bg-slate-200 text-slate-500'}`}>
+                {notificationsEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-black text-slate-900">Push Notifications</span>
+                <span className="text-[10px] font-bold text-slate-400">
+                  {notificationsEnabled ? 'Notify for new messages' : 'Muted on this device'}
+                </span>
+              </div>
+            </div>
+
+            {/* iOS/Modern style Switch Toggle */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={notificationsEnabled}
+              onClick={handleToggleNotifications}
+              className={`w-12 h-6 rounded-full transition-colors relative p-0.5 cursor-pointer ${
+                notificationsEnabled ? 'bg-[#fa0f5c]' : 'bg-slate-300'
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
+                  notificationsEnabled ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           {/* Action Button: Bold Black Pill */}
           <button
             type="submit"
             disabled={isSaving || !username.trim()}
-            className="w-full bg-black hover:bg-slate-900 text-white font-black text-base py-4 rounded-full active:scale-95 shadow-xl disabled:opacity-50 transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer"
+            className="w-full bg-black hover:bg-slate-900 text-white font-black text-base py-3.5 rounded-full active:scale-95 shadow-xl disabled:opacity-50 transition-all flex items-center justify-center gap-2 mt-1 cursor-pointer"
           >
             {isSaving ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <Check className="w-4 h-4" />
-                <span>Save Profile</span>
+                <span>Save Changes</span>
               </>
             )}
           </button>
 
-          {onResetAccount && (
-            <button
-              type="button"
-              onClick={() => {
-                if (confirm("Go to NGL welcome screen?")) {
-                  onResetAccount();
+          {/* Switch Account and Sign Out */}
+          <div className="flex flex-col gap-1.5 pt-1 border-t border-slate-100">
+            {onOpenSwitchAccount && (
+              <button
+                type="button"
+                onClick={() => {
                   onClose();
-                }
-              }}
-              className="w-full py-1 text-xs font-bold text-slate-400 hover:text-red-500 transition-colors cursor-pointer text-center"
-            >
-              Sign out / Switch Account
-            </button>
-          )}
+                  onOpenSwitchAccount();
+                }}
+                className="w-full py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs transition-colors cursor-pointer text-center"
+              >
+                Switch Account
+              </button>
+            )}
+
+            {onResetAccount && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Are you sure you want to sign out of this account?")) {
+                    onResetAccount();
+                    onClose();
+                  }
+                }}
+                className="w-full py-1.5 text-xs font-bold text-red-500 hover:text-red-600 transition-colors cursor-pointer text-center"
+              >
+                Sign Out
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>

@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
 
 interface SenderViewProps {
   recipientProfile: UserProfile;
-  onSendMessage: (text: string, file: MediaAttachment | null, deviceHint?: any) => Promise<void>;
+  onSendMessage: (text: string, file: MediaAttachment | null, deviceHint?: any, files?: MediaAttachment[]) => Promise<void>;
   isOwnLink?: boolean;
   onOpenMyInbox?: () => void;
   onGetOwnLink?: () => void;
@@ -23,96 +23,144 @@ export const SenderView: React.FC<SenderViewProps> = ({
   appUrl
 }) => {
   const [message, setMessage] = useState('');
-  const [selectedFile, setSelectedFile] = useState<MediaAttachment | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<MediaAttachment[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Random placeholder suggestion
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setPlaceholderIndex((prev) => (prev + 1) % NGL_60_TEMPLATES.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Check size limit: images get compressed; other raw media/docs must fit within Firestore 1MB doc limit
-    if (file.type.startsWith('image/')) {
-      if (file.size > 25 * 1024 * 1024) {
-        alert("Image is too large (max 25MB).");
-        return;
-      }
-      // Compress and resize image so it comfortably fits within Firestore 1MB document limit (<350KB base64)
+  // Helper to compress an image client-side to ensure fast transmission and fit Firestore limits
+  const compressImage = (file: File): Promise<MediaAttachment> => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       const reader = new FileReader();
       reader.onload = (event) => {
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const maxDimension = 1080;
+          try {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxDimension = 1080;
 
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = Math.round((height * maxDimension) / width);
-              width = maxDimension;
-            } else {
-              width = Math.round((width * maxDimension) / height);
-              height = maxDimension;
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
             }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            // Compress to JPEG at 0.76 quality (~60-180KB per image)
+            const compressedDataURL = canvas.toDataURL('image/jpeg', 0.76);
+            resolve({
+              id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+              name: file.name,
+              type: 'image/jpeg',
+              size: Math.round((compressedDataURL.length * 3) / 4),
+              dataURL: compressedDataURL
+            });
+          } catch (e) {
+            reject(e);
           }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-
-          // Compress to JPEG at 0.78 quality (~80-250KB)
-          const compressedDataURL = canvas.toDataURL('image/jpeg', 0.78);
-          setSelectedFile({
-            name: file.name,
-            type: 'image/jpeg',
-            size: Math.round((compressedDataURL.length * 3) / 4),
-            dataURL: compressedDataURL
-          });
         };
+        img.onerror = () => reject(new Error(`Failed to load image: ${file.name}`));
         img.src = event.target?.result as string;
       };
+      reader.onerror = () => reject(new Error(`Could not read file: ${file.name}`));
       reader.readAsDataURL(file);
-    } else {
-      // Audio, Video, PDF, Docs, and other files
-      if (file.size > 800 * 1024) {
-        alert("Attached audio, video, or file must be under 800KB for direct instant delivery.");
+    });
+  };
+
+  // Helper to read other media (audio, video, PDF, documents)
+  const processGenericFile = (file: File): Promise<MediaAttachment> => {
+    return new Promise((resolve, reject) => {
+      // Check file size: Firestore has a 1MB payload ceiling
+      if (file.size > 850 * 1024) {
+        reject(new Error(`"${file.name}" is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Non-image files must be under 850KB.`));
         return;
       }
-
       const reader = new FileReader();
       reader.onload = (event) => {
-        setSelectedFile({
+        resolve({
+          id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           name: file.name,
           type: file.type || 'application/octet-stream',
           size: file.size,
           dataURL: event.target?.result as string
         });
       };
+      reader.onerror = () => reject(new Error(`Could not read file "${file.name}"`));
       reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawFiles: File[] = e.target.files ? Array.from(e.target.files) : [];
+    if (rawFiles.length === 0) return;
+
+    setUploadError(null);
+    setIsProcessingFiles(true);
+
+    const newAttachments: MediaAttachment[] = [];
+    const errors: string[] = [];
+
+    for (const file of rawFiles) {
+      try {
+        if (file.type.startsWith('image/')) {
+          if (file.size > 30 * 1024 * 1024) {
+            errors.push(`"${file.name}" exceeds 30MB maximum limit.`);
+            continue;
+          }
+          const attachment = await compressImage(file);
+          newAttachments.push(attachment);
+        } else {
+          const attachment = await processGenericFile(file);
+          newAttachments.push(attachment);
+        }
+      } catch (err: any) {
+        errors.push(err.message || `Failed to process ${file.name}`);
+      }
     }
+
+    if (errors.length > 0) {
+      setUploadError(errors.join(' • '));
+    }
+
+    if (newAttachments.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...newAttachments]);
+    }
+
+    setIsProcessingFiles(false);
+    // Reset file input so user can attach more of the same files if needed
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveFile = (fileIdOrIndex: string | number) => {
+    setSelectedFiles((prev) =>
+      prev.filter((f, idx) => (f.id ? f.id !== fileIdOrIndex : idx !== fileIdOrIndex))
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() && !selectedFile) {
+    if (!message.trim() && selectedFiles.length === 0) {
       return;
     }
 
     setIsSubmitting(true);
+    setUploadError(null);
+
     try {
       // Capture actual device telemetry & IP hints
       const deviceHint = await captureRealDeviceHints();
@@ -126,10 +174,12 @@ export const SenderView: React.FC<SenderViewProps> = ({
         os: deviceHint.os,
         browser: deviceHint.browser,
         screen: deviceHint.screen,
-        approxLocation: `${deviceHint.city || 'Unknown City'}, ${deviceHint.country || 'Unknown Country'}`
+        approxLocation: `${deviceHint.city || 'Unknown City'}, ${deviceHint.country || 'Unknown Country'}`,
+        attachedFilesCount: selectedFiles.length
       });
 
-      await onSendMessage(message.trim(), selectedFile, deviceHint);
+      const primaryFile = selectedFiles.length > 0 ? selectedFiles[0] : null;
+      await onSendMessage(message.trim(), primaryFile, deviceHint, selectedFiles);
       setIsSuccess(true);
       
       confetti({
@@ -139,10 +189,10 @@ export const SenderView: React.FC<SenderViewProps> = ({
       });
 
       setMessage('');
-      setSelectedFile(null);
-    } catch (err) {
+      setSelectedFiles([]);
+    } catch (err: any) {
       console.error('Error sending message:', err);
-      alert('Failed to send anonymous message. Please try again.');
+      setUploadError('Failed to send anonymous message. If your attachments are large, try attaching fewer files.');
     } finally {
       setIsSubmitting(false);
     }
@@ -249,60 +299,106 @@ export const SenderView: React.FC<SenderViewProps> = ({
               className="w-full text-base font-bold text-slate-800 placeholder:text-[#a0abbd] placeholder:font-medium bg-transparent border-0 focus:border-0 outline-none focus:outline-none focus:ring-0 shadow-none resize-none p-1 transition-all leading-relaxed"
             />
 
-            {/* Media Attachment Preview inside gray container if chosen */}
-            {selectedFile && (
-              <div className="relative mt-2 rounded-2xl overflow-hidden bg-white/90 p-2 flex items-center gap-3 shadow-xs">
-                {selectedFile.type.startsWith('image/') ? (
-                  <img
-                    src={selectedFile.dataURL}
-                    alt="attachment"
-                    className="w-10 h-10 rounded-xl object-cover"
-                  />
-                ) : selectedFile.type.startsWith('video/') ? (
-                  <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs">
-                    <Video className="w-5 h-5" />
-                  </div>
-                ) : selectedFile.type.startsWith('audio/') ? (
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xs">
-                    <Music className="w-5 h-5" />
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0 text-left">
-                  <p className="text-xs font-bold text-slate-800 truncate">
-                    {selectedFile.name}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-medium">
-                    {(selectedFile.size / 1024).toFixed(0)} KB
-                  </p>
+            {/* Loading Indicator when compressing files */}
+            {isProcessingFiles && (
+              <div className="flex items-center gap-2 text-xs font-bold text-[#fa0f5c] animate-pulse py-1">
+                <div className="w-3.5 h-3.5 border-2 border-[#fa0f5c] border-t-transparent rounded-full animate-spin" />
+                <span>Processing media files...</span>
+              </div>
+            )}
+
+            {/* Error Message for invalid or oversized attachments */}
+            {uploadError && (
+              <div className="w-full bg-red-50 border border-red-100 rounded-xl p-2.5 text-[11px] font-bold text-red-600 flex items-start gap-1.5 animate-in fade-in">
+                <span className="shrink-0">⚠️</span>
+                <span>{uploadError}</span>
+              </div>
+            )}
+
+            {/* Multi-Media Attachments Grid/List Preview */}
+            {selectedFiles.length > 0 && (
+              <div className="flex flex-col gap-1.5 mt-2 max-h-44 overflow-y-auto pr-1">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[10px] font-black uppercase text-slate-400">
+                    Attached Files ({selectedFiles.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFiles([])}
+                    className="text-[10px] font-bold text-red-500 hover:underline cursor-pointer"
+                  >
+                    Clear All
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedFile(null)}
-                  className="p-1.5 rounded-full bg-slate-100 hover:bg-red-100 hover:text-red-600 transition-colors cursor-pointer"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                
+                <div className="grid grid-cols-1 gap-1.5">
+                  {selectedFiles.map((fileItem, idx) => (
+                    <div
+                      key={fileItem.id || idx}
+                      className="relative rounded-2xl overflow-hidden bg-white/95 p-2 flex items-center gap-3 shadow-xs border border-slate-100"
+                    >
+                      {fileItem.type.startsWith('image/') ? (
+                        <img
+                          src={fileItem.dataURL}
+                          alt={fileItem.name}
+                          className="w-10 h-10 rounded-xl object-cover shrink-0"
+                        />
+                      ) : fileItem.type.startsWith('video/') ? (
+                        <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-xs shrink-0">
+                          <Video className="w-5 h-5" />
+                        </div>
+                      ) : fileItem.type.startsWith('audio/') ? (
+                        <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xs shrink-0">
+                          <Music className="w-5 h-5" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                      )}
+                      
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-xs font-bold text-slate-800 truncate">
+                          {fileItem.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-medium">
+                          {(fileItem.size / 1024).toFixed(0)} KB
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(fileItem.id || idx)}
+                        className="p-1.5 rounded-full bg-slate-100 hover:bg-red-100 hover:text-red-600 transition-colors cursor-pointer shrink-0"
+                        title="Remove attachment"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Bottom Card Controls: Exact Attach Pill Button */}
-          <div className="flex items-center justify-end pt-1">
+          {/* Bottom Card Controls: Exact Attach Pill Button supporting multiple files */}
+          <div className="flex items-center justify-between pt-1 px-1">
+            <span className="text-[11px] font-bold text-slate-400">
+              {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) attached` : 'Attach images, audio & files'}
+            </span>
+
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-black bg-[#dce2ec] hover:bg-[#cfd7e3] px-4 py-2 rounded-full transition-all active:scale-95 shadow-xs cursor-pointer"
             >
               <Paperclip className="w-4 h-4 stroke-[2.5] text-black" />
-              <span>{selectedFile ? 'Change' : 'Attach'}</span>
+              <span>{selectedFiles.length > 0 ? 'Add More' : 'Attach'}</span>
             </button>
             <input
               ref={fileInputRef}
               type="file"
+              multiple
               accept="*/*"
               onChange={handleFileChange}
               className="hidden"
@@ -315,7 +411,7 @@ export const SenderView: React.FC<SenderViewProps> = ({
       <button
         type="button"
         onClick={(e) => {
-          if (message.trim() || selectedFile) {
+          if (message.trim() || selectedFiles.length > 0) {
             handleSubmit(e);
           } else if (onGetOwnLink) {
             onGetOwnLink();
@@ -323,13 +419,13 @@ export const SenderView: React.FC<SenderViewProps> = ({
             textareaRef.current.focus();
           }
         }}
-        disabled={isSubmitting}
-        className="w-full mt-4 bg-black hover:bg-neutral-900 text-white font-black text-lg sm:text-xl py-4 rounded-full shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer tracking-tight"
+        disabled={isSubmitting || isProcessingFiles}
+        className="w-full mt-4 bg-black hover:bg-neutral-900 text-white font-black text-lg sm:text-xl py-4 rounded-full shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer tracking-tight disabled:opacity-50"
       >
         {isSubmitting ? (
           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
         ) : (
-          <span>{message.trim() || selectedFile ? 'Send!' : 'get link!'}</span>
+          <span>{message.trim() || selectedFiles.length > 0 ? 'Send!' : 'get link!'}</span>
         )}
       </button>
 

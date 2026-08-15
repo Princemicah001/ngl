@@ -42,7 +42,7 @@ export const PlayView: React.FC<PlayViewProps> = ({
   };
 
   const usernameHandle = profile?.username?.toUpperCase() || 'USER';
-  const displayPrompt = profile?.prompt || 'send me anonymous messages!';
+  const displayPrompt = profile?.prompt || 'Send me an anonymous message';
 
   return (
     <div className="w-full max-w-md md:max-w-4xl lg:max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-2 sm:py-6 flex flex-col md:flex-row md:items-center md:justify-center md:gap-10 lg:gap-16 flex-1 select-none">

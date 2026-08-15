@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
 import {
   ensureAnonymousAuth,
@@ -20,6 +20,7 @@ import { LandingView } from './components/LandingView';
 import { MessageCardModal } from './components/MessageCardModal';
 import { ProfileModal } from './components/ProfileModal';
 import { StoryShareModal } from './components/StoryShareModal';
+import { SwitchAccountModal } from './components/SwitchAccountModal';
 import { generateRandomCode } from './lib/templates';
 
 export default function App() {
@@ -31,11 +32,16 @@ export default function App() {
   const [myProfile, setMyProfile] = useState<UserProfile>(() => {
     const savedHandle = localStorage.getItem('ngl_username') || `user_${generateRandomCode(4)}`;
     const savedCode = localStorage.getItem('ngl_shortcode') || generateRandomCode(6);
+    const savedPhoto = localStorage.getItem('ngl_photo_url') || undefined;
+    const savedNotifs = localStorage.getItem('ngl_notifications_enabled');
+    const savedPrompt = localStorage.getItem('ngl_user_prompt') || 'Send me an anonymous message';
     return {
       id: localStorage.getItem('ngl_uid') || 'local_user',
       username: savedHandle,
       shortCode: savedCode,
-      prompt: 'send me anonymous messages!',
+      photoURL: savedPhoto,
+      notificationsEnabled: savedNotifs !== null ? savedNotifs === 'true' : true,
+      prompt: savedPrompt,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -48,10 +54,17 @@ export default function App() {
   const [selectedMessage, setSelectedMessage] = useState<NglMessage | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
+  const [isSwitchAccountModalOpen, setIsSwitchAccountModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [hasOnboarded, setHasOnboarded] = useState<boolean>(() => {
     return localStorage.getItem('ngl_has_onboarded') === 'true' || Boolean(localStorage.getItem('ngl_username'));
   });
+
+  const prevMessagesCountRef = useRef<number | null>(null);
+  const myProfileRef = useRef(myProfile);
+  useEffect(() => {
+    myProfileRef.current = myProfile;
+  }, [myProfile]);
 
   const isViewingOther = Boolean(
     targetParam &&
@@ -99,6 +112,28 @@ export default function App() {
           setRecipientProfile(profile);
           // Real-time inbox subscription
           unsubscribeInbox = subscribeToInbox(user.uid, (newMessages) => {
+            // Check if a new message arrived
+            if (prevMessagesCountRef.current !== null && newMessages.length > prevMessagesCountRef.current) {
+              const latestMsg = newMessages[0];
+              const notifsActive = myProfileRef.current?.notificationsEnabled !== false && localStorage.getItem('ngl_notifications_enabled') !== 'false';
+              
+              if (notifsActive && 'Notification' in window && Notification.permission === 'granted') {
+                try {
+                  const notif = new Notification('New Anonymous Message! 💌', {
+                    body: latestMsg?.text ? (latestMsg.text.length > 50 ? `${latestMsg.text.substring(0, 50)}...` : latestMsg.text) : 'You received a new secret message on NGL',
+                    icon: 'https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png',
+                    tag: 'ngl-new-message'
+                  });
+                  notif.onclick = () => {
+                    window.focus();
+                    setCurrentView('inbox');
+                  };
+                } catch (e) {
+                  console.warn('Could not show browser notification:', e);
+                }
+              }
+            }
+            prevMessagesCountRef.current = newMessages.length;
             setMessages(newMessages);
           });
         }
@@ -114,13 +149,38 @@ export default function App() {
     };
   }, [targetParam]);
 
+  // Helper to persist account into local multi-account storage
+  const saveAccountToList = (username: string, photoURL?: string) => {
+    try {
+      const raw = localStorage.getItem('ngl_saved_accounts');
+      let accounts: Array<{ username: string; photoURL?: string; lastActive: number }> = raw ? JSON.parse(raw) : [];
+      accounts = accounts.filter(a => a.username.toLowerCase() !== username.toLowerCase());
+      accounts.unshift({
+        username,
+        photoURL,
+        lastActive: Date.now()
+      });
+      localStorage.setItem('ngl_saved_accounts', JSON.stringify(accounts.slice(0, 10)));
+    } catch (e) {
+      console.warn('Could not update saved accounts:', e);
+    }
+  };
+
   // Handle Get Started from Landing View
-  const handleGetStarted = async (username: string) => {
+  const handleGetStarted = async (username: string, photoURL?: string) => {
     const cleanUsername = username.trim().toLowerCase().replace(/[@\s]/g, '') || `user_${generateRandomCode(4)}`;
     localStorage.setItem('ngl_username', cleanUsername);
     localStorage.setItem('ngl_has_onboarded', 'true');
+    if (photoURL) localStorage.setItem('ngl_photo_url', photoURL);
+
+    saveAccountToList(cleanUsername, photoURL);
+
     setHasOnboarded(true);
-    setMyProfile(prev => ({ ...prev, username: cleanUsername }));
+    setMyProfile(prev => ({
+      ...prev,
+      username: cleanUsername,
+      photoURL: photoURL || prev.photoURL
+    }));
     setCurrentView('play');
 
     try {
@@ -130,10 +190,13 @@ export default function App() {
         setCurrentUser(user);
       }
       const updated = await getOrCreateUserProfile(user.uid, cleanUsername);
-      if (updated.username !== cleanUsername) {
-        await updateUserProfile(user.uid, { username: cleanUsername });
-        updated.username = cleanUsername;
-      }
+      const updates: Partial<UserProfile> = { username: cleanUsername };
+      if (photoURL) updates.photoURL = photoURL;
+      
+      await updateUserProfile(user.uid, updates);
+      updated.username = cleanUsername;
+      if (photoURL) updated.photoURL = photoURL;
+
       setMyProfile(updated);
       setRecipientProfile(updated);
     } catch (err) {
@@ -141,10 +204,62 @@ export default function App() {
     }
   };
 
-  // Handle Reset / Sign Out
-  const handleResetAccount = () => {
+  // Handle Switch to Another Account
+  const handleSwitchAccount = async (targetUsername: string, targetPhoto?: string) => {
+    const cleanUsername = targetUsername.trim().toLowerCase().replace(/[@\s]/g, '');
+    if (!cleanUsername) return;
+
+    localStorage.setItem('ngl_username', cleanUsername);
+    localStorage.setItem('ngl_has_onboarded', 'true');
+    if (targetPhoto) {
+      localStorage.setItem('ngl_photo_url', targetPhoto);
+    } else {
+      localStorage.removeItem('ngl_photo_url');
+    }
+
+    saveAccountToList(cleanUsername, targetPhoto);
+
+    setHasOnboarded(true);
+    setMyProfile(prev => ({
+      ...prev,
+      username: cleanUsername,
+      photoURL: targetPhoto || undefined
+    }));
+    setCurrentView('play');
+
+    try {
+      const fetched = await getUserProfile(cleanUsername);
+      if (fetched) {
+        setMyProfile(fetched);
+        setRecipientProfile(fetched);
+        if (fetched.photoURL) {
+          localStorage.setItem('ngl_photo_url', fetched.photoURL);
+        }
+      } else {
+        let user = currentUser;
+        if (!user) {
+          user = await ensureAnonymousAuth();
+          setCurrentUser(user);
+        }
+        const created = await getOrCreateUserProfile(user.uid, cleanUsername);
+        setMyProfile(created);
+        setRecipientProfile(created);
+      }
+    } catch (err) {
+      console.warn('Error during account switch:', err);
+    }
+  };
+
+  // Handle Complete Sign Out / Reset Account
+  const handleSignOut = () => {
     localStorage.removeItem('ngl_has_onboarded');
+    localStorage.removeItem('ngl_username');
+    localStorage.removeItem('ngl_photo_url');
+    localStorage.removeItem('ngl_display_name');
     setHasOnboarded(false);
+    setSelectedMessage(null);
+    setIsProfileModalOpen(false);
+    setIsSwitchAccountModalOpen(false);
     window.history.pushState({}, '', window.location.pathname);
   };
 
@@ -159,6 +274,7 @@ export default function App() {
 
   // Handle Update Prompt from Play view
   const handleUpdatePrompt = async (newPrompt: string) => {
+    localStorage.setItem('ngl_user_prompt', newPrompt);
     setMyProfile(prev => ({ ...prev, prompt: newPrompt }));
     if (currentUser?.uid) {
       try {
@@ -169,17 +285,26 @@ export default function App() {
     }
   };
 
-  // Handle Send Message
-  const handleSendMessage = async (text: string, file: MediaAttachment | null, deviceHint?: any) => {
+  // Handle Send Message with multiple media attachments support
+  const handleSendMessage = async (
+    text: string,
+    file: MediaAttachment | null,
+    deviceHint?: any,
+    files?: MediaAttachment[]
+  ) => {
     const target = recipientProfile || myProfile;
     if (!target) throw new Error('No recipient found');
+
+    const allFiles = files && files.length > 0 ? files : (file ? [file] : []);
+    const primaryFile = allFiles.length > 0 ? allFiles[0] : null;
 
     await sendAnonymousMessage(target.id, {
       recipientId: target.id,
       senderUid: currentUser?.uid,
       text,
-      promptTitle: target.prompt || 'send me anonymous messages!',
-      file: file || null,
+      promptTitle: target.prompt || 'Send me an anonymous message',
+      file: primaryFile,
+      files: allFiles,
       read: false,
       createdAt: Date.now(),
       deviceHint: deviceHint || undefined
@@ -336,7 +461,18 @@ export default function App() {
           profile={myProfile}
           onClose={() => setIsProfileModalOpen(false)}
           onSave={handleSaveProfile}
-          onResetAccount={handleResetAccount}
+          onResetAccount={handleSignOut}
+          onOpenSwitchAccount={() => setIsSwitchAccountModalOpen(true)}
+        />
+      )}
+
+      {/* Switch Account Modal */}
+      {isSwitchAccountModalOpen && (
+        <SwitchAccountModal
+          currentProfile={myProfile}
+          onClose={() => setIsSwitchAccountModalOpen(false)}
+          onSwitchAccount={handleSwitchAccount}
+          onSignOut={handleSignOut}
         />
       )}
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { NglMessage, UserProfile } from '../types';
+import { NglMessage, UserProfile, MediaAttachment } from '../types';
 import {
   X,
   AlertTriangle,
@@ -16,7 +16,8 @@ import {
   Palette,
   Instagram,
   Music,
-  FileText
+  FileText,
+  Video
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { WhoSentModal } from './WhoSentModal';
@@ -71,17 +72,26 @@ export const MessageCardModal: React.FC<MessageCardModalProps> = ({
     }
   };
 
-  const handleDownloadAttachment = (e?: React.MouseEvent) => {
+  // Gather all attachments from legacy .file or new .files array
+  const allAttachments: MediaAttachment[] = React.useMemo(() => {
+    if (message.files && message.files.length > 0) {
+      return message.files;
+    }
+    if (message.file) {
+      return [message.file];
+    }
+    return [];
+  }, [message.file, message.files]);
+
+  const handleDownloadSingleAttachment = (attachment: MediaAttachment, e?: React.MouseEvent) => {
     if (e) {
       e.stopPropagation();
       e.preventDefault();
     }
-    if (!message.file) return;
-
     try {
       const link = document.createElement('a');
-      link.href = message.file.dataURL;
-      link.download = message.file.name || `ngl-attachment-${Date.now()}`;
+      link.href = attachment.dataURL;
+      link.download = attachment.name || `ngl-media-${Date.now()}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -90,6 +100,19 @@ export const MessageCardModal: React.FC<MessageCardModalProps> = ({
     }
   };
 
+  const handleDownloadAllMedia = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    allAttachments.forEach((att, idx) => {
+      setTimeout(() => {
+        handleDownloadSingleAttachment(att);
+      }, idx * 250);
+    });
+  };
+
+  // Download Story Card as clean PNG, and if media exists, also trigger download of the attached media separately
   const handleDownloadStory = async () => {
     if (!cardRef.current) return;
     setIsExporting(true);
@@ -108,6 +131,15 @@ export const MessageCardModal: React.FC<MessageCardModalProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // If message has media attachments, download each media file separately
+      if (allAttachments.length > 0) {
+        allAttachments.forEach((att, idx) => {
+          setTimeout(() => {
+            handleDownloadSingleAttachment(att);
+          }, 300 + idx * 250);
+        });
+      }
     } catch (err) {
       console.error('Failed to export message card as PNG:', err);
     } finally {
@@ -207,7 +239,7 @@ export const MessageCardModal: React.FC<MessageCardModalProps> = ({
             </button>
           </div>
 
-          {/* Exportable Story Card Container */}
+          {/* Exportable Story Card Container - Clean PNG export without media inside */}
           <div
             ref={cardRef}
             className="w-full rounded-[32px] sm:rounded-[36px] overflow-hidden bg-white shadow-2xl flex flex-col"
@@ -215,112 +247,15 @@ export const MessageCardModal: React.FC<MessageCardModalProps> = ({
             {/* Top Gradient Banner */}
             <div className="bg-gradient-to-r from-[#fa0f5c] via-[#f70a59] to-[#fc6320] px-6 py-6 sm:py-7 text-center flex flex-col items-center justify-center">
               <h2 className="text-white font-black text-xl sm:text-2xl leading-tight tracking-tight drop-shadow-xs max-w-[260px]">
-                {message.promptTitle || profile?.prompt || "send me anonymous messages!"}
+                {message.promptTitle || profile?.prompt || "Send me an anonymous message"}
               </h2>
             </div>
 
-            {/* Bottom Card Body (White) with Centered Anonymous Question */}
+            {/* Bottom Card Body (White) with Centered Anonymous Question and Reply */}
             <div className="px-6 py-8 sm:py-10 flex flex-col items-center justify-center text-center bg-white min-h-[140px]">
               <p className="text-slate-900 font-black text-xl sm:text-2xl leading-snug tracking-tight break-words max-w-[280px]">
-                {message.text || (message.file ? "📷 Photo attached" : "Anonymous")}
+                {message.text || "Anonymous"}
               </p>
-
-              {/* Media Attachment if present */}
-              {message.file && (
-                <div className="w-full mt-4 rounded-2xl overflow-hidden">
-                  {message.file.type.startsWith('image/') ? (
-                    <div className="relative group/media rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center cursor-pointer">
-                      <img
-                        src={message.file.dataURL}
-                        alt={message.file.name}
-                        className="w-full max-h-60 object-contain rounded-2xl transition-transform group-hover/media:scale-[1.02]"
-                      />
-                      {/* Hover Overlay with Download Icon */}
-                      <div
-                        onClick={handleDownloadAttachment}
-                        className="absolute inset-0 bg-black/40 opacity-0 group-hover/media:opacity-100 transition-opacity flex items-center justify-center gap-2 cursor-pointer z-10 backdrop-blur-[1px]"
-                      >
-                        <button
-                          type="button"
-                          onClick={handleDownloadAttachment}
-                          className="px-4 py-2 bg-white/95 hover:bg-white text-slate-900 rounded-full font-black text-xs shadow-xl flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/40"
-                          title="Download photo"
-                        >
-                          <Download className="w-4 h-4 text-[#fa0f5c]" />
-                          <span>Download Photo</span>
-                        </button>
-                      </div>
-                      {/* Corner Icon for Mobile / Touch devices */}
-                      <button
-                        type="button"
-                        onClick={handleDownloadAttachment}
-                        className="sm:hidden absolute top-2.5 right-2.5 p-2 rounded-full bg-black/60 hover:bg-black text-white shadow-md backdrop-blur-sm z-10"
-                        title="Download photo"
-                      >
-                        <Download className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ) : message.file.type.startsWith('video/') ? (
-                    <div className="relative group/media rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-                      <video
-                        src={message.file.dataURL}
-                        controls
-                        className="w-full max-h-60 rounded-2xl"
-                      />
-                      {/* Top-Right Download Overlay Button */}
-                      <button
-                        type="button"
-                        onClick={handleDownloadAttachment}
-                        className="absolute top-2.5 right-2.5 px-3 py-1.5 rounded-full bg-black/75 hover:bg-black text-white text-xs font-bold shadow-lg backdrop-blur-md flex items-center gap-1.5 transition-all active:scale-95 z-20 cursor-pointer border border-white/20"
-                        title="Download video"
-                      >
-                        <Download className="w-3.5 h-3.5 text-[#fa0f5c]" />
-                        <span>Download</span>
-                      </button>
-                    </div>
-                  ) : message.file.type.startsWith('audio/') ? (
-                    <div className="relative group/media w-full bg-slate-100 rounded-2xl p-4 flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-slate-700 font-bold text-xs truncate max-w-[200px]">
-                          <Music className="w-4 h-4 text-[#fa0f5c] shrink-0" />
-                          <span className="truncate">{message.file.name}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleDownloadAttachment}
-                          className="px-3 py-1 rounded-full bg-white hover:bg-slate-200 text-slate-800 font-black text-xs shadow-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                          title="Download audio"
-                        >
-                          <Download className="w-3.5 h-3.5 text-[#fa0f5c]" />
-                          <span>Download</span>
-                        </button>
-                      </div>
-                      <audio src={message.file.dataURL} controls className="w-full h-8" />
-                    </div>
-                  ) : (
-                    <div className="relative group/media w-full bg-slate-100 rounded-2xl p-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="p-2 bg-white rounded-xl text-[#fa0f5c] shadow-xs">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                        <div className="text-left truncate">
-                          <p className="text-xs font-bold text-slate-800 truncate">{message.file.name}</p>
-                          <p className="text-[10px] text-slate-500">{(message.file.size / 1024).toFixed(0)} KB</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleDownloadAttachment}
-                        className="p-2 px-3 rounded-xl bg-white hover:bg-slate-200 text-slate-800 font-black text-xs transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
-                        title="Download file"
-                      >
-                        <Download className="w-4 h-4 text-[#fa0f5c]" />
-                        <span>Download</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* Response preview if user has answered */}
               {message.reply && (
@@ -336,6 +271,77 @@ export const MessageCardModal: React.FC<MessageCardModalProps> = ({
               )}
             </div>
           </div>
+
+          {/* Attached Media Section (Rendered separately from the PNG Story Card) */}
+          {allAttachments.length > 0 && (
+            <div className="w-full mt-4 bg-black/25 backdrop-blur-md rounded-2xl p-3 sm:p-4 flex flex-col gap-2.5 text-white border border-white/20">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-black uppercase tracking-wider text-white/90">
+                  Attached Media ({allAttachments.length})
+                </span>
+                {allAttachments.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={handleDownloadAllMedia}
+                    className="text-xs font-black text-white hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download All</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {allAttachments.map((att, idx) => (
+                  <div
+                    key={att.id || idx}
+                    className="bg-white/10 rounded-xl p-2 sm:p-2.5 flex items-center justify-between gap-3 border border-white/10"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {att.type.startsWith('image/') ? (
+                        <img
+                          src={att.dataURL}
+                          alt={att.name}
+                          className="w-10 h-10 rounded-lg object-cover bg-black/40 shrink-0"
+                        />
+                      ) : att.type.startsWith('video/') ? (
+                        <div className="w-10 h-10 rounded-lg bg-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-xs shrink-0">
+                          <Video className="w-5 h-5" />
+                        </div>
+                      ) : att.type.startsWith('audio/') ? (
+                        <div className="w-10 h-10 rounded-lg bg-amber-500/30 text-amber-300 flex items-center justify-center font-bold text-xs shrink-0">
+                          <Music className="w-5 h-5" />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/30 text-blue-300 flex items-center justify-center font-bold text-xs shrink-0">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                      )}
+                      
+                      <div className="text-left min-w-0">
+                        <p className="text-xs font-bold text-white truncate max-w-[140px] sm:max-w-[180px]">
+                          {att.name}
+                        </p>
+                        <p className="text-[10px] text-white/70">
+                          {(att.size / 1024).toFixed(0)} KB
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleDownloadSingleAttachment(att, e)}
+                      className="px-3 py-1.5 rounded-full bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-md cursor-pointer shrink-0"
+                      title="Download media separately"
+                    >
+                      <Download className="w-3.5 h-3.5 text-[#fa0f5c]" />
+                      <span>Download</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Decorative Tools */}
           <div className="flex items-center justify-center gap-4 mt-3">

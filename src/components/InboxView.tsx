@@ -116,7 +116,7 @@ export const InboxView: React.FC<InboxViewProps> = ({
                       {/* Middle: Question Text and Timestamp */}
                       <div className="flex flex-col min-w-0 text-left">
                         <p className="text-slate-900 font-extrabold text-sm sm:text-base leading-snug truncate">
-                          {msg.text || (msg.file ? "📷 Photo / Media Attached" : "Anonymous Question")}
+                          {msg.text || ((msg.files && msg.files.length > 0) || msg.file ? `📷 ${msg.files?.length || 1} Media File(s) Attached` : "Anonymous Question")}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-xs font-semibold text-slate-400">
@@ -125,6 +125,11 @@ export const InboxView: React.FC<InboxViewProps> = ({
                           {msg.reply && (
                             <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.2 rounded-md">
                               Replied
+                            </span>
+                          )}
+                          {((msg.files && msg.files.length > 0) || msg.file) && (
+                            <span className="text-[10px] font-bold text-[#fa0f5c] bg-pink-50 px-1.5 py-0.2 rounded-md">
+                              📎 {msg.files?.length || 1} file(s)
                             </span>
                           )}
                         </div>

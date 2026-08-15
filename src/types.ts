@@ -6,11 +6,13 @@ export interface UserProfile {
   shortCode?: string;
   prompt: string;
   photoURL?: string;
+  notificationsEnabled?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface MediaAttachment {
+  id?: string;
   name: string;
   type: string;
   size: number;
@@ -24,6 +26,7 @@ export interface NglMessage {
   text: string;
   promptTitle?: string;
   file?: MediaAttachment | null;
+  files?: MediaAttachment[];
   read: boolean;
   reply?: string | null;
   repliedAt?: string | null;
