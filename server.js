@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 const ROOT = __dirname;
 const DATA_FILE = path.join(ROOT, "data.json");
 
