@@ -103,7 +103,6 @@
                 font-size: clamp(48px, 11vw, 150px);
             }
 
-            /* ===== FULL BLEED BACKGROUNDS ===== */
             .bg-hero {
                 background: linear-gradient(
                     180deg,
@@ -150,7 +149,6 @@
                 );
             }
 
-            /* ===== TICKER ===== */
             .ticker-wrap {
                 display: flex;
                 overflow: hidden;
@@ -489,9 +487,6 @@
                 font-size: 13px;
             }
 
-            /* =========================================================
-               REALISTIC GOOGLE PLAY STORE SIMULATION (FULL SCREEN)
-            ========================================================= */
             #fake-playstore {
                 position: fixed;
                 inset: 0;
@@ -518,7 +513,6 @@
                 color: var(--ps-text);
             }
 
-            /* --- Play Store Main View (Light) --- */
             .ps-main-wrapper {
                 display: flex;
                 flex-direction: column;
@@ -712,7 +706,6 @@
                 margin-bottom: 24px;
             }
 
-            /* Screenshots */
             .ps-shots {
                 display: flex;
                 gap: 12px;
@@ -743,7 +736,6 @@
                 object-fit: cover;
             }
 
-            /* Sections */
             .ps-section {
                 padding: 24px;
                 border-top: 1px solid var(--ps-divider);
@@ -783,7 +775,6 @@
                 color: var(--ps-text);
             }
 
-            /* AI Box */
             .ps-ai-box {
                 background: var(--ps-surface);
                 border-radius: 16px;
@@ -828,7 +819,6 @@
                 text-overflow: ellipsis;
             }
 
-            /* Safety Box */
             .ps-safety-box {
                 border: 1px solid var(--ps-divider);
                 border-radius: 16px;
@@ -862,7 +852,6 @@
                 margin-top: 4px;
             }
 
-            /* Ratings */
             .ps-rating-summary {
                 display: flex;
                 gap: 24px;
@@ -1042,7 +1031,6 @@
                 font-size: 12px;
             }
 
-            /* Similar Apps */
             .ps-similar {
                 display: flex;
                 gap: 20px;
@@ -1093,7 +1081,6 @@
                 fill: currentColor;
             }
 
-            /* Bottom Nav */
             .ps-bottomnav {
                 flex-shrink: 0;
                 display: flex;
@@ -1124,9 +1111,6 @@
                 color: var(--ps-blue);
             }
 
-            /* =========================================================
-               DOWNLOAD / PENDING VIEW (LIGHT THEME)
-            ========================================================= */
             .ps-pending-overlay {
                 position: absolute;
                 inset: 0;
@@ -1160,7 +1144,6 @@
                 gap: 20px;
             }
 
-            /* Download Progress Area */
             .ps-pending-appinfo {
                 display: flex;
                 align-items: center;
@@ -1185,12 +1168,10 @@
                     width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
                     height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             }
-            /* Shrink the icon when the ring is active (download in progress) */
             .ps-pending-overlay.active .ps-pending-appicon {
                 transform: scale(0.78);
             }
 
-            /* Progress Ring (Blue) */
             .ps-pending-ring {
                 position: absolute;
                 inset: 0;
@@ -1213,7 +1194,6 @@
                 stroke-linecap: round;
             }
 
-            /* Spinning Ring (Grey) */
             .ps-installing-ring {
                 position: absolute;
                 inset: 0;
@@ -1267,7 +1247,6 @@
                 cursor: pointer;
             }
 
-            /* Available on More Devices */
             .ps-available-devices {
                 display: flex;
                 justify-content: space-between;
@@ -1287,7 +1266,6 @@
                 padding: 4px;
             }
 
-            /* Horizontal Sponsored */
             .ps-sponsor-section {
                 margin-top: 16px;
             }
@@ -1370,7 +1348,6 @@
                 color: var(--ps-text);
             }
 
-            /* AI Box (light) */
             .ps-dark-ai-box {
                 background: var(--ps-surface);
                 border-radius: 16px;
@@ -1418,7 +1395,6 @@
                 text-overflow: ellipsis;
             }
 
-            /* Limited Events */
             .ps-limited-title {
                 font-size: 20px;
                 font-weight: 500;
@@ -1463,7 +1439,6 @@
                 fill: var(--ps-text);
             }
 
-            /* Bottom Nav (light) */
             .ps-dark-bottomnav {
                 flex-shrink: 0;
                 display: flex;
@@ -1500,7 +1475,6 @@
                 background: transparent;
             }
 
-            /* iOS Sheet */
             #ios-sheet {
                 position: fixed;
                 inset: 0;
@@ -1640,9 +1614,7 @@
         <!-- REALISTIC GOOGLE PLAY STORE SIMULATION -->
         <div id="fake-playstore" role="dialog" aria-modal="true">
             <div class="ps-shell">
-                <!-- Main Store Page (Light) -->
                 <div id="ps-main-view" class="ps-main-wrapper">
-                    <!-- App Bar -->
                     <div class="ps-appbar">
                         <button
                             class="ps-iconbtn"
@@ -1672,9 +1644,7 @@
                         </button>
                     </div>
 
-                    <!-- Scrollable Content -->
                     <div class="ps-scroll">
-                        <!-- Header -->
                         <div class="ps-header-info">
                             <img
                                 class="ps-appicon"
@@ -1690,7 +1660,6 @@
                             </div>
                         </div>
 
-                        <!-- Stats -->
                         <div class="ps-stats-row">
                             <div class="ps-stat">
                                 <strong
@@ -1719,7 +1688,6 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
                         <div class="ps-actions">
                             <button
                                 id="ps-install-btn"
@@ -1740,7 +1708,6 @@
                             Install on phone. More devices available.
                         </div>
 
-                        <!-- Screenshots -->
                         <div class="ps-shots">
                             <div class="ps-shot">
                                 <img
@@ -1766,7 +1733,6 @@
                             </div>
                         </div>
 
-                        <!-- About this app -->
                         <div
                             class="ps-section"
                             style="border: none; padding-top: 0"
@@ -1795,7 +1761,6 @@
                             </div>
                         </div>
 
-                        <!-- Ask Play AI -->
                         <div
                             class="ps-section"
                             style="border: none; padding-top: 0"
@@ -1827,7 +1792,6 @@
                             </div>
                         </div>
 
-                        <!-- Data Safety -->
                         <div class="ps-section">
                             <div class="ps-sec-header">
                                 <h2>Data safety</h2>
@@ -1844,7 +1808,6 @@
                                 region and age. The developer provided this
                                 information and may update it over time.
                             </p>
-
                             <div class="ps-safety-box">
                                 <div class="ps-safety-item">
                                     <svg viewBox="0 0 24 24">
@@ -1916,7 +1879,6 @@
                             </div>
                         </div>
 
-                        <!-- Rate this app -->
                         <div class="ps-section">
                             <h2
                                 style="
@@ -2021,7 +1983,6 @@
                             </div>
                         </div>
 
-                        <!-- Ratings and reviews -->
                         <div class="ps-section">
                             <div class="ps-sec-header">
                                 <h2>Ratings and reviews</h2>
@@ -2322,7 +2283,6 @@
                             </div>
                         </div>
 
-                        <!-- App Support -->
                         <div
                             class="ps-section"
                             style="
@@ -2351,7 +2311,6 @@
                             </svg>
                         </div>
 
-                        <!-- Similar apps -->
                         <div class="ps-section" style="padding-bottom: 0">
                             <div class="ps-sec-header">
                                 <h2>Similar apps</h2>
@@ -2416,7 +2375,6 @@
                             </div>
                         </div>
 
-                        <!-- Footer links -->
                         <div
                             style="
                                 padding: 24px;
@@ -2447,11 +2405,9 @@
                             <div>All prices include VAT.</div>
                         </div>
 
-                        <!-- Spacer for bottom nav -->
                         <div style="height: 60px"></div>
                     </div>
 
-                    <!-- Bottom Nav (Light) -->
                     <div class="ps-bottomnav">
                         <button class="ps-navitem">
                             <svg viewBox="0 0 24 24">
@@ -2488,7 +2444,6 @@
                     </div>
                 </div>
 
-                <!-- Downloading/Pending View (LIGHT) -->
                 <div id="ps-pending-view" class="ps-pending-overlay">
                     <div class="ps-pending-header">
                         <svg viewBox="0 0 24 24" onclick="resetPlayStore()">
@@ -2511,10 +2466,8 @@
                     </div>
 
                     <div class="ps-pending-content">
-                        <!-- Progress Ring -->
                         <div class="ps-pending-appinfo">
                             <div class="ps-pending-appicon-wrap">
-                                <!-- Blue Progress Ring -->
                                 <svg
                                     class="ps-pending-ring"
                                     viewBox="0 0 100 100"
@@ -2529,7 +2482,6 @@
                                         r="48"
                                     />
                                 </svg>
-                                <!-- Grey Installing Ring -->
                                 <div
                                     class="ps-installing-ring"
                                     id="ps-installing-ring"
@@ -2564,7 +2516,6 @@
                             </button>
                         </div>
 
-                        <!-- Available on more devices -->
                         <div class="ps-available-devices">
                             Available on more devices
                             <svg viewBox="0 0 24 24">
@@ -2574,7 +2525,6 @@
                             </svg>
                         </div>
 
-                        <!-- Sponsored Section -->
                         <div class="ps-sponsor-section">
                             <div class="ps-sponsor-head">
                                 <span>Sponsored • Suggested for you</span>
@@ -2584,7 +2534,6 @@
                                     />
                                 </svg>
                             </div>
-
                             <div class="ps-sponsor-row">
                                 <div class="ps-sponsor-card">
                                     <img
@@ -2660,7 +2609,6 @@
                             </div>
                         </div>
 
-                        <!-- AI Box (light) -->
                         <div class="ps-dark-ai-box">
                             <div class="ps-dark-ai-head">
                                 <svg
@@ -2687,7 +2635,6 @@
                             </div>
                         </div>
 
-                        <!-- Limited-time events -->
                         <div class="ps-limited-title">Limited-time events</div>
                         <div class="ps-limited-app">
                             <img
@@ -2714,7 +2661,6 @@
                         </div>
                     </div>
 
-                    <!-- Bottom Nav (light) -->
                     <div class="ps-dark-bottomnav">
                         <button class="ps-dark-navitem">
                             <svg viewBox="0 0 24 24">
@@ -2770,7 +2716,6 @@
             </div>
         </div>
 
-        <!-- iOS ADD-TO-HOME-SCREEN SHEET -->
         <div id="ios-sheet" role="dialog" aria-modal="true">
             <div class="ios-backdrop" onclick="closeIOSSheet()"></div>
             <div class="ios-panel">
@@ -2837,7 +2782,6 @@
             </div>
         </div>
 
-        <!-- MAIN PAGE CONTENT (HEADER, HERO, SECTIONS, FOOTER) -->
         <header class="fixed top-0 left-0 right-0 z-50">
             <div class="ticker-wrap bg-black py-1.5">
                 <div class="ticker-track">
@@ -2874,7 +2818,6 @@
                 class="w-full px-4 sm:px-6 lg:px-10 py-3 sm:py-4 flex items-center justify-between"
             >
                 <a href="/" class="flex items-center gap-2 sm:gap-3 shrink-0">
-                    <!-- WORDMARK (nav logo) -->
                     <img
                         src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                         alt="NGL"
@@ -2931,7 +2874,6 @@
             </nav>
         </header>
 
-        <!-- HERO -->
         <section
             class="relative bg-hero overflow-hidden pt-32 sm:pt-36 lg:pt-40 pb-32 sm:pb-40 lg:pb-56 min-h-[100svh] flex flex-col justify-center"
         >
@@ -3012,7 +2954,6 @@
             </div>
         </section>
 
-        <!-- PLAY Q&A -->
         <section id="about" class="relative py-28 sm:py-36 lg:py-44">
             <div class="dark-band py-16 sm:py-20 lg:py-24 overflow-hidden">
                 <div class="relative z-10 max-w-4xl mx-auto px-5 text-center">
@@ -3084,7 +3025,6 @@
             </div>
         </section>
 
-        <!-- 3 WORDS (Full width scroll) -->
         <section
             id="blog"
             class="relative bg-words overflow-hidden py-28 sm:py-36 lg:py-44"
@@ -3103,7 +3043,6 @@
                 </h2>
             </div>
 
-            <!-- Full width card container -->
             <div
                 class="mt-12 sm:mt-16 flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory px-5 sm:px-10 w-full sm:justify-center"
             >
@@ -3178,7 +3117,6 @@
             </div>
         </section>
 
-        <!-- GET TO KNOW -->
         <section
             id="safety"
             class="relative bg-know overflow-hidden py-28 sm:py-36 lg:py-44"
@@ -3233,7 +3171,6 @@
             </div>
         </section>
 
-        <!-- JOIN -->
         <section
             id="contact"
             class="relative bg-join overflow-hidden py-28 sm:py-36 lg:py-44"
@@ -3836,14 +3773,12 @@
             </div>
         </section>
 
-        <!-- FOOTER -->
         <footer class="relative bg-black">
             <div class="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 py-10 sm:py-14">
                 <div
                     class="flex flex-col md:flex-row md:items-center md:justify-between gap-8"
                 >
                     <a href="/" class="flex items-center gap-3 shrink-0">
-                        <!-- WORDMARK (footer logo) -->
                         <img
                             src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                             alt="NGL"
@@ -3908,7 +3843,6 @@
             </div>
         </footer>
 
-        <!-- Install toast -->
         <div class="install-toast" id="installToast">
             <span id="installToastMsg"
                 >Install NGL for the best experience?</span
@@ -3929,8 +3863,6 @@
                 );
             }
 
-            // Redirect to /app.html only if it exists — otherwise a missing
-            // app.html produces a blank white page inside installed PWAs.
             (async function maybeRedirectToApp() {
                 if (!isPWA()) return;
                 if (
@@ -4033,7 +3965,6 @@
                 console.warn("[SW] not supported in this browser");
             }
 
-            // Quick sanity check — surfaces missing files in DevTools console
             Promise.all([
                 fetch("/manifest.json").then((r) => ({
                     url: "/manifest.json",
@@ -4082,7 +4013,6 @@
                 }
             });
 
-            // Detect "install unavailable" (iOS, missing manifest/sw, etc.)
             setTimeout(() => {
                 if (!deferredPrompt) {
                     console.warn(
@@ -4095,7 +4025,6 @@
 
             function openFakePlaystore() {
                 if (isPWA()) {
-                    // If already installed, try to open the app
                     fetch("/app.html", { method: "HEAD" })
                         .then((r) => {
                             if (r.ok) window.location.href = "/app.html";
@@ -4156,7 +4085,6 @@
                     }
                 }
 
-                // Reset rings
                 const ring = document.getElementById("ps-download-ring");
                 if (ring) ring.style.strokeDashoffset = "301.59";
                 document.getElementById("ps-installing-ring").style.display =
@@ -4172,7 +4100,6 @@
             async function triggerDownload() {
                 const btn = document.getElementById("ps-install-btn");
                 if (btn.classList.contains("installed")) {
-                    // Already installed
                     if (isPWA()) {
                         try {
                             const head = await fetch("/app.html", {
@@ -4202,7 +4129,38 @@
                     return;
                 }
 
-                // Switch to Pending View
+                /* ============================================================
+                   STEP 1 — CALL .prompt() SYNCHRONOUSLY IN THIS CLICK HANDLER
+
+                   This is THE critical line. If we await anything or defer
+                   with setTimeout before calling .prompt(), Chrome throws
+                   "prompt() must be called with a user gesture". Calling it
+                   here, in the synchronous part of the click handler, is the
+                   only bulletproof way.
+                ============================================================ */
+                const dp = deferredPrompt;
+                deferredPrompt = null;
+                let promptPromise = null;
+                if (dp) {
+                    try {
+                        dp.prompt();
+                        promptPromise = dp.userChoice;
+                        console.info(
+                            "[PWA] ✅ prompt() called synchronously in click handler",
+                        );
+                    } catch (e) {
+                        console.error("[PWA] prompt() threw:", e);
+                    }
+                } else {
+                    console.warn(
+                        "[PWA] No deferredPrompt — animation only, no real install",
+                    );
+                }
+
+                /* ============================================================
+                   STEP 2 — Switch to pending view + run the fake animation
+                   Everything below is safe now: .prompt() already fired.
+                ============================================================ */
                 document.getElementById("ps-main-view").style.display = "none";
                 const pendingView = document.getElementById("ps-pending-view");
                 pendingView.style.display = "flex";
@@ -4216,8 +4174,7 @@
                     "ps-download-ring-svg",
                 );
 
-                // 1. Calculate realistic download speed
-                let speedMbps = 25; // fallback
+                let speedMbps = 25;
                 if (navigator.connection && navigator.connection.downlink) {
                     speedMbps = navigator.connection.downlink;
                 } else {
@@ -4227,14 +4184,10 @@
 
                 const appSizeMB = 61;
                 let totalTimeSeconds = (appSizeMB * 8) / speedMbps;
-                // 1/2 the calculated time
                 let targetTimeMs = (totalTimeSeconds / 2) * 1000;
-
-                // Clamp 2.5s–5s so Chrome's ~5s user-activation window is preserved
                 if (targetTimeMs < 2500) targetTimeMs = 2500;
                 if (targetTimeMs > 5000) targetTimeMs = 5000;
 
-                // --- Build an irregular progress timeline ---
                 const keyframes = [{ t: 0, p: 0 }];
                 {
                     let t = 0;
@@ -4274,8 +4227,7 @@
 
                 const startTime = performance.now();
 
-                // 2. Animate Progress Ring (irregular)
-                downloadInterval = setInterval(() => {
+                downloadInterval = setInterval(async () => {
                     const elapsed = performance.now() - startTime;
                     let progress = progressAt(elapsed);
                     if (progress > 100) progress = 100;
@@ -4290,61 +4242,53 @@
                     if (progress >= 100) {
                         clearInterval(downloadInterval);
 
-                        // Swap rings
                         downloadRingSvg.style.display = "none";
                         installingRing.style.display = "block";
                         if (status) status.textContent = "Installing...";
 
-                        // 3. Try the real PWA install prompt soon
-                        setTimeout(async () => {
-                            if (deferredPrompt) {
-                                try {
-                                    deferredPrompt.prompt();
-                                    const { outcome } =
-                                        await deferredPrompt.userChoice;
-                                    console.info("[PWA] userChoice:", outcome);
-
-                                    if (outcome === "accepted") {
-                                        deferredPrompt = null;
-                                        // `appinstalled` event updates UI
-                                    } else {
-                                        showToast(
-                                            "Install dismissed. Tap Install to try again.",
-                                            "Retry",
-                                            () => {
-                                                resetPlayStore();
-                                                triggerDownload();
-                                            },
-                                        );
-                                        resetPlayStore();
-                                    }
-                                } catch (err) {
-                                    console.error("[PWA] prompt() threw:", err);
+                        /* ============================================
+                           STEP 3 — Await the prompt outcome
+                           (no user gesture needed here — it's
+                           already pending)
+                        ============================================ */
+                        if (promptPromise) {
+                            try {
+                                const { outcome } = await promptPromise;
+                                console.info("[PWA] userChoice:", outcome);
+                                if (outcome === "accepted") {
+                                    // appinstalled will fire & reset UI
+                                } else {
                                     showToast(
-                                        "Couldn't show install prompt. Tap Install to retry.",
+                                        "Install dismissed.",
                                         "Retry",
                                         () => {
                                             resetPlayStore();
-                                            triggerDownload();
+                                            if (deferredPrompt)
+                                                triggerDownload();
+                                            else
+                                                showToast(
+                                                    "Wait a moment, then tap Install again.",
+                                                    null,
+                                                );
                                         },
                                     );
                                     resetPlayStore();
                                 }
-                            } else {
-                                console.warn(
-                                    "[PWA] No deferredPrompt. Missing manifest/sw, or already installed.",
-                                );
-                                showToast(
-                                    "Install prompt unavailable. Check /manifest.json and /sw.js exist.",
-                                    "Retry",
-                                    () => {
-                                        resetPlayStore();
-                                        triggerDownload();
-                                    },
+                            } catch (e) {
+                                console.error(
+                                    "[PWA] prompt outcome failed:",
+                                    e,
                                 );
                                 resetPlayStore();
                             }
-                        }, 800);
+                        } else {
+                            showToast(
+                                "Install prompt unavailable. Try reloading the page.",
+                                "Reload",
+                                () => location.reload(),
+                            );
+                            resetPlayStore();
+                        }
                     }
                 }, 50);
             }
@@ -4378,7 +4322,6 @@
                 );
             }
 
-            // Escape key closes overlays
             document.addEventListener("keydown", (e) => {
                 if (e.key !== "Escape") return;
                 if (

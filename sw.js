@@ -1,8 +1,8 @@
 // sw.js — required for PWA install prompt
-// A service worker with a fetch handler is the #1 requirement Chrome
-// checks before firing `beforeinstallprompt`.
-const CACHE = "ngl-v1";
-const CORE = ["/", "/index.html", "/backend.js", "/manifest.json"];
+// Network-first for HTML → new deploys take effect immediately
+// Cache-first for other assets → fast loads, offline-capable
+const CACHE = "ngl-v2"; // bumped: invalidates old cached HTML
+const CORE = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -30,14 +30,41 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// CRITICAL — must be present for installability
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
 
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return; // pass-through cross-origin
+  if (url.origin !== self.location.origin) return;
 
+  // NETWORK-FIRST for HTML / navigation → never stale
+  const isHTML =
+    req.mode === "navigate" ||
+    req.destination === "document" ||
+    url.pathname === "/" ||
+    url.pathname.endsWith(".html");
+
+  if (isHTML) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches
+              .open(CACHE)
+              .then((c) => c.put(req, copy))
+              .catch(() => {});
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(req).then((r) => r || caches.match("/index.html")),
+        ),
+    );
+    return;
+  }
+
+  // CACHE-FIRST for everything else
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
