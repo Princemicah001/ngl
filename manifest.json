@@ -1,32 +1,32 @@
 {
-  "name": "NGL: Anonymous Q&A",
+  "name": "NGL - anonymous q&a",
   "short_name": "NGL",
-  "description": "Send anonymous messages and get honest feedback.",
-  "start_url": "/app.html",
+  "description": "NGL is a new way to q&a. Get anonymous messages and play q&a games with your friends.",
+  "start_url": "/",
   "scope": "/",
-  "id": "/app.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ee0e6a",
   "theme_color": "#ee0e6a",
-  "orientation": "portrait",
+  "categories": ["social", "entertainment"],
   "icons": [
     {
-      "src": "/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png",
+      "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Crect%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22%23ee0e6a%22%2F%3E%3Ctext%20x%3D%22256%22%20y%3D%22340%22%20text-anchor%3D%22middle%22%20font-family%3D%22Arial%20Black%2C%20sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%22280%22%20fill%3D%22%23fff%22%3En%3C%2Ftext%3E%3C%2Fsvg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3My8IzG1ZK9cwQhKfqXAvd1EVB3i047XjsyoxnF8FoQ&s=10",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png",
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3My8IzG1ZK9cwQhKfqXAvd1EVB3i047XjsyoxnF8FoQ&s=10",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }

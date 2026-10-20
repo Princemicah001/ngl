@@ -2939,6 +2939,7 @@
                 src="/public/1ojZwN35M1543O3qePxnuoypA9A.png"
                 alt=""
                 data-pop
+                onerror="this.style.display = 'none'"
                 class="pop-icon float-a no-select absolute z-20 w-20 sm:w-28 md:w-36 lg:w-44 left-[4%] sm:left-[6%] md:left-[8%] lg:left-[10%] top-[22%] sm:top-[20%]"
                 style="--rot: -8deg"
             />
@@ -2946,6 +2947,7 @@
                 src="/public/lb7blSnnkBEQMJ7sQMzXUQo6ok.png"
                 alt=""
                 data-pop
+                onerror="this.style.display = 'none'"
                 class="pop-icon float-b no-select absolute z-20 w-20 sm:w-28 md:w-36 lg:w-44 right-[4%] sm:right-[6%] md:right-[8%] lg:right-[10%] top-[22%] sm:top-[20%]"
                 style="--rot: 12deg"
             />
@@ -2953,6 +2955,7 @@
                 src="/public/9Zn10awOegDDlupSZubQ1vQ0c.png"
                 alt=""
                 data-pop
+                onerror="this.style.display = 'none'"
                 class="pop-icon float-c no-select absolute z-20 w-20 sm:w-24 md:w-32 lg:w-40 left-[6%] sm:left-[8%] md:left-[10%] top-[62%] sm:top-[60%]"
                 style="--rot: -3deg"
             />
@@ -2961,13 +2964,21 @@
                 class="photo-card float-a no-select absolute z-10 hidden sm:block w-28 sm:w-32 md:w-40 lg:w-48 aspect-[3/4] left-[2%] sm:left-[3%] md:left-[5%] bottom-[6%]"
                 style="--rot: -7deg"
             >
-                <img src="/public/jdTxRdllkie3eF2vOBncxQwIr4.png" alt="" />
+                <img
+                    src="/public/jdTxRdllkie3eF2vOBncxQwIr4.png"
+                    alt=""
+                    onerror="this.parentElement.style.display = 'none'"
+                />
             </div>
             <div
                 class="photo-card float-b no-select absolute z-10 hidden sm:block w-28 sm:w-32 md:w-40 lg:w-48 aspect-[3/4] right-[2%] sm:right-[3%] md:right-[5%] bottom-[6%]"
                 style="--rot: 7deg"
             >
-                <img src="/public/Ok7TXTFvuZmj5ehhe3vc1x4XDk.png" alt="" />
+                <img
+                    src="/public/Ok7TXTFvuZmj5ehhe3vc1x4XDk.png"
+                    alt=""
+                    onerror="this.parentElement.style.display = 'none'"
+                />
             </div>
 
             <div class="relative z-30 max-w-5xl mx-auto px-5 text-center">
@@ -3191,6 +3202,7 @@
                     src="/public/KIHJNCllq4hXkrhDsSlNXXJKo0.png"
                     alt=""
                     data-pop
+                    onerror="this.style.display = 'none'"
                     class="pop-icon float-a no-select absolute w-16 sm:w-20 md:w-28 left-[4%] sm:left-[6%] md:left-[8%] top-[22%]"
                     style="--rot: -18deg"
                 />
@@ -3198,6 +3210,7 @@
                     src="/public/i7tfa9iMXfDY9eQQLdPpJzwIAdU.png"
                     alt=""
                     data-pop
+                    onerror="this.style.display = 'none'"
                     class="pop-icon float-b no-select absolute w-16 sm:w-20 md:w-28 right-[4%] sm:right-[6%] md:right-[8%] top-[26%]"
                     style="--rot: 15deg"
                 />
@@ -3205,6 +3218,7 @@
                     src="/public/60xKPbSxymtSc475jnSbvuOgh6Y.png"
                     alt=""
                     data-pop
+                    onerror="this.style.display = 'none'"
                     class="pop-icon float-c no-select absolute w-16 sm:w-24 md:w-32 left-[6%] sm:left-[10%] md:left-[12%] bottom-[10%]"
                     style="--rot: 6deg"
                 />
@@ -3212,6 +3226,7 @@
                     src="/public/wNwzlleA6uzU0Xk7TO32UzbNQA.png"
                     alt=""
                     data-pop
+                    onerror="this.style.display = 'none'"
                     class="pop-icon float-a no-select absolute w-16 sm:w-20 md:w-28 right-[6%] sm:right-[10%] md:right-[12%] bottom-[12%]"
                     style="--rot: -22deg"
                 />
@@ -3239,6 +3254,7 @@
                         src="/public/60xKPbSxymtSc475jnSbvuOgh6Y.png"
                         alt=""
                         data-pop
+                        onerror="this.style.display = 'none'"
                         class="pop-icon float-a no-select w-20 sm:w-28 md:w-36 lg:w-44"
                     />
                     <div
@@ -3801,6 +3817,7 @@
                         src="/public/wNwzlleA6uzU0Xk7TO32UzbNQA.png"
                         alt=""
                         data-pop
+                        onerror="this.style.display = 'none'"
                         class="pop-icon float-b no-select w-20 sm:w-28 md:w-36 lg:w-44"
                     />
                 </div>
@@ -3901,7 +3918,7 @@
 
         <script>
             /* =====================================================
-               1. PWA GUARD - Only redirect if already a PWA
+               1. PWA GUARD — only redirect if app.html actually exists
             ===================================================== */
             function isPWA() {
                 return (
@@ -3912,14 +3929,20 @@
                 );
             }
 
-            // If the user opens index.html directly from their app drawer (PWA mode), send to app
-            if (
-                isPWA() &&
-                (window.location.pathname === "/" ||
-                    window.location.pathname === "/index.html")
-            ) {
-                window.location.replace("/app.html");
-            }
+            // Redirect to /app.html only if it exists — otherwise a missing
+            // app.html produces a blank white page inside installed PWAs.
+            (async function maybeRedirectToApp() {
+                if (!isPWA()) return;
+                if (
+                    window.location.pathname !== "/" &&
+                    window.location.pathname !== "/index.html"
+                )
+                    return;
+                try {
+                    const head = await fetch("/app.html", { method: "HEAD" });
+                    if (head.ok) window.location.replace("/app.html");
+                } catch {}
+            })();
 
             /* =====================================================
                2. SCROLL ANIMATIONS
@@ -3993,15 +4016,42 @@
             });
 
             /* =====================================================
-               3. SERVICE WORKER
+               3. SERVICE WORKER — register EARLY, log everything
             ===================================================== */
             if ("serviceWorker" in navigator) {
-                window.addEventListener("load", () => {
-                    navigator.serviceWorker
-                        .register("/sw.js", { scope: "/" })
-                        .catch((e) => console.warn("SW reg failed", e));
-                });
+                navigator.serviceWorker
+                    .register("/sw.js", { scope: "/" })
+                    .then((reg) => {
+                        console.info("[SW] registered:", reg.scope);
+                        return navigator.serviceWorker.ready;
+                    })
+                    .then((reg) =>
+                        console.info("[SW] active:", reg.active?.state),
+                    )
+                    .catch((e) => console.error("[SW] reg FAILED:", e));
+            } else {
+                console.warn("[SW] not supported in this browser");
             }
+
+            // Quick sanity check — surfaces missing files in DevTools console
+            Promise.all([
+                fetch("/manifest.json").then((r) => ({
+                    url: "/manifest.json",
+                    ok: r.ok,
+                    status: r.status,
+                })),
+                fetch("/sw.js").then((r) => ({
+                    url: "/sw.js",
+                    ok: r.ok,
+                    status: r.status,
+                })),
+            ]).then((results) => {
+                results.forEach((r) =>
+                    console.log(
+                        `[PWA] ${r.url} → ${r.ok ? "OK" : "MISSING " + r.status}`,
+                    ),
+                );
+            });
 
             /* =====================================================
                4. PLAY STORE SIMULATION & PWA INSTALL LOGIC
@@ -4016,9 +4066,13 @@
             window.addEventListener("beforeinstallprompt", (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
+                console.info(
+                    "[PWA] ✅ beforeinstallprompt captured — install is available",
+                );
             });
 
             window.addEventListener("appinstalled", () => {
+                console.info("[PWA] ✅ appinstalled — install completed");
                 showToast("NGL was installed on your device 🎉", null);
                 resetPlayStore();
                 const btn = document.getElementById("ps-install-btn");
@@ -4028,9 +4082,31 @@
                 }
             });
 
+            // Detect "install unavailable" (iOS, missing manifest/sw, etc.)
+            setTimeout(() => {
+                if (!deferredPrompt) {
+                    console.warn(
+                        "[PWA] beforeinstallprompt has NOT fired after 3s. " +
+                            "Reasons: manifest.json or sw.js missing, not HTTPS, " +
+                            "already installed, or user dismissed recently.",
+                    );
+                }
+            }, 3000);
+
             function openFakePlaystore() {
                 if (isPWA()) {
-                    window.location.href = "/app.html";
+                    // If already installed, try to open the app
+                    fetch("/app.html", { method: "HEAD" })
+                        .then((r) => {
+                            if (r.ok) window.location.href = "/app.html";
+                            else
+                                showToast(
+                                    "Already installed. Open it from your app drawer.",
+                                    "OK",
+                                    () => {},
+                                );
+                        })
+                        .catch(() => {});
                     return;
                 }
                 if (isIOS) {
@@ -4098,7 +4174,24 @@
                 if (btn.classList.contains("installed")) {
                     // Already installed
                     if (isPWA()) {
-                        window.location.href = "/app.html";
+                        try {
+                            const head = await fetch("/app.html", {
+                                method: "HEAD",
+                            });
+                            if (head.ok) window.location.href = "/app.html";
+                            else
+                                showToast(
+                                    "App is already installed. Please open it from your app drawer.",
+                                    "OK",
+                                    () => {},
+                                );
+                        } catch {
+                            showToast(
+                                "App is already installed. Please open it from your app drawer.",
+                                "OK",
+                                () => {},
+                            );
+                        }
                     } else {
                         showToast(
                             "App is already installed. Please open it from your app drawer.",
@@ -4128,34 +4221,29 @@
                 if (navigator.connection && navigator.connection.downlink) {
                     speedMbps = navigator.connection.downlink;
                 } else {
-                    // Randomize between 10 and 45 Mbps for realism
                     speedMbps = Math.floor(Math.random() * 35) + 10;
                 }
-                if (speedMbps < 2) speedMbps = 2; // Minimum for UI sanity
+                if (speedMbps < 2) speedMbps = 2;
 
                 const appSizeMB = 61;
-                // Time = (Size in MB * 8) / Speed in Mbps
                 let totalTimeSeconds = (appSizeMB * 8) / speedMbps;
-                // 1/2 of the actual time as requested
+                // 1/2 the calculated time
                 let targetTimeMs = (totalTimeSeconds / 2) * 1000;
 
-                // Clamp so the animation stays watchable (4s - 15s)
-                if (targetTimeMs < 4000) targetTimeMs = 4000;
-                if (targetTimeMs > 15000) targetTimeMs = 15000;
+                // Clamp 2.5s–5s so Chrome's ~5s user-activation window is preserved
+                if (targetTimeMs < 2500) targetTimeMs = 2500;
+                if (targetTimeMs > 5000) targetTimeMs = 5000;
 
                 // --- Build an irregular progress timeline ---
-                // Random stalls (progress holds) and sudden leaps (spikes)
                 const keyframes = [{ t: 0, p: 0 }];
                 {
                     let t = 0;
                     let p = 0;
                     while (p < 100) {
-                        // Random stall: hold current progress for a moment
                         if (Math.random() < 0.4) {
                             t += 200 + Math.random() * 800;
                             keyframes.push({ t, p });
                         }
-                        // Random leap: usually small, sometimes a big spike
                         const bigSpike = Math.random() < 0.28;
                         const leap = bigSpike
                             ? 5 + Math.random() * 13
@@ -4164,12 +4252,10 @@
                         p = Math.min(100, p + leap);
                         keyframes.push({ t, p });
                     }
-                    // Stretch the timeline so it finishes exactly at targetTimeMs
                     const scale = targetTimeMs / t;
                     keyframes.forEach((k) => (k.t *= scale));
                 }
 
-                // Read progress from the keyframe timeline at a given elapsed time
                 function progressAt(elapsed) {
                     if (elapsed <= 0) return 0;
                     const last = keyframes[keyframes.length - 1];
@@ -4201,7 +4287,6 @@
                     if (status)
                         status.textContent = `${Math.round(progress)}% of ${currentMb} MB`;
 
-                    // 3. Download Complete -> Show Installing Spinner
                     if (progress >= 100) {
                         clearInterval(downloadInterval);
 
@@ -4210,30 +4295,56 @@
                         installingRing.style.display = "block";
                         if (status) status.textContent = "Installing...";
 
-                        // 4. Trigger PWA Installation after a brief delay
+                        // 3. Try the real PWA install prompt soon
                         setTimeout(async () => {
                             if (deferredPrompt) {
-                                deferredPrompt.prompt();
-                                const { outcome } =
-                                    await deferredPrompt.userChoice;
-                                if (outcome === "accepted") {
-                                    deferredPrompt = null;
-                                    // Play Store handles UI change via 'appinstalled' event listener
-                                } else {
-                                    // User dismissed prompt
-                                    showToast("Installation cancelled.", null);
+                                try {
+                                    deferredPrompt.prompt();
+                                    const { outcome } =
+                                        await deferredPrompt.userChoice;
+                                    console.info("[PWA] userChoice:", outcome);
+
+                                    if (outcome === "accepted") {
+                                        deferredPrompt = null;
+                                        // `appinstalled` event updates UI
+                                    } else {
+                                        showToast(
+                                            "Install dismissed. Tap Install to try again.",
+                                            "Retry",
+                                            () => {
+                                                resetPlayStore();
+                                                triggerDownload();
+                                            },
+                                        );
+                                        resetPlayStore();
+                                    }
+                                } catch (err) {
+                                    console.error("[PWA] prompt() threw:", err);
+                                    showToast(
+                                        "Couldn't show install prompt. Tap Install to retry.",
+                                        "Retry",
+                                        () => {
+                                            resetPlayStore();
+                                            triggerDownload();
+                                        },
+                                    );
                                     resetPlayStore();
                                 }
                             } else {
-                                // Fallback if no prompt available (e.g. unsupported browser, criteria not met)
-                                showToast("App installed successfully!", null);
-                                const btn =
-                                    document.getElementById("ps-install-btn");
-                                btn.textContent = "Open";
-                                btn.classList.add("installed");
+                                console.warn(
+                                    "[PWA] No deferredPrompt. Missing manifest/sw, or already installed.",
+                                );
+                                showToast(
+                                    "Install prompt unavailable. Check /manifest.json and /sw.js exist.",
+                                    "Retry",
+                                    () => {
+                                        resetPlayStore();
+                                        triggerDownload();
+                                    },
+                                );
                                 resetPlayStore();
                             }
-                        }, 1500); // 1.5s delay while "Installing..."
+                        }, 800);
                     }
                 }, 50);
             }
