@@ -75,6 +75,24 @@
                 display: inline-block;
             }
 
+            /* Golden Pro Badge */
+            .pro-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 2px;
+                padding: 2px 8px;
+                border-radius: 9999px;
+                background: linear-gradient(90deg, #fbbf24, #f59e0b, #d97706);
+                color: #000;
+                font-weight: 900;
+                font-size: 10px;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                box-shadow:
+                    0 4px 14px rgba(251, 191, 36, 0.35),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+            }
+
             .inbox-row {
                 border-bottom: 1px solid rgba(0, 0, 0, 0.05);
                 transition: background 0.2s;
@@ -355,17 +373,13 @@
                 class="w-full h-full flex flex-col justify-between py-12 px-6 max-w-md mx-auto"
             >
                 <div class="flex-1 flex items-center justify-center">
-                    <h1
-                        class="text-white font-black text-[110px] sm:text-[130px] tracking-tighter"
-                        style="
-                            -webkit-text-stroke: 10px black;
-                            paint-order: stroke fill;
-                            filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.2));
-                            transform: rotate(-6deg);
-                        "
-                    >
-                        NGL
-                    </h1>
+                    <!-- NGL LOGO -->
+                    <img
+                        src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                        alt="NGL Logo"
+                        class="w-64 h-auto object-contain drop-shadow-2xl"
+                        style="transform: rotate(-6deg)"
+                    />
                 </div>
                 <div class="w-full flex flex-col items-center pb-safe">
                     <button
@@ -486,16 +500,12 @@
                                 id="avatar-preview"
                                 class="w-full h-full object-cover hidden"
                             />
-                            <svg
+                            <!-- NGL LOGO Placeholder -->
+                            <img
                                 id="avatar-placeholder"
-                                class="w-24 h-24 text-[#9ca3af]"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                                />
-                            </svg>
+                                src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                                class="w-20 h-auto object-contain"
+                            />
                         </div>
                         <div
                             class="absolute bottom-1 right-1 bg-white rounded-full p-2 shadow-lg group-hover:scale-110 transition-transform"
@@ -541,23 +551,41 @@
                 <header
                     class="flex items-center justify-between px-6 py-4 z-10 sticky top-0 bg-inherit"
                 >
+                    <!-- Profile & Pro Badge -->
                     <div
-                        class="profile-ring w-10 h-10 flex-shrink-0"
+                        class="flex items-center gap-2 cursor-pointer"
                         onclick="showView('view-settings')"
                     >
-                        <div
-                            class="w-full h-full bg-white dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden"
-                        >
-                            <img
-                                id="header-avatar"
-                                class="w-full h-full object-cover hidden"
-                            />
-                            <span id="header-avatar-fallback" class="text-xl"
-                                >⚡</span
+                        <div class="profile-ring w-10 h-10 flex-shrink-0">
+                            <div
+                                class="w-full h-full bg-white dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden"
                             >
+                                <img
+                                    id="header-avatar"
+                                    class="w-full h-full object-cover hidden"
+                                />
+                                <!-- NGL LOGO fallback -->
+                                <img
+                                    id="header-avatar-fallback"
+                                    src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                                    class="w-6 h-auto object-contain"
+                                />
+                            </div>
                         </div>
+                        <span class="pro-badge">
+                            <svg
+                                class="w-2.5 h-2.5 fill-black"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3H5v-2h14v2z"
+                                />
+                            </svg>
+                            Pro
+                        </span>
                     </div>
 
+                    <!-- Tabs -->
                     <div class="flex items-center gap-4 text-2xl font-black">
                         <button
                             onclick="switchTab('play')"
@@ -579,6 +607,7 @@
                         </button>
                     </div>
 
+                    <!-- Settings -->
                     <button
                         onclick="showView('view-settings')"
                         class="bg-white dark:bg-gray-800 p-2.5 rounded-full shadow-sm"
@@ -620,15 +649,11 @@
                                     <div
                                         class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center"
                                     >
-                                        <svg
-                                            class="w-12 h-12 text-white/50"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                                            />
-                                        </svg>
+                                        <!-- NGL Logo watermark inside card -->
+                                        <img
+                                            src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                                            class="w-10 h-auto opacity-70"
+                                        />
                                     </div>
                                 </div>
                                 <h3
@@ -638,61 +663,17 @@
                                     send me<br />anonymous<br />messages!
                                 </h3>
 
-                                <!-- DICE SHUFFLE BUTTON -->
+                                <!-- 🎲 DICE EMOJI SHUFFLE BUTTON -->
                                 <button
                                     id="dice-btn"
                                     onclick="cycleTheme()"
                                     class="absolute bottom-6 right-6 bg-black/40 backdrop-blur-md text-white p-3 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform border border-white/20"
                                 >
-                                    <svg
+                                    <span
                                         id="dice-icon"
-                                        class="w-6 h-6"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
+                                        class="text-2xl inline-block leading-none"
+                                        >🎲</span
                                     >
-                                        <rect
-                                            x="3"
-                                            y="3"
-                                            width="18"
-                                            height="18"
-                                            rx="4"
-                                            ry="4"
-                                        />
-                                        <circle
-                                            cx="8.5"
-                                            cy="8.5"
-                                            r="1.5"
-                                            fill="currentColor"
-                                        />
-                                        <circle
-                                            cx="15.5"
-                                            cy="8.5"
-                                            r="1.5"
-                                            fill="currentColor"
-                                        />
-                                        <circle
-                                            cx="8.5"
-                                            cy="15.5"
-                                            r="1.5"
-                                            fill="currentColor"
-                                        />
-                                        <circle
-                                            cx="15.5"
-                                            cy="15.5"
-                                            r="1.5"
-                                            fill="currentColor"
-                                        />
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="1.5"
-                                            fill="currentColor"
-                                        />
-                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -885,12 +866,16 @@
                             ></div>
                         </div>
                         <div
-                            class="bg-gray-50 dark:bg-gray-900 p-4 text-center border-t border-gray-100 dark:border-gray-800"
+                            class="bg-gray-50 dark:bg-gray-900 p-4 text-center border-t border-gray-100 dark:border-gray-800 flex items-center justify-center gap-1"
                         >
                             <span
                                 class="text-[11px] font-light text-gray-400 tracking-wide"
-                                >Sent with ❤️ from NGL</span
+                                >Sent with ❤️ from</span
                             >
+                            <img
+                                src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                                class="h-3 w-auto opacity-70"
+                            />
                         </div>
                     </div>
 
@@ -969,58 +954,60 @@
                 </header>
 
                 <div class="px-6 pb-12">
-                    <h3
-                        class="text-gray-500 dark:text-gray-400 font-bold text-sm mb-3 flex items-center gap-2"
-                    >
-                        <span class="text-lg">⭐</span> Profile & Appearance
-                    </h3>
+                    <!-- PROFILE HEADER -->
                     <div
-                        class="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden mb-6 shadow-sm border border-transparent dark:border-gray-700"
+                        class="flex items-center gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm border border-transparent dark:border-gray-700"
                     >
                         <div
-                            class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700 cursor-pointer"
+                            class="profile-ring w-16 h-16 flex-shrink-0 cursor-pointer"
                             onclick="
                                 document
                                     .getElementById('settings-avatar-input')
                                     .click()
                             "
                         >
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"
+                            <div
+                                class="w-full h-full bg-white dark:bg-gray-700 rounded-full flex items-center justify-center overflow-hidden"
+                            >
+                                <img
+                                    id="settings-avatar"
+                                    class="w-full h-full object-cover hidden"
+                                />
+                                <img
+                                    id="settings-avatar-fallback"
+                                    src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                                    class="w-8 h-auto object-contain"
+                                />
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    id="settings-handle"
+                                    class="text-lg font-black"
+                                    >@username</span
                                 >
-                                    <img
-                                        id="settings-avatar"
-                                        class="w-full h-full object-cover hidden"
-                                    />
+                                <span class="pro-badge">
                                     <svg
-                                        id="settings-avatar-fallback"
-                                        class="w-5 h-5 text-gray-500"
-                                        fill="currentColor"
+                                        class="w-2.5 h-2.5 fill-black"
                                         viewBox="0 0 24 24"
                                     >
                                         <path
-                                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                                            d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3H5v-2h14v2z"
                                         />
                                     </svg>
-                                </div>
-                                <span class="text-lg font-bold"
-                                    >Profile Picture</span
-                                >
+                                    Pro
+                                </span>
                             </div>
-                            <svg
-                                class="w-5 h-5 text-gray-300"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                            <span
+                                class="text-xs text-gray-500 font-medium cursor-pointer"
+                                onclick="
+                                    document
+                                        .getElementById('settings-avatar-input')
+                                        .click()
+                                "
+                                >Tap to change photo</span
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M9 5l7 7-7 7"
-                                ></path>
-                            </svg>
                             <input
                                 type="file"
                                 id="settings-avatar-input"
@@ -1029,7 +1016,16 @@
                                 onchange="handleImageUpload(event)"
                             />
                         </div>
+                    </div>
 
+                    <h3
+                        class="text-gray-500 dark:text-gray-400 font-bold text-sm mb-3 flex items-center gap-2"
+                    >
+                        <span class="text-lg">⭐</span> Preferences
+                    </h3>
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden mb-6 shadow-sm border border-transparent dark:border-gray-700"
+                    >
                         <div
                             class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700"
                         >
@@ -1406,7 +1402,6 @@
             let currentIndex = -1;
             let unsubscribeRTDB = null;
 
-            // High-contrast distinct themes
             const playThemes = [
                 {
                     class: "theme-ngl-sunrise",
@@ -1647,6 +1642,7 @@
                         document
                             .getElementById("avatar-placeholder")
                             .classList.add("hidden");
+
                         document.getElementById("header-avatar").src = base64;
                         document
                             .getElementById("header-avatar")
@@ -1654,6 +1650,7 @@
                         document
                             .getElementById("header-avatar-fallback")
                             .classList.add("hidden");
+
                         document.getElementById("settings-avatar").src = base64;
                         document
                             .getElementById("settings-avatar")
@@ -1700,6 +1697,9 @@
 
                 showView("view-main");
 
+                document.getElementById("settings-handle").textContent =
+                    `@${currentUser.handle}`;
+
                 if (currentUser.photoURL) {
                     document.getElementById("header-avatar").src =
                         currentUser.photoURL;
@@ -1709,6 +1709,7 @@
                     document
                         .getElementById("header-avatar-fallback")
                         .classList.add("hidden");
+
                     document.getElementById("settings-avatar").src =
                         currentUser.photoURL;
                     document
@@ -1796,10 +1797,9 @@
             }
 
             function cycleTheme() {
-                // Dice spin animation
                 const dice = document.getElementById("dice-icon");
                 dice.classList.remove("dice-spinning");
-                void dice.offsetWidth; // trigger reflow
+                void dice.offsetWidth;
                 dice.classList.add("dice-spinning");
 
                 currentUser.themeIndex =
@@ -1808,7 +1808,6 @@
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
                 saveProfileToServer();
 
-                // Delay actual theme switch slightly for effect
                 setTimeout(() => {
                     updatePlayCard();
                     showToast("Theme changed!");

@@ -1,0 +1,22 @@
+{
+  "name": "ngl-clone",
+  "version": "1.0.0",
+  "description": "NGL clone - Anonymous Q&A PWA with Firebase RTDB and Real-time messaging",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "ngl",
+    "pwa",
+    "anonymous",
+    "qa",
+    "firebase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

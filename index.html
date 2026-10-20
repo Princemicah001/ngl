@@ -22,9 +22,10 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Archivo+Black&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Archivo+Black&family=Roboto:wght@400;500;700&display=swap"
             rel="stylesheet"
         />
+
         <style>
             * {
                 -webkit-tap-highlight-color: transparent;
@@ -62,16 +63,16 @@
                 -webkit-font-smoothing: antialiased;
                 min-height: 100vh;
             }
+
             :root {
                 --pink: #ee0e6a;
                 --pink-2: #f70a63;
-                --pink-3: #f8116d;
                 --orange: #ff6200;
-                --orange-2: #ff7a1a;
                 --pro-1: #fbbf24;
                 --pro-2: #f59e0b;
                 --pro-3: #d97706;
             }
+
             .display {
                 font-family: "Archivo Black", "Inter", sans-serif;
                 font-weight: 900;
@@ -89,7 +90,7 @@
                 font-size: clamp(48px, 11vw, 150px);
             }
 
-            /* Full-bleed section gradients */
+            /* ===== FULL BLEED BACKGROUNDS ===== */
             .bg-hero {
                 background: linear-gradient(
                     180deg,
@@ -136,7 +137,7 @@
                 );
             }
 
-            /* Ticker */
+            /* ===== TICKER ===== */
             .ticker-wrap {
                 display: flex;
                 overflow: hidden;
@@ -206,6 +207,7 @@
                     0 4px 14px rgba(251, 191, 36, 0.35),
                     0 0 0 1px rgba(255, 255, 255, 0.15);
             }
+
             .store-pill {
                 display: inline-flex;
                 align-items: center;
@@ -214,6 +216,7 @@
                 border-radius: 9999px;
                 padding: 10px 16px;
                 transition: transform 0.2s;
+                cursor: pointer;
             }
             .store-pill:hover {
                 transform: scale(1.04);
@@ -223,18 +226,51 @@
                 height: 18px;
                 background: rgba(255, 255, 255, 0.4);
             }
+
+            /* ===== EXACT BUTTON STYLE FROM IMAGE ===== */
+            .btn-get-questions {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #ffffff;
+                color: #0f172a; /* Dark navy text */
+                font-family: "Inter", sans-serif;
+                font-weight: 800;
+                font-size: clamp(18px, 1.2rem + 0.6vw, 24px);
+                letter-spacing: -0.02em;
+                text-transform: none;
+                padding: 20px 32px;
+                border-radius: 9999px;
+                text-decoration: none;
+                width: 100%;
+                max-width: 380px;
+                transition:
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+                border: none;
+                cursor: pointer;
+            }
+            .btn-get-questions:hover {
+                transform: scale(1.02);
+            }
+            .btn-get-questions:active {
+                transform: scale(0.97);
+            }
+
+            /* Generic White Pill for Hero */
             .cta-pill {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 gap: 10px;
                 background: #fff;
-                color: #ff6200;
-                font-family: "Archivo Black", sans-serif;
-                font-weight: 900;
-                font-size: clamp(18px, 1.2rem + 0.6vw, 26px);
-                letter-spacing: -0.03em;
-                text-transform: lowercase;
+                color: #0f172a;
+                font-family: "Inter", sans-serif;
+                font-weight: 800;
+                font-size: clamp(18px, 1.2rem + 0.6vw, 24px);
+                letter-spacing: -0.02em;
+                text-transform: none;
                 padding: 20px 44px;
                 border-radius: 9999px;
                 text-decoration: none;
@@ -242,8 +278,8 @@
                     transform 0.22s,
                     box-shadow 0.22s;
                 box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-                cursor: pointer;
                 border: 0;
+                cursor: pointer;
             }
             .cta-pill:hover {
                 transform: scale(1.05);
@@ -336,7 +372,7 @@
                 letter-spacing: -0.02em;
             }
 
-            /* ===== SCROLL-ANIMATED WORDS ===== */
+            /* ===== SCROLL ANIMATIONS ===== */
             .split-word {
                 display: inline-block;
                 opacity: 0;
@@ -351,7 +387,6 @@
                 transform: translateY(0) rotate(0) scale(1);
             }
 
-            /* ===== POP-IN ICONS ===== */
             .pop-icon {
                 opacity: 0;
                 transform: scale(0.3) rotate(var(--rot, 0deg));
@@ -363,7 +398,6 @@
                 opacity: 1;
                 transform: scale(1) rotate(var(--rot, 0deg));
             }
-            /* After pop, resume float */
             .pop-icon.in-view.float-a {
                 animation: float-a 6s ease-in-out infinite 0.7s;
             }
@@ -379,10 +413,7 @@
             /* ===== BLACK CURVED SECTION ===== */
             .dark-band {
                 background: #000;
-                border-top-left-radius: 48px;
-                border-top-right-radius: 48px;
-                border-bottom-left-radius: 48px;
-                border-bottom-right-radius: 48px;
+                border-radius: 48px;
                 margin-left: 12px;
                 margin-right: 12px;
                 position: relative;
@@ -390,10 +421,7 @@
             }
             @media (min-width: 768px) {
                 .dark-band {
-                    border-top-left-radius: 72px;
-                    border-top-right-radius: 72px;
-                    border-bottom-left-radius: 72px;
-                    border-bottom-right-radius: 72px;
+                    border-radius: 72px;
                     margin-left: 24px;
                     margin-right: 24px;
                 }
@@ -419,7 +447,7 @@
                 pointer-events: none;
             }
 
-            /* Install toast */
+            /* Install Toast */
             .install-toast {
                 position: fixed;
                 left: 50%;
@@ -452,9 +480,380 @@
                 cursor: pointer;
                 font-size: 13px;
             }
+
+            /* ===== FAKE PLAY STORE UI (ANDROID & DESKTOP) ===== */
+            #fake-playstore {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100dvh;
+                background: #f1f3f4;
+                z-index: 9999;
+                display: none;
+                flex-direction: column;
+                overflow-y: auto;
+                font-family: "Roboto", sans-serif;
+                color: #202124;
+            }
+            #fake-playstore.active {
+                display: flex;
+                animation: slideUpFade 0.3s ease;
+            }
+            @keyframes slideUpFade {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .ps-header {
+                background: #fff;
+                padding: 12px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+            .ps-search {
+                flex: 1;
+                background: #f1f3f4;
+                border-radius: 8px;
+                padding: 10px 16px;
+                color: #5f6368;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .ps-app-header {
+                padding: 24px 16px;
+                display: flex;
+                gap: 20px;
+                max-width: 800px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            .ps-icon {
+                width: 72px;
+                height: 72px;
+                border-radius: 16px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+            .ps-title {
+                font-size: 22px;
+                font-weight: 500;
+                margin: 0 0 4px 0;
+                line-height: 1.2;
+            }
+            .ps-dev {
+                color: #01875f;
+                font-size: 14px;
+                font-weight: 500;
+                margin-bottom: 4px;
+            }
+            .ps-meta {
+                color: #5f6368;
+                font-size: 12px;
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .ps-stats {
+                display: flex;
+                justify-content: space-around;
+                padding: 16px;
+                border-bottom: 1px solid #dadce0;
+                margin: 0 auto;
+                max-width: 800px;
+                width: calc(100% - 32px);
+            }
+            .ps-stat {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-size: 12px;
+                color: #5f6368;
+            }
+            .ps-stat strong {
+                font-size: 16px;
+                color: #202124;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .ps-actions {
+                padding: 16px;
+                display: flex;
+                justify-content: center;
+                max-width: 800px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            .ps-install-btn {
+                background: #01875f;
+                color: #fff;
+                font-weight: 500;
+                font-size: 16px;
+                padding: 10px 24px;
+                border-radius: 8px;
+                width: 100%;
+                text-align: center;
+                border: none;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .ps-install-btn:active {
+                background: #016a4b;
+            }
+            .ps-install-btn.installing {
+                background: #e8eaed;
+                color: #5f6368;
+                pointer-events: none;
+            }
+
+            .ps-screenshots {
+                display: flex;
+                gap: 12px;
+                padding: 16px;
+                overflow-x: auto;
+                max-width: 800px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            .ps-screenshot {
+                height: 200px;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #ee0e6a, #ff6200);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                flex-shrink: 0;
+                border: 1px solid #dadce0;
+            }
+
+            .ps-similar {
+                padding: 16px;
+                max-width: 800px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            .ps-similar h3 {
+                font-size: 16px;
+                font-weight: 500;
+                margin-bottom: 12px;
+                display: flex;
+                justify-content: space-between;
+            }
+            .ps-similar-apps {
+                display: flex;
+                gap: 16px;
+                overflow-x: auto;
+            }
+            .ps-sim-app {
+                width: 96px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 8px;
+            }
+            .ps-sim-app div {
+                width: 72px;
+                height: 72px;
+                border-radius: 16px;
+            }
+            .ps-sim-app span {
+                font-size: 12px;
+                color: #5f6368;
+                line-height: 1.2;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
         </style>
     </head>
     <body>
+        <!-- FAKE PLAY STORE OVERLAY -->
+        <div id="fake-playstore">
+            <div class="ps-header">
+                <!-- Close Button -->
+                <svg
+                    class="w-6 h-6 text-gray-600 cursor-pointer"
+                    onclick="closeFakePlaystore()"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                    />
+                </svg>
+                <div class="ps-search">
+                    <svg
+                        class="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                        />
+                    </svg>
+                    Search apps & games
+                </div>
+                <img
+                    src="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                    class="w-8 h-8 rounded-full"
+                />
+            </div>
+
+            <div class="ps-app-header">
+                <img
+                    src="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                    class="ps-icon"
+                />
+                <div>
+                    <h1 class="ps-title">NGL: anonymous q&a</h1>
+                    <p class="ps-dev">DeepMoji, Inc.</p>
+                    <p class="ps-meta">Contains ads • In-app purchases</p>
+                </div>
+            </div>
+
+            <div class="ps-stats">
+                <div class="ps-stat">
+                    <strong
+                        >4.5
+                        <svg
+                            class="w-3 h-3 text-yellow-500"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                            /></svg
+                    ></strong>
+                    <span>1M+ reviews</span>
+                </div>
+                <div class="ps-stat">
+                    <strong>100M+</strong>
+                    <span>Downloads</span>
+                </div>
+                <div class="ps-stat">
+                    <strong>12+</strong>
+                    <span>Rated for 12+</span>
+                </div>
+            </div>
+
+            <div class="ps-actions">
+                <button id="ps-install-btn" class="ps-install-btn">
+                    Install
+                </button>
+            </div>
+
+            <div class="ps-screenshots">
+                <div class="ps-screenshot">
+                    <img
+                        src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                        class="w-24 h-auto drop-shadow-xl"
+                        style="transform: rotate(-6deg)"
+                    />
+                </div>
+                <div
+                    class="ps-screenshot"
+                    style="
+                        background: #1e2530;
+                        flex-direction: column;
+                        gap: 10px;
+                    "
+                >
+                    <div
+                        class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center"
+                    >
+                        <img
+                            src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                            class="w-8"
+                        />
+                    </div>
+                    <div class="text-white font-bold text-center leading-tight">
+                        send me<br />anonymous<br />messages!
+                    </div>
+                </div>
+                <div
+                    class="ps-screenshot"
+                    style="
+                        background: linear-gradient(135deg, #6a11cb, #2575fc);
+                        flex-direction: column;
+                        gap: 10px;
+                    "
+                >
+                    <div
+                        class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center"
+                    >
+                        <img
+                            src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                            class="w-8"
+                        />
+                    </div>
+                    <div class="text-white font-bold text-center leading-tight">
+                        ask me anything!
+                    </div>
+                </div>
+            </div>
+
+            <div
+                style="
+                    padding: 0 16px 24px;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    width: 100%;
+                "
+            >
+                <p style="font-size: 14px; line-height: 1.5; color: #202124">
+                    NGL is a new way to Q&A. Get anonymous messages and play Q&A
+                    games with your friends. The app provides a safe space for
+                    users to connect with friends and be their authentic selves.
+                </p>
+            </div>
+
+            <div class="ps-similar">
+                <h3>
+                    Similar apps
+                    <span class="text-[#01875f] text-sm font-medium"
+                        >See all</span
+                    >
+                </h3>
+                <div class="ps-similar-apps">
+                    <div class="ps-sim-app">
+                        <div style="background: #1da1f2"></div>
+                        <span>Tellonym: anonymous Q&A</span>
+                    </div>
+                    <div class="ps-sim-app">
+                        <div style="background: #25d366"></div>
+                        <span>Sarahah</span>
+                    </div>
+                    <div class="ps-sim-app">
+                        <div style="background: #ff0000"></div>
+                        <span>Whisper</span>
+                    </div>
+                    <div class="ps-sim-app">
+                        <div style="background: #833ab4"></div>
+                        <span>Gas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- HEADER -->
         <header class="fixed top-0 left-0 right-0 z-50">
             <div class="ticker-wrap bg-black py-1.5">
@@ -517,28 +916,15 @@
                 <div class="flex items-center gap-2 sm:gap-3">
                     <a
                         href="/app.html"
-                        id="nav-account"
-                        class="hidden sm:inline-flex items-center gap-2 bg-white text-black font-black text-xs sm:text-sm px-4 py-2.5 rounded-full hover:scale-105 transition shadow-lg"
+                        class="hidden sm:inline-flex items-center justify-center bg-white text-[#0f172a] font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full hover:scale-105 transition shadow-lg trigger-install"
                     >
-                        <svg
-                            class="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="3"
-                        >
-                            <path
-                                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-                            />
-                        </svg>
-                        Get messages
+                        Get Questions!
                     </a>
-                    <div class="store-pill shrink-0 hidden sm:flex">
-                        <a
-                            href="#"
-                            aria-label="App Store"
-                            class="flex items-center"
-                        >
+                    <!-- Play Store / App Store Icons -->
+                    <div
+                        class="store-pill shrink-0 hidden sm:flex trigger-install"
+                    >
+                        <a aria-label="App Store" class="flex items-center">
                             <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
                                 <path
                                     d="M17.05 12.53c-.03-2.4 1.96-3.55 2.05-3.6-1.12-1.63-2.86-1.86-3.47-1.88-1.48-.15-2.88.87-3.63.87-.75 0-1.9-.85-3.12-.83-1.61.02-3.1.93-3.93 2.37-1.67 2.9-.43 7.2 1.2 9.55.8 1.16 1.75 2.45 3 2.4 1.2-.05 1.65-.78 3.1-.78s1.86.78 3.13.75c1.29-.02 2.1-1.17 2.9-2.33.9-1.32 1.28-2.6 1.3-2.66-.03-.02-2.5-.96-2.53-3.82zM14.75 5.62c.66-.8 1.1-1.9.98-3-.95.04-2.1.63-2.78 1.42-.61.7-1.14 1.83-1 2.9 1.06.08 2.15-.54 2.8-1.32z"
@@ -546,11 +932,7 @@
                             </svg>
                         </a>
                         <span class="divider"></span>
-                        <a
-                            href="#"
-                            aria-label="Google Play"
-                            class="flex items-center"
-                        >
+                        <a aria-label="Google Play" class="flex items-center">
                             <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
                                 <path
                                     d="M3.6 2.3c-.24.25-.38.65-.38 1.16v17.07c0 .51.14.91.4 1.15l.06.06L13.2 12.2v-.22L3.66 2.24l-.06.06zm13.3 13.6l-3.7-3.7v-.22l3.7-3.7.08.05 4.38 2.5c1.25.7 1.25 1.86 0 2.57l-4.38 2.5-.08.02zM13.2 12.2l3.72 3.72L4.7 22.9c-.5.28-.96.24-1.32-.06L13.2 12.2zm0-.2L3.4 1.16c.36-.3.82-.34 1.32-.06l12.2 6.96L13.2 12z"
@@ -608,34 +990,14 @@
                 <div
                     class="mt-8 sm:mt-12 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4"
                 >
-                    <button id="install-btn" class="cta-pill">
-                        <svg class="w-5 h-5" viewBox="0 0 24 24">
-                            <path
-                                d="M12 3v14m0 0l-5-5m5 5l5-5"
-                                stroke="#ff6200"
-                                stroke-width="2.5"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                fill="none"
-                            />
-                        </svg>
+                    <button class="cta-pill trigger-install">
                         Download the app!
                     </button>
-                    <a href="/app.html" class="cta-pill dark">
-                        Get messages
-                        <svg
-                            class="w-5 h-5"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="#fff"
-                            stroke-width="2.5"
-                        >
-                            <path
-                                d="M5 12h14M12 5l7 7-7 7"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            />
-                        </svg>
+                    <a
+                        href="/app.html"
+                        class="btn-get-questions trigger-install"
+                    >
+                        Get Questions!
                     </a>
                 </div>
                 <div class="mt-10 sm:mt-14 flex justify-center">
@@ -655,7 +1017,7 @@
             </div>
         </section>
 
-        <!-- PLAY Q&A (black curved band) -->
+        <!-- PLAY Q&A -->
         <section id="about" class="relative py-28 sm:py-36 lg:py-44">
             <div class="dark-band py-16 sm:py-20 lg:py-24 overflow-hidden">
                 <div class="relative z-10 max-w-4xl mx-auto px-5 text-center">
@@ -727,12 +1089,12 @@
             </div>
         </section>
 
-        <!-- 3 WORDS -->
+        <!-- 3 WORDS (Full width scroll) -->
         <section
             id="blog"
             class="relative bg-words overflow-hidden py-28 sm:py-36 lg:py-44"
         >
-            <div class="max-w-4xl mx-auto px-5 text-center">
+            <div class="w-full px-5 text-center">
                 <div class="flex justify-center mb-8">
                     <div
                         class="chat-bubble left"
@@ -744,64 +1106,80 @@
                 <h2 class="display section-title text-white" data-split-words>
                     3 words
                 </h2>
-                <div
-                    class="mt-12 sm:mt-16 flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory justify-start sm:justify-center"
+            </div>
+
+            <!-- Full width card container -->
+            <div
+                class="mt-12 sm:mt-16 flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory px-5 sm:px-10 w-full sm:justify-center"
+            >
+                <article
+                    class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
+                    style="transform: rotate(-2deg)"
                 >
-                    <article
-                        class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
-                        style="transform: rotate(-2deg)"
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        >3 words</span
                     >
-                        <span
-                            class="text-[10px] font-black uppercase tracking-widest text-slate-400"
-                            >3 words</span
-                        >
-                        <p
-                            class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
-                        >
-                            smart, funny, lit
-                        </p>
-                        <span
-                            class="block mt-4 text-xs font-bold text-slate-400"
-                            >— anonymous</span
-                        >
-                    </article>
-                    <article
-                        class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
-                        style="transform: rotate(1.5deg)"
+                    <p
+                        class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
                     >
-                        <span
-                            class="text-[10px] font-black uppercase tracking-widest text-slate-400"
-                            >3 words</span
-                        >
-                        <p
-                            class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
-                        >
-                            stunning, radiant, kind
-                        </p>
-                        <span
-                            class="block mt-4 text-xs font-bold text-slate-400"
-                            >— anonymous</span
-                        >
-                    </article>
-                    <article
-                        class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
-                        style="transform: rotate(-1.5deg)"
+                        smart, funny, lit
+                    </p>
+                    <span class="block mt-4 text-xs font-bold text-slate-400"
+                        >— anonymous</span
                     >
-                        <span
-                            class="text-[10px] font-black uppercase tracking-widest text-slate-400"
-                            >3 words</span
-                        >
-                        <p
-                            class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
-                        >
-                            chaotic, brilliant, warm
-                        </p>
-                        <span
-                            class="block mt-4 text-xs font-bold text-slate-400"
-                            >— anonymous</span
-                        >
-                    </article>
-                </div>
+                </article>
+                <article
+                    class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
+                    style="transform: rotate(1.5deg)"
+                >
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        >3 words</span
+                    >
+                    <p
+                        class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
+                    >
+                        stunning, radiant, kind
+                    </p>
+                    <span class="block mt-4 text-xs font-bold text-slate-400"
+                        >— anonymous</span
+                    >
+                </article>
+                <article
+                    class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
+                    style="transform: rotate(-1.5deg)"
+                >
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        >3 words</span
+                    >
+                    <p
+                        class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
+                    >
+                        chaotic, brilliant, warm
+                    </p>
+                    <span class="block mt-4 text-xs font-bold text-slate-400"
+                        >— anonymous</span
+                    >
+                </article>
+                <article
+                    class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
+                    style="transform: rotate(2deg)"
+                >
+                    <span
+                        class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                        >3 words</span
+                    >
+                    <p
+                        class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
+                    >
+                        bold, fearless, real
+                    </p>
+                    <span class="block mt-4 text-xs font-bold text-slate-400"
+                        >— anonymous</span
+                    >
+                </article>
             </div>
         </section>
 
@@ -1442,12 +1820,16 @@
                     />
                 </div>
                 <div
-                    class="mt-14 sm:mt-20 flex flex-col sm:flex-row justify-center gap-3"
+                    class="mt-14 sm:mt-20 flex flex-col sm:flex-row justify-center gap-3 w-full max-w-sm px-4"
                 >
-                    <button id="install-btn-2" class="cta-pill">
+                    <button class="cta-pill w-full sm:w-auto trigger-install">
                         Install app
                     </button>
-                    <a href="/app.html" class="cta-pill dark">Get Questions!</a>
+                    <a
+                        href="/app.html"
+                        class="btn-get-questions w-full sm:w-auto trigger-install"
+                        >Get Questions!</a
+                    >
                 </div>
             </div>
         </section>
@@ -1479,11 +1861,8 @@
                         <a href="#blog" class="nav-link">Blog</a>
                         <a href="#contact" class="nav-link">Contact us</a>
                     </div>
-                    <div class="store-pill shrink-0">
-                        <a
-                            href="#"
-                            aria-label="App Store"
-                            class="flex items-center"
+                    <div class="store-pill shrink-0 trigger-install">
+                        <a aria-label="App Store" class="flex items-center"
                             ><svg
                                 class="w-5 h-5 fill-white"
                                 viewBox="0 0 24 24"
@@ -1493,10 +1872,7 @@
                                 /></svg
                         ></a>
                         <span class="divider"></span>
-                        <a
-                            href="#"
-                            aria-label="Google Play"
-                            class="flex items-center"
+                        <a aria-label="Google Play" class="flex items-center"
                             ><svg
                                 class="w-5 h-5 fill-white"
                                 viewBox="0 0 24 24"
@@ -1538,205 +1914,242 @@
         </div>
 
         <script>
+            /* =====================================================
+           1. PWA GUARD: Redirect to app if already installed
+        ===================================================== */
+            function isPWA() {
+                return (
+                    window.matchMedia("(display-mode: standalone)").matches ||
+                    window.navigator.standalone === true
+                );
+            }
 
-                    /* =====================================================
-                       REDIRECT IF INSTALLED (PWA)
-                    ===================================================== */
-                    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-                        window
-                        /* =====================================================
-               SPLIT WORDS — scroll-triggered word reveal
-            ===================================================== */
-                        document.querySelectorAll("[data-split-words]").forEach((el) => {
-                            const html = el.innerHTML;
-                            // Preserve <br/> tags, split remaining text into words
-                            const parts = html.split(/(<br\s*\/?>)/i);
-                            el.innerHTML = parts
-                                .map((part) => {
-                                    if (/<br/i.test(part)) return part;
-                                    return part
-                                        .split(/(\s+)/)
-                                        .map((tok) => {
-                                            if (!tok.trim()) return tok;
-                                            return `<span class="split-word">${tok}</span>`;
-                                        })
-                                        .join("");
-                                })
-                                .join("");
-                        });
+            if (
+                isPWA() &&
+                (window.location.pathname === "/" ||
+                    window.location.pathname === "/index.html")
+            ) {
+                window.location.replace("/app.html");
+            }
 
-                        const wordObs = new IntersectionObserver(
-                            (entries) => {
-                                entries.forEach((entry) => {
-                                    if (entry.isIntersecting) {
-                                        const words =
-                                            entry.target.querySelectorAll(".split-word");
-                                        words.forEach((w, i) => {
-                                            setTimeout(
-                                                () => w.classList.add("in-view"),
-                                                i * 80,
-                                            );
-                                        });
-                                        wordObs.unobserve(entry.target);
-                                    }
-                                });
-                            },
-                            { threshold: 0.15 },
-                        );
+            /* =====================================================
+           2. SPLIT WORDS & SCROLL ANIMATIONS
+        ===================================================== */
+            document.querySelectorAll("[data-split-words]").forEach((el) => {
+                const html = el.innerHTML;
+                const parts = html.split(/(<br\s*\/?>)/i);
+                el.innerHTML = parts
+                    .map((part) => {
+                        if (/<br/i.test(part)) return part;
+                        return part
+                            .split(/(\s+)/)
+                            .map((tok) => {
+                                if (!tok.trim()) return tok;
+                                return `<span class="split-word">${tok}</span>`;
+                            })
+                            .join("");
+                    })
+                    .join("");
+            });
 
-                        document
-                            .querySelectorAll("[data-split-words]")
-                            .forEach((el) => wordObs.observe(el));
-
-                        /* =====================================================
-               POP-IN ICONS
-            ===================================================== */
-                        const popObs = new IntersectionObserver(
-                            (entries) => {
-                                entries.forEach((entry) => {
-                                    if (entry.isIntersecting) {
-                                        entry.target.classList.add("in-view");
-                                        popObs.unobserve(entry.target);
-                                    }
-                                });
-                            },
-                            { threshold: 0.1 },
-                        );
-
-                        document
-                            .querySelectorAll("[data-pop]")
-                            .forEach((el) => popObs.observe(el));
-
-                        /* =====================================================
-               SMOOTH ANCHORS
-            ===================================================== */
-                        document.querySelectorAll('a[href^="#"]').forEach((a) => {
-                            a.addEventListener("click", (e) => {
-                                const id = a.getAttribute("href").slice(1);
-                                const el = document.getElementById(id);
-                                if (el) {
-                                    e.preventDefault();
-                                    el.scrollIntoView({
-                                        behavior: "smooth",
-                                        block: "start",
-                                    });
-                                }
-                            });
-                        });
-
-                        /* =====================================================
-               PWA — register service worker
-            ===================================================== */
-                        if ("serviceWorker" in navigator) {
-                            window.addEventListener("load", () => {
-                                navigator.serviceWorker
-                                    .register("/sw.js")
-                                    .catch((e) => console.warn("SW reg failed", e));
-                            });
-                        }
-
-                        /* =====================================================
-               PWA — install prompt
-            ===================================================== */
-                        let deferredPrompt = null;
-                        window.addEventListener("beforeinstallprompt", (e) => {
-                            e.preventDefault();
-                            deferredPrompt = e;
-                        });
-
-                        async function triggerInstall() {
-                            if (deferredPrompt) {
-                                deferredPrompt.prompt();
-                                const { outcome } = await deferredPrompt.userChoice;
-                                deferredPrompt = null;
-                                if (outcome === "accepted") {
-                                    showToast("Installing NGL…", null);
-                                } else {
-                                    showToast(
-                                        "You can install later from the browser menu",
-                                        null,
-                                    );
-                                }
-                                return;
-                            }
-
-                            // Already installed?
-                            if (
-                                window.matchMedia("(display-mode: standalone)").matches ||
-                                window.navigator.standalone
-                            ) {
-                                showToast(
-                                    "App is already installed — opening inbox…",
-                                    null,
-                                );
-                                setTimeout(() => (location.href = "/app.html"), 1200);
-                                return;
-                            }
-
-                            // Not installable (no HTTPS, unsupported browser, etc.)
-                            const isSecure =
-                                location.protocol === "https:" ||
-                                location.hostname === "localhost";
-                            if (!isSecure) {
-                                showToast(
-                                    "PWA install requires HTTPS. Opening inbox in browser instead…",
-                                    null,
-                                );
-                                setTimeout(() => (location.href = "/app.html"), 1600);
-                                return;
-                            }
-
-                            showToast('Use your browser menu → "Add to Home Screen"', null);
-                        }
-
-                        function showToast(msg, actionLabel, onClick) {
-                            const t = document.getElementById("installToast");
-                            const btn = document.getElementById("installToastBtn");
-                            document.getElementById("installToastMsg").textContent = msg;
-                            if (actionLabel) {
-                                btn.style.display = "inline-flex";
-                                btn.textContent = actionLabel;
-                                btn.onclick = () => {
-                                    onClick && onClick();
-                                    t.classList.remove("show");
-                                };
-                            } else {
-                                btn.style.display = "none";
-                            }
-                            t.classList.add("show");
-                            clearTimeout(showToast._t);
-                            showToast._t = setTimeout(
-                                () => t.classList.remove("show"),
-                                5000,
+            const wordObs = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            const words =
+                                entry.target.querySelectorAll(".split-word");
+                            words.forEach((w, i) =>
+                                setTimeout(
+                                    () => w.classList.add("in-view"),
+                                    i * 80,
+                                ),
                             );
+                            wordObs.unobserve(entry.target);
                         }
+                    });
+                },
+                { threshold: 0.15 },
+            );
+            document
+                .querySelectorAll("[data-split-words]")
+                .forEach((el) => wordObs.observe(el));
 
-                        document
-                            .getElementById("install-btn")
-                            .addEventListener("click", triggerInstall);
-                        document
-                            .getElementById("install-btn-2")
-                            .addEventListener("click", triggerInstall);
+            const popObs = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("in-view");
+                            popObs.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.1 },
+            );
+            document
+                .querySelectorAll("[data-pop]")
+                .forEach((el) => popObs.observe(el));
 
-                        /* =====================================================
-               Nav — show account button if profile exists
-            ===================================================== */
-                        (function navAccount() {
-                            try {
-                                const raw = localStorage.getItem("ngl_profile");
-                                if (raw) {
-                                    const p = JSON.parse(raw);
-                                    if (p && p.handle) {
-                                        const btn = document.getElementById("nav-account");
-                                        btn.classList.remove("hidden");
-                                        btn.innerHTML = `
-                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      @${p.handle}
-                    `;
-                                    }
-                                }
-                            } catch (e) {}
-                        })();
+            document.querySelectorAll('a[href^="#"]').forEach((a) => {
+                a.addEventListener("click", (e) => {
+                    const id = a.getAttribute("href").slice(1);
+                    const el = document.getElementById(id);
+                    if (el) {
+                        e.preventDefault();
+                        el.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        });
+                    }
+                });
+            });
+
+            /* =====================================================
+           3. PLAY STORE EMULATION & PWA INSTALL
+        ===================================================== */
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker
+                        .register("/sw.js")
+                        .catch((e) => console.warn("SW reg failed", e));
+                });
+            }
+
+            let deferredPrompt = null;
+            window.addEventListener("beforeinstallprompt", (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+
+            const isIOS =
+                /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+                !window.MSStream;
+
+            // Intercept all install triggers
+            document.querySelectorAll(".trigger-install").forEach((el) => {
+                el.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    handleInstallFlow();
+                });
+            });
+
+            function handleInstallFlow() {
+                if (isPWA()) {
+                    window.location.href = "/app.html";
+                    return;
+                }
+
+                // Use Play Store simulation for Desktop and Android
+                if (!isIOS) {
+                    document
+                        .getElementById("fake-playstore")
+                        .classList.add("active");
+                    document.body.style.overflow = "hidden"; // Prevent background scrolling
+                } else {
+                    // iOS fallback
+                    showToast(
+                        'Tap the Share icon ⍐ then "Add to Home Screen" to install.',
+                        null,
+                    );
+                }
+            }
+
+            function closeFakePlaystore() {
+                document
+                    .getElementById("fake-playstore")
+                    .classList.remove("active");
+                document.body.style.overflow = "";
+            }
+
+            // Handle Fake Play Store Install Button
+            document
+                .getElementById("ps-install-btn")
+                .addEventListener("click", async () => {
+                    const btn = document.getElementById("ps-install-btn");
+
+                    if (!deferredPrompt) {
+                        // Fallback if native prompt is blocked or unavailable (e.g., already dismissed)
+                        btn.classList.add("installing");
+                        btn.textContent = "Installing...";
+                        setTimeout(() => {
+                            window.location.href = "/app.html";
+                        }, 2000);
+                        return;
+                    }
+
+                    // Trigger the native Chrome install prompt
+                    deferredPrompt.prompt();
+                    btn.classList.add("installing");
+                    btn.textContent = "Pending...";
+
+                    const { outcome } = await deferredPrompt.userChoice;
+
+                    if (outcome === "accepted") {
+                        btn.textContent = "Installing...";
+                        deferredPrompt = null;
+                    } else {
+                        btn.classList.remove("installing");
+                        btn.textContent = "Install";
+                        closeFakePlaystore();
+                    }
+                });
+
+            // Listen for successful installation
+            window.addEventListener("appinstalled", (e) => {
+                const psBtn = document.getElementById("ps-install-btn");
+                if (psBtn) {
+                    psBtn.textContent = "Installed!";
+                    psBtn.style.background = "#01875f";
+                    psBtn.style.color = "#fff";
+                }
+                showToast("Successfully installed! Redirecting...", null);
+
+                // Auto redirect to PWA
+                setTimeout(() => {
+                    window.location.replace("/app.html");
+                }, 1500);
+            });
+
+            // Toast utility
+            function showToast(msg, actionLabel, onClick) {
+                const t = document.getElementById("installToast");
+                const btn = document.getElementById("installToastBtn");
+                document.getElementById("installToastMsg").textContent = msg;
+                if (actionLabel) {
+                    btn.style.display = "inline-flex";
+                    btn.textContent = actionLabel;
+                    btn.onclick = () => {
+                        onClick && onClick();
+                        t.classList.remove("show");
+                    };
+                } else {
+                    btn.style.display = "none";
+                }
+                t.classList.add("show");
+                clearTimeout(showToast._t);
+                showToast._t = setTimeout(
+                    () => t.classList.remove("show"),
+                    6000,
+                );
+            }
+
+            /* NAV ACCOUNT UI */
+            (function navAccount() {
+                try {
+                    const raw = localStorage.getItem("ngl_profile");
+                    if (raw) {
+                        const p = JSON.parse(raw);
+                        if (p && p.handle) {
+                            const btn = document.getElementById("nav-account");
+                            if (btn) {
+                                btn.innerHTML = `
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                @${p.handle}
+                            `;
+                            }
+                        }
+                    }
+                } catch (e) {}
+            })();
         </script>
     </body>
 </html>
