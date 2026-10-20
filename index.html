@@ -74,6 +74,7 @@
                 --pro-1: #fbbf24;
                 --pro-2: #f59e0b;
                 --pro-3: #d97706;
+
                 --ps-bg: #ffffff;
                 --ps-text: #202124;
                 --ps-text-sec: #5f6368;
@@ -82,13 +83,6 @@
                 --ps-green: #01875f;
                 --ps-divider: #e8eaed;
                 --ps-surface: #f1f3f4;
-                --ps-dark-bg: #131314;
-                --ps-dark-surface: #282a2c;
-                --ps-dark-text: #e3e3e3;
-                --ps-dark-text-sec: #9aa0a6;
-                --ps-dark-divider: #3c4043;
-                --ps-dark-blue: #a8c7fa;
-                --ps-dark-btn: #004a77;
             }
 
             .display {
@@ -253,6 +247,7 @@
                 font-weight: 800;
                 font-size: clamp(18px, 1.2rem + 0.6vw, 24px);
                 letter-spacing: -0.02em;
+                text-transform: none;
                 padding: 20px 32px;
                 border-radius: 9999px;
                 text-decoration: none;
@@ -283,6 +278,7 @@
                 font-weight: 800;
                 font-size: clamp(18px, 1.2rem + 0.6vw, 24px);
                 letter-spacing: -0.02em;
+                text-transform: none;
                 padding: 20px 44px;
                 border-radius: 9999px;
                 text-decoration: none;
@@ -298,6 +294,10 @@
             }
             .cta-pill:active {
                 transform: scale(0.97);
+            }
+            .cta-pill.dark {
+                background: #000;
+                color: #fff;
             }
 
             .chat-bubble {
@@ -1113,8 +1113,8 @@
             .ps-pending-overlay {
                 position: absolute;
                 inset: 0;
-                background: var(--ps-dark-bg);
-                color: var(--ps-dark-text);
+                background: var(--ps-bg);
+                color: var(--ps-text);
                 z-index: 20;
                 display: none;
                 flex-direction: column;
@@ -1131,7 +1131,7 @@
             .ps-pending-header svg {
                 width: 24px;
                 height: 24px;
-                fill: var(--ps-dark-text);
+                fill: var(--ps-text);
                 cursor: pointer;
             }
             .ps-pending-content {
@@ -1162,7 +1162,10 @@
                 height: 54px;
                 border-radius: 14px;
                 z-index: 2;
-                transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+                transition:
+                    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             }
             .ps-pending-overlay.active .ps-pending-appicon {
                 transform: scale(0.78);
@@ -1180,10 +1183,10 @@
                 stroke-width: 3;
             }
             .ps-pending-ring .bg {
-                stroke: var(--ps-dark-surface);
+                stroke: var(--ps-divider);
             }
             .ps-pending-ring .fg {
-                stroke: var(--ps-dark-blue);
+                stroke: var(--ps-blue);
                 stroke-dasharray: 301.59;
                 stroke-dashoffset: 301.59;
                 transition: stroke-dashoffset 0.2s linear;
@@ -1194,8 +1197,8 @@
                 position: absolute;
                 inset: 0;
                 border-radius: 50%;
-                border: 3px solid var(--ps-dark-surface);
-                border-top-color: #9aa0a6;
+                border: 3px solid var(--ps-divider);
+                border-top-color: var(--ps-text-sec);
                 animation: spin 1s linear infinite;
                 z-index: 1;
                 display: none;
@@ -1216,25 +1219,26 @@
                 align-items: center;
                 gap: 8px;
                 margin-bottom: 6px;
+                color: var(--ps-text);
             }
             .ps-pending-title svg {
                 width: 18px;
                 height: 18px;
-                fill: #8ab4f8;
+                fill: var(--ps-blue);
             }
             .ps-pending-status {
                 font-size: 13px;
-                color: var(--ps-dark-text);
-                background: var(--ps-dark-surface);
+                color: var(--ps-text);
+                background: var(--ps-surface);
                 padding: 4px 12px;
                 border-radius: 12px;
                 display: inline-block;
             }
 
             .ps-pending-cancel {
-                border: 1px solid var(--ps-dark-text-sec);
+                border: 1px solid #dadce0;
                 background: transparent;
-                color: var(--ps-dark-blue);
+                color: var(--ps-blue);
                 border-radius: 20px;
                 padding: 8px 20px;
                 font-weight: 500;
@@ -1250,12 +1254,13 @@
                 font-size: 18px;
                 font-weight: 500;
                 margin-top: 10px;
+                color: var(--ps-text);
             }
             .ps-available-devices svg {
                 width: 28px;
                 height: 28px;
-                fill: var(--ps-dark-text);
-                background: var(--ps-dark-surface);
+                fill: var(--ps-text);
+                background: var(--ps-surface);
                 border-radius: 50%;
                 padding: 4px;
             }
@@ -1270,6 +1275,7 @@
                 font-size: 14px;
                 font-weight: 500;
                 margin-bottom: 16px;
+                color: var(--ps-text);
             }
             .ps-sponsor-head span {
                 display: flex;
@@ -1279,7 +1285,7 @@
             .ps-sponsor-head svg {
                 width: 18px;
                 height: 18px;
-                fill: var(--ps-dark-text-sec);
+                fill: var(--ps-text-sec);
             }
 
             .ps-sponsor-row {
@@ -1309,16 +1315,17 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 margin-bottom: 6px;
+                color: var(--ps-text);
             }
             .ps-sponsor-meta {
                 display: flex;
                 align-items: center;
                 gap: 6px;
                 font-size: 12px;
-                color: var(--ps-dark-text-sec);
+                color: var(--ps-text-sec);
             }
             .ps-sponsor-meta .badge {
-                background: var(--ps-dark-surface);
+                background: var(--ps-surface);
                 padding: 2px 6px;
                 border-radius: 4px;
                 display: flex;
@@ -1331,17 +1338,17 @@
                 fill: currentColor;
             }
             .ps-sponsor-rating {
-                background: var(--ps-dark-surface);
+                background: var(--ps-surface);
                 padding: 2px 6px;
                 border-radius: 4px;
                 display: flex;
                 align-items: center;
                 gap: 4px;
-                color: var(--ps-dark-text);
+                color: var(--ps-text);
             }
 
             .ps-dark-ai-box {
-                background: var(--ps-dark-surface);
+                background: var(--ps-surface);
                 border-radius: 16px;
                 padding: 20px;
                 margin-top: 24px;
@@ -1353,6 +1360,7 @@
                 font-size: 16px;
                 font-weight: 500;
                 margin-bottom: 16px;
+                color: var(--ps-text);
             }
             .ps-dark-ai-badge {
                 background: #1e8e3e;
@@ -1364,16 +1372,16 @@
                 margin-left: 4px;
             }
             .ps-dark-ai-input {
-                background: #1b1b1b;
+                background: var(--ps-bg);
                 border-radius: 24px;
                 padding: 16px 20px;
                 font-size: 15px;
-                color: var(--ps-dark-text-sec);
+                color: var(--ps-text-sec);
                 margin-bottom: 12px;
             }
             .ps-dark-ai-chip {
-                background: #004a77;
-                color: #d3e3fd;
+                background: #1a73e8;
+                color: #fff;
                 border-radius: 8px;
                 padding: 12px 16px;
                 font-size: 14px;
@@ -1390,6 +1398,7 @@
                 font-size: 20px;
                 font-weight: 500;
                 margin: 32px 0 16px;
+                color: var(--ps-text);
             }
             .ps-limited-app {
                 display: flex;
@@ -1409,23 +1418,24 @@
                 font-size: 16px;
                 font-weight: 500;
                 margin-bottom: 4px;
+                color: var(--ps-text);
             }
             .ps-limited-dev {
                 font-size: 13px;
-                color: var(--ps-dark-text-sec);
+                color: var(--ps-text-sec);
             }
             .ps-limited-expand {
                 width: 32px;
                 height: 32px;
                 border-radius: 50%;
-                background: var(--ps-dark-surface);
+                background: var(--ps-surface);
                 display: grid;
                 place-items: center;
             }
             .ps-limited-expand svg {
                 width: 20px;
                 height: 20px;
-                fill: var(--ps-dark-text);
+                fill: var(--ps-text);
             }
 
             .ps-dark-bottomnav {
@@ -1433,8 +1443,8 @@
                 display: flex;
                 justify-content: space-around;
                 padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
-                border-top: 1px solid var(--ps-dark-divider);
-                background: var(--ps-dark-bg);
+                border-top: 1px solid var(--ps-divider);
+                background: var(--ps-bg);
             }
             .ps-dark-navitem {
                 display: flex;
@@ -1442,7 +1452,7 @@
                 align-items: center;
                 gap: 4px;
                 font-size: 12px;
-                color: var(--ps-dark-text-sec);
+                color: var(--ps-text-sec);
                 background: none;
                 border: 0;
                 cursor: pointer;
@@ -1455,10 +1465,13 @@
                 fill: currentColor;
             }
             .ps-dark-navitem.active {
-                color: var(--ps-dark-blue);
+                color: var(--ps-blue);
             }
             .ps-dark-navitem.active svg {
-                fill: var(--ps-dark-blue);
+                fill: var(--ps-blue);
+            }
+            .ps-dark-navitem.active span {
+                background: transparent;
             }
 
             #ios-sheet {
@@ -1618,7 +1631,7 @@
                                     d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
                                 />
                             </svg>
-                            <span>Search apps &amp; games</span>
+                            <span>Search apps & games</span>
                         </div>
                         <button class="ps-iconbtn" aria-label="More options">
                             <svg viewBox="0 0 24 24">
@@ -1635,11 +1648,6 @@
                                 class="ps-appicon"
                                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                                 alt="NGL"
-                                onerror="
-                                    this.style.background =
-                                        'linear-gradient(135deg,#ee0e6a,#ff6200)';
-                                    this.removeAttribute('src');
-                                "
                             />
                             <div class="ps-title-wrap">
                                 <h1>NGL: ask me anything</h1>
@@ -1703,10 +1711,6 @@
                                 <img
                                     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                                     alt="Screenshot 1"
-                                    onerror="
-                                        this.parentElement.style.background =
-                                            'linear-gradient(135deg,#ff004f,#ff004f)'
-                                    "
                                     style="
                                         object-fit: contain;
                                         padding: 20px;
@@ -1718,10 +1722,6 @@
                                 <img
                                     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                                     alt="Screenshot 2"
-                                    onerror="
-                                        this.parentElement.style.background =
-                                            'linear-gradient(135deg,#ff6b00,#ff6b00)'
-                                    "
                                     style="
                                         object-fit: contain;
                                         padding: 20px;
@@ -2143,9 +2143,6 @@
                                             src="https://i.pravatar.cc/150?img=47"
                                             alt="Avatar"
                                             class="ps-ravatar"
-                                            onerror="
-                                                this.style.display = 'none'
-                                            "
                                         />
                                         <div>
                                             <div class="ps-rname">
@@ -2329,9 +2326,8 @@
                                     alt="Pdb"
                                     class="ps-simicon"
                                     style="background: #222; padding: 20px"
-                                    onerror="this.style.background = '#222'"
                                 />
-                                <span>Pdb: Personality &amp; Friends</span>
+                                <span>Pdb: Personality & Friends</span>
                                 <div class="rating">
                                     4.4
                                     <svg viewBox="0 0 24 24">
@@ -2347,7 +2343,6 @@
                                     alt="status"
                                     class="ps-simicon"
                                     style="background: #000; padding: 20px"
-                                    onerror="this.style.background = '#000'"
                                 />
                                 <span>status - sims but social media</span>
                                 <div class="rating">
@@ -2365,7 +2360,6 @@
                                     alt="Clubhouse"
                                     class="ps-simicon"
                                     style="background: #fff; padding: 20px"
-                                    onerror="this.style.background = '#fff'"
                                 />
                                 <span>Clubhouse</span>
                                 <div class="rating">
@@ -2494,11 +2488,6 @@
                                     class="ps-pending-appicon"
                                     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                                     alt="NGL"
-                                    onerror="
-                                        this.style.background =
-                                            'linear-gradient(135deg,#ee0e6a,#ff6200)';
-                                        this.removeAttribute('src');
-                                    "
                                 />
                             </div>
                             <div class="ps-pending-info">
@@ -2543,7 +2532,6 @@
                                     />
                                 </svg>
                             </div>
-
                             <div class="ps-sponsor-row">
                                 <div class="ps-sponsor-card">
                                     <img
@@ -2551,9 +2539,6 @@
                                         alt="rednote"
                                         class="ps-sponsor-icon"
                                         style="background: #ff2442"
-                                        onerror="
-                                            this.style.background = '#ff2442'
-                                        "
                                     />
                                     <div class="ps-sponsor-title">rednote</div>
                                     <div class="ps-sponsor-meta">
@@ -2579,9 +2564,6 @@
                                         alt="Kenya Driving Test"
                                         class="ps-sponsor-icon"
                                         style="background: #7cb342"
-                                        onerror="
-                                            this.style.background = '#7cb342'
-                                        "
                                     />
                                     <div class="ps-sponsor-title">
                                         Kenya Driving Test: NTSA Prep
@@ -2609,7 +2591,6 @@
                                         alt="Traveler"
                                         class="ps-sponsor-icon"
                                         style="background: #fff; padding: 20px"
-                                        onerror="this.style.background = '#fff'"
                                     />
                                     <div class="ps-sponsor-title">Traveler</div>
                                     <div class="ps-sponsor-meta">
@@ -2630,7 +2611,7 @@
                             <div class="ps-dark-ai-head">
                                 <svg
                                     viewBox="0 0 24 24"
-                                    style="width: 22px; fill: #a8c7fa"
+                                    style="width: 22px; fill: #1a73e8"
                                 >
                                     <path
                                         d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 9h-2V7h-2v5H6v2h2v5h2v-5h2v-2z"
@@ -2659,15 +2640,13 @@
                                 alt="CapCut"
                                 class="ps-limited-icon"
                                 style="background: #fff"
-                                onerror="this.style.background = '#fff'"
                             />
                             <div class="ps-limited-info">
                                 <div class="ps-limited-name">
-                                    CapCut: Photo &amp; Video Editor
+                                    CapCut: Photo & Video Editor
                                 </div>
                                 <div class="ps-limited-dev">
-                                    Bytedance Pte. ... • Video players &amp;
-                                    editors
+                                    Bytedance Pte. ... • Video players & editors
                                 </div>
                             </div>
                             <div class="ps-limited-expand">
@@ -2743,11 +2722,6 @@
                     <img
                         src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                         alt="NGL"
-                        onerror="
-                            this.style.background =
-                                'linear-gradient(135deg,#ee0e6a,#ff6200)';
-                            this.removeAttribute('src');
-                        "
                     />
                     <div>
                         <strong>Install NGL</strong>
@@ -2846,7 +2820,6 @@
                         src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                         alt="NGL"
                         class="ngl-logo-img h-8 sm:h-10 lg:h-12 w-auto object-contain"
-                        onerror="this.style.display = 'none'"
                     />
                     <span class="pro-badge">
                         <svg class="w-3 h-3 fill-black" viewBox="0 0 24 24">
@@ -2875,21 +2848,25 @@
                     <div
                         class="store-pill shrink-0 hidden sm:flex trigger-install"
                     >
-                        <a aria-label="App Store" class="flex items-center">
-                            <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                        <a aria-label="App Store" class="flex items-center"
+                            ><svg
+                                class="w-5 h-5 fill-white"
+                                viewBox="0 0 24 24"
+                            >
                                 <path
                                     d="M17.05 12.53c-.03-2.4 1.96-3.55 2.05-3.6-1.12-1.63-2.86-1.86-3.47-1.88-1.48-.15-2.88.87-3.63.87-.75 0-1.9-.85-3.12-.83-1.61.02-3.1.93-3.93 2.37-1.67 2.9-.43 7.2 1.2 9.55.8 1.16 1.75 2.45 3 2.4 1.2-.05 1.65-.78 3.1-.78s1.86.78 3.13.75c1.29-.02 2.1-1.17 2.9-2.33.9-1.32 1.28-2.6 1.3-2.66-.03-.02-2.5-.96-2.53-3.82zM14.75 5.62c.66-.8 1.1-1.9.98-3-.95.04-2.1.63-2.78 1.42-.61.7-1.14 1.83-1 2.9 1.06.08 2.15-.54 2.8-1.32z"
-                                />
-                            </svg>
-                        </a>
+                                /></svg
+                        ></a>
                         <span class="divider"></span>
-                        <a aria-label="Google Play" class="flex items-center">
-                            <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                        <a aria-label="Google Play" class="flex items-center"
+                            ><svg
+                                class="w-5 h-5 fill-white"
+                                viewBox="0 0 24 24"
+                            >
                                 <path
                                     d="M3.6 2.3c-.24.25-.38.65-.38 1.16v17.07c0 .51.14.91.4 1.15l.06.06L13.2 12.2v-.22L3.66 2.24l-.06.06zm13.3 13.6l-3.7-3.7v-.22l3.7-3.7.08.05 4.38 2.5c1.25.7 1.25 1.86 0 2.57l-4.38 2.5-.08.02zM13.2 12.2l3.72 3.72L4.7 22.9c-.5.28-.96.24-1.32-.06L13.2 12.2zm0-.2L3.4 1.16c.36-.3.82-.34 1.32-.06l12.2 6.96L13.2 12z"
-                                />
-                            </svg>
-                        </a>
+                                /></svg
+                        ></a>
                     </div>
                 </div>
             </nav>
@@ -3768,11 +3745,6 @@
                                     object-fit: contain;
                                     border-radius: 50%;
                                 "
-                                onerror="
-                                    this.style.background =
-                                        'linear-gradient(135deg,#ee0e6a,#ff6200)';
-                                    this.removeAttribute('src');
-                                "
                             />
                         </div>
                     </div>
@@ -3809,7 +3781,6 @@
                             src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                             alt="NGL"
                             class="h-10 sm:h-12 w-auto object-contain"
-                            onerror="this.style.display = 'none'"
                         />
                         <span class="pro-badge">
                             <svg class="w-3 h-3 fill-black" viewBox="0 0 24 24">
@@ -3827,21 +3798,25 @@
                         <a href="#contact" class="nav-link">Contact us</a>
                     </div>
                     <div class="store-pill shrink-0 trigger-install">
-                        <a aria-label="App Store" class="flex items-center">
-                            <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                        <a aria-label="App Store" class="flex items-center"
+                            ><svg
+                                class="w-5 h-5 fill-white"
+                                viewBox="0 0 24 24"
+                            >
                                 <path
                                     d="M17.05 12.53c-.03-2.4 1.96-3.55 2.05-3.6-1.12-1.63-2.86-1.86-3.47-1.88-1.48-.15-2.88.87-3.63.87-.75 0-1.9-.85-3.12-.83-1.61.02-3.1.93-3.93 2.37-1.67 2.9-.43 7.2 1.2 9.55.8 1.16 1.75 2.45 3 2.4 1.2-.05 1.65-.78 3.1-.78s1.86.78 3.13.75c1.29-.02 2.1-1.17 2.9-2.33.9-1.32 1.28-2.6 1.3-2.66-.03-.02-2.5-.96-2.53-3.82zM14.75 5.62c.66-.8 1.1-1.9.98-3-.95.04-2.1.63-2.78 1.42-.61.7-1.14 1.83-1 2.9 1.06.08 2.15-.54 2.8-1.32z"
-                                />
-                            </svg>
-                        </a>
+                                /></svg
+                        ></a>
                         <span class="divider"></span>
-                        <a aria-label="Google Play" class="flex items-center">
-                            <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                        <a aria-label="Google Play" class="flex items-center"
+                            ><svg
+                                class="w-5 h-5 fill-white"
+                                viewBox="0 0 24 24"
+                            >
                                 <path
                                     d="M3.6 2.3c-.24.25-.38.65-.38 1.16v17.07c0 .51.14.91.4 1.15l.06.06L13.2 12.2v-.22L3.66 2.24l-.06.06zm13.3 13.6l-3.7-3.7v-.22l3.7-3.7.08.05 4.38 2.5c1.25.7 1.25 1.86 0 2.57l-4.38 2.5-.08.02zM13.2 12.2l3.72 3.72L4.7 22.9c-.5.28-.96.24-1.32-.06L13.2 12.2zm0-.2L3.4 1.16c.36-.3.82-.34 1.32-.06l12.2 6.96L13.2 12z"
-                                />
-                            </svg>
-                        </a>
+                                /></svg
+                        ></a>
                     </div>
                 </div>
                 <div
@@ -3875,7 +3850,7 @@
 
         <script>
             /* =====================================================
-               1. PWA GUARD
+               1. PWA GUARD — only redirect if app.html actually exists
             ===================================================== */
             function isPWA() {
                 return (
@@ -3886,7 +3861,6 @@
                 );
             }
 
-            // Only redirect if app.html actually exists — prevents blank page on missing file
             (async function maybeRedirectToApp() {
                 if (!isPWA()) return;
                 if (
@@ -3900,8 +3874,12 @@
                 } catch {}
             })();
 
-            /* Active redirect — enters the PWA UI. HEAD-checks /app.html
-               first so a missing file never leaves a 404. */
+            /* =====================================================
+               ACTIVE REDIRECT HELPER — go straight into the PWA UI
+
+               Prefers /app.html (the actual app). Falls back to "/"
+               so a missing /app.html never leaves the user on a 404.
+            ===================================================== */
             let _redirecting = false;
             async function goToPWA() {
                 if (_redirecting) return;
@@ -3992,7 +3970,7 @@
             });
 
             /* =====================================================
-               3. SERVICE WORKER — register early + log
+               3. SERVICE WORKER — register EARLY, log everything
             ===================================================== */
             if ("serviceWorker" in navigator) {
                 navigator.serviceWorker
@@ -4006,7 +3984,7 @@
                     )
                     .catch((e) => console.error("[SW] reg FAILED:", e));
             } else {
-                console.warn("[SW] not supported");
+                console.warn("[SW] not supported in this browser");
             }
 
             Promise.all([
@@ -4029,7 +4007,7 @@
             });
 
             /* =====================================================
-               4. PLAY STORE SIMULATION & PWA INSTALL
+               4. PLAY STORE SIMULATION & PWA INSTALL LOGIC
             ===================================================== */
             const isIOS =
                 /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -4041,33 +4019,35 @@
             window.addEventListener("beforeinstallprompt", (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                console.info("[PWA] ✅ beforeinstallprompt captured");
+                console.info(
+                    "[PWA] ✅ beforeinstallprompt captured — install is available",
+                );
             });
 
             window.addEventListener("appinstalled", () => {
-                console.info(
-                    "[PWA] ✅ appinstalled — redirecting to /app.html",
-                );
+                console.info("[PWA] ✅ appinstalled — install completed");
                 resetPlayStore();
                 const btn = document.getElementById("ps-install-btn");
                 if (btn) {
                     btn.textContent = "Open";
                     btn.classList.add("installed");
                 }
-                // Active redirect
+                // Active redirect into the app after install
                 setTimeout(goToPWA, 400);
             });
 
-            // Warn after 3s if prompt hasn't fired
             setTimeout(() => {
                 if (!deferredPrompt) {
                     console.warn(
-                        "[PWA] beforeinstallprompt has NOT fired after 3s. Check manifest.json + sw.js + HTTPS.",
+                        "[PWA] beforeinstallprompt has NOT fired after 3s. " +
+                            "Reasons: manifest.json or sw.js missing, not HTTPS, " +
+                            "already installed, or user dismissed recently.",
                     );
                 }
             }, 3000);
 
             function openFakePlaystore() {
+                // Already inside the PWA — go straight to the app UI
                 if (isPWA()) {
                     goToPWA();
                     return;
@@ -4130,17 +4110,19 @@
                 if (status) status.textContent = "1% of 61 MB";
             }
 
+            // Main Install Click Action
             async function triggerDownload() {
                 const btn = document.getElementById("ps-install-btn");
                 if (btn.classList.contains("installed")) {
+                    // Already installed → actively enter the app
                     goToPWA();
                     return;
                 }
 
                 /* ============================================================
-                   STEP 1 — call .prompt() SYNCHRONOUSLY in this click handler
-                   BEFORE any await/timer. Otherwise Chrome throws
-                   "prompt() must be called with a user gesture".
+                   STEP 1 — CALL .prompt() SYNCHRONOUSLY IN THIS CLICK HANDLER
+                   Must happen before any await / setTimeout / RAF, otherwise
+                   Chrome throws NotAllowedError (no user gesture).
                 ============================================================ */
                 const dp = deferredPrompt;
                 deferredPrompt = null;
@@ -4149,18 +4131,20 @@
                     try {
                         dp.prompt();
                         promptPromise = dp.userChoice;
-                        console.info("[PWA] ✅ prompt() called synchronously");
+                        console.info(
+                            "[PWA] ✅ prompt() called synchronously in click handler",
+                        );
                     } catch (e) {
-                        console.error("[PWA] prompt() failed:", e);
+                        console.error("[PWA] prompt() threw:", e);
                     }
                 } else {
                     console.warn(
-                        "[PWA] No deferredPrompt — animation only, redirect after",
+                        "[PWA] No deferredPrompt — animation only, then redirect into /app.html",
                     );
                 }
 
                 /* ============================================================
-                   STEP 2 — show pending view + run fake animation
+                   STEP 2 — Show the download UI + run the fake animation
                 ============================================================ */
                 document.getElementById("ps-main-view").style.display = "none";
                 const pendingView = document.getElementById("ps-pending-view");
@@ -4189,7 +4173,6 @@
                 if (targetTimeMs < 2500) targetTimeMs = 2500;
                 if (targetTimeMs > 5000) targetTimeMs = 5000;
 
-                // Irregular progress timeline: random stalls + leaps
                 const keyframes = [{ t: 0, p: 0 }];
                 {
                     let t = 0;
@@ -4249,10 +4232,10 @@
                         if (status) status.textContent = "Installing...";
 
                         /* ============================================
-                           STEP 3 — await prompt outcome, then ACTIVELY
-                           redirect into the PWA. Whether accepted,
-                           dismissed, errored, or unavailable, the user
-                           lands on /app.html.
+                           STEP 3 — Await the prompt outcome, then
+                           ACTIVELY redirect into the PWA.
+                           Whether accepted, dismissed, errored, or
+                           unavailable, the user lands in the app.
                         ============================================ */
                         if (promptPromise) {
                             try {

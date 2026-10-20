@@ -42,7 +42,6 @@
                 overflow-x: hidden;
             }
 
-            /* Shake + Expand animation */
             @keyframes shake-expand {
                 0%,
                 100% {
@@ -71,21 +70,26 @@
             .shake-expand-once {
                 animation: shake-expand 1.2s ease-in-out 1;
             }
+
+            /* Card entrance — no jarring flash while data loads */
+            @keyframes cardIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(8px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .card-in {
+                animation: cardIn 0.28s ease-out;
+            }
         </style>
     </head>
     <body
         class="flex flex-col items-center justify-center min-h-screen px-4 text-slate-900 antialiased"
     >
-        <div
-            id="loading"
-            class="text-white font-bold text-xl flex items-center gap-3"
-        >
-            <div
-                class="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"
-            ></div>
-            Loading...
-        </div>
-
         <div
             id="error-view"
             class="hidden w-full max-w-sm bg-white rounded-[32px] p-8 text-center shadow-2xl flex-col items-center"
@@ -120,9 +124,11 @@
             >
         </div>
 
+        <!-- Sender card starts visible in skeleton state -->
         <div
             id="sender-wrap"
-            class="hidden w-full max-w-[340px] sm:max-w-md flex-col items-center"
+            class="w-full max-w-[340px] sm:max-w-md flex-col items-center flex card-in"
+            aria-busy="true"
         >
             <form
                 id="send-form"
@@ -140,20 +146,26 @@
                         />
                         <div
                             id="avatar-fallback"
-                            class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-2xl"
-                        >
-                            U
-                        </div>
+                            class="w-full h-full rounded-full bg-slate-300 animate-pulse"
+                        ></div>
                     </div>
                     <div class="flex-1 min-w-0 text-left">
                         <p
                             id="recipient-handle"
-                            class="text-white/80 text-sm font-bold truncate"
-                        ></p>
+                            class="text-white/90 text-sm font-bold truncate"
+                        >
+                            <span
+                                class="inline-block w-20 h-3 bg-white/40 rounded animate-pulse align-middle"
+                            ></span>
+                        </p>
                         <h2
                             id="recipient-prompt"
-                            class="text-white font-extrabold text-xl leading-tight mt-0.5"
-                        ></h2>
+                            class="text-white font-extrabold text-xl leading-tight mt-1"
+                        >
+                            <span
+                                class="inline-block w-40 h-5 bg-white/40 rounded animate-pulse"
+                            ></span>
+                        </h2>
                     </div>
                 </div>
 
@@ -208,7 +220,8 @@
 
             <button
                 id="send-btn"
-                class="w-full bg-black text-white font-extrabold text-xl py-4 rounded-full shadow-xl active:scale-95 transition-all mb-4"
+                disabled
+                class="w-full bg-black text-white font-extrabold text-xl py-4 rounded-full shadow-xl active:scale-95 transition-all mb-4 opacity-60 cursor-not-allowed"
             >
                 Send!
             </button>
@@ -284,6 +297,7 @@
                 .replace(/^@/, "");
             let recipient = null;
             let files = [];
+            let isReady = false;
             const $ = (id) => document.getElementById(id);
 
             if (!targetHandle) window.location.href = "/";
@@ -367,32 +381,141 @@
                 animate();
             }
 
-            // ====================== INIT ======================
-            (async function () {
+            // ====================== ATTACHMENTS (independent of load) ======================
+            function readFileAsDataURL(file) {
+                return new Promise((res, rej) => {
+                    const r = new FileReader();
+                    r.onload = () => res(r.result);
+                    r.onerror = rej;
+                    r.readAsDataURL(file);
+                });
+            }
+
+            function renderFiles() {
+                $("attach-list").innerHTML = files
+                    .map(
+                        (f, i) => `
+                    <div class="bg-white rounded-xl p-2 flex items-center gap-3 border border-slate-100">
+                        ${f.type.startsWith("image/") ? `<img src="${f.dataURL}" class="w-10 h-10 rounded-lg object-cover" />` : '<div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">📎</div>'}
+                        <div class="flex-1 min-w-0 text-left">
+                            <p class="text-xs font-bold truncate">${f.name}</p>
+                        </div>
+                        <button type="button" data-i="${i}" class="remove-file p-1.5 rounded-full bg-slate-100 hover:bg-red-100 text-black">✕</button>
+                    </div>
+                `,
+                    )
+                    .join("");
+                document.querySelectorAll(".remove-file").forEach((b) => {
+                    b.addEventListener("click", () => {
+                        files.splice(parseInt(b.dataset.i), 1);
+                        renderFiles();
+                    });
+                });
+            }
+
+            $("attach-btn").addEventListener("click", () =>
+                $("file-input").click(),
+            );
+            $("file-input").addEventListener("change", async (e) => {
+                for (const file of Array.from(e.target.files)) {
+                    if (file.size > 3 * 1024 * 1024) {
+                        alert(file.name + " is too large (max 3MB).");
+                        continue;
+                    }
+                    const dataURL = await readFileAsDataURL(file);
+                    files.push({
+                        id:
+                            Date.now() +
+                            "_" +
+                            Math.random().toString(36).slice(2, 7),
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        dataURL,
+                    });
+                }
+                e.target.value = "";
+                renderFiles();
+            });
+
+            $("msg-input").addEventListener("input", (e) => {
+                $("char-count").textContent = e.target.value.length + "/500";
+            });
+
+            // ====================== SEND HANDLER ======================
+            $("send-btn").addEventListener("click", async () => {
+                if (!isReady) return;
+
+                const text = $("msg-input").value.trim();
+
+                if (!text && files.length === 0) {
+                    $("send-btn").classList.add("shake-expand-once");
+                    setTimeout(
+                        () =>
+                            $("send-btn").classList.remove("shake-expand-once"),
+                        1300,
+                    );
+                    return;
+                }
+
+                $("send-btn").textContent = "Sending…";
+                $("send-btn").disabled = true;
+
+                try {
+                    await Backend.sendMessage(targetHandle, {
+                        text: text.slice(0, 500),
+                        files,
+                    });
+
+                    $("sender-wrap").classList.add("hidden");
+                    $("sender-wrap").classList.remove("flex");
+                    $("success-to").textContent =
+                        "@" + recipient.handle + " received your message.";
+                    $("success-view").classList.remove("hidden");
+                    $("success-view").classList.add("flex");
+
+                    burstConfetti();
+                } catch (e) {
+                    console.error(e);
+                    alert("Failed to send. Please try again.");
+                    $("send-btn").textContent = "Send!";
+                    $("send-btn").disabled = false;
+                }
+            });
+
+            $("send-another-btn").addEventListener("click", () =>
+                location.reload(),
+            );
+
+            // ====================== DYNAMIC LOAD ======================
+            (async function loadRecipient() {
                 await Backend.init();
 
                 try {
                     recipient = await Backend.getProfile(targetHandle);
-                } catch (e) {}
+                } catch (e) {
+                    recipient = null;
+                }
 
+                // Handle not-found
                 if (!recipient) {
-                    $("loading").classList.add("hidden");
+                    $("sender-wrap").classList.add("hidden");
+                    $("sender-wrap").classList.remove("flex");
                     $("error-view").classList.remove("hidden");
                     $("error-view").classList.add("flex");
                     return;
                 }
 
-                $("loading").classList.add("hidden");
-
+                // Handle paused
                 if (recipient.paused) {
+                    $("sender-wrap").classList.add("hidden");
+                    $("sender-wrap").classList.remove("flex");
                     $("paused-view").classList.remove("hidden");
                     $("paused-view").classList.add("flex");
                     return;
                 }
 
-                $("sender-wrap").classList.remove("hidden");
-                $("sender-wrap").classList.add("flex");
-
+                // Populate the card in place — no layout shift
                 $("recipient-handle").textContent = "@" + recipient.handle;
                 $("recipient-prompt").textContent =
                     recipient.prompt || "send me anonymous messages!";
@@ -402,118 +525,28 @@
                     $("avatar-img").classList.remove("hidden");
                     $("avatar-fallback").classList.add("hidden");
                 } else {
-                    $("avatar-fallback").textContent = (
-                        recipient.handle[0] || "U"
-                    ).toUpperCase();
+                    const fb = $("avatar-fallback");
+                    fb.classList.remove("animate-pulse", "bg-slate-300");
+                    fb.classList.add(
+                        "bg-slate-900",
+                        "flex",
+                        "items-center",
+                        "justify-center",
+                        "text-white",
+                        "font-black",
+                        "text-2xl",
+                    );
+                    fb.textContent = (recipient.handle[0] || "U").toUpperCase();
                 }
 
-                $("msg-input").addEventListener("input", (e) => {
-                    $("char-count").textContent =
-                        e.target.value.length + "/500";
-                });
-
-                $("attach-btn").addEventListener("click", () =>
-                    $("file-input").click(),
+                // Enable the send button now that we've confirmed the recipient is valid
+                isReady = true;
+                $("send-btn").disabled = false;
+                $("send-btn").classList.remove(
+                    "opacity-60",
+                    "cursor-not-allowed",
                 );
-                $("file-input").addEventListener("change", async (e) => {
-                    for (const file of Array.from(e.target.files)) {
-                        if (file.size > 3 * 1024 * 1024) {
-                            alert(file.name + " is too large (max 3MB).");
-                            continue;
-                        }
-                        const dataURL = await readFileAsDataURL(file);
-                        files.push({
-                            id:
-                                Date.now() +
-                                "_" +
-                                Math.random().toString(36).slice(2, 7),
-                            name: file.name,
-                            type: file.type,
-                            size: file.size,
-                            dataURL,
-                        });
-                    }
-                    e.target.value = "";
-                    renderFiles();
-                });
-
-                function readFileAsDataURL(file) {
-                    return new Promise((res, rej) => {
-                        const r = new FileReader();
-                        r.onload = () => res(r.result);
-                        r.onerror = rej;
-                        r.readAsDataURL(file);
-                    });
-                }
-
-                function renderFiles() {
-                    $("attach-list").innerHTML = files
-                        .map(
-                            (f, i) => `
-                        <div class="bg-white rounded-xl p-2 flex items-center gap-3 border border-slate-100">
-                            ${f.type.startsWith("image/") ? `<img src="${f.dataURL}" class="w-10 h-10 rounded-lg object-cover" />` : '<div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">📎</div>'}
-                            <div class="flex-1 min-w-0 text-left">
-                                <p class="text-xs font-bold truncate">${f.name}</p>
-                            </div>
-                            <button type="button" data-i="${i}" class="remove-file p-1.5 rounded-full bg-slate-100 hover:bg-red-100 text-black">✕</button>
-                        </div>
-                    `,
-                        )
-                        .join("");
-                    document.querySelectorAll(".remove-file").forEach((b) => {
-                        b.addEventListener("click", () => {
-                            files.splice(parseInt(b.dataset.i), 1);
-                            renderFiles();
-                        });
-                    });
-                }
-
-                $("send-btn").addEventListener("click", async () => {
-                    const text = $("msg-input").value.trim();
-
-                    // Empty state: shake to prompt the user
-                    if (!text && files.length === 0) {
-                        $("send-btn").classList.add("shake-expand-once");
-                        setTimeout(
-                            () =>
-                                $("send-btn").classList.remove(
-                                    "shake-expand-once",
-                                ),
-                            1300,
-                        );
-                        return;
-                    }
-
-                    $("send-btn").textContent = "Sending…";
-                    $("send-btn").disabled = true;
-
-                    try {
-                        // Chunking happens inside Backend.sendMessage in the background
-                        await Backend.sendMessage(targetHandle, {
-                            text: text.slice(0, 500),
-                            files,
-                        });
-
-                        $("sender-wrap").classList.add("hidden");
-                        $("sender-wrap").classList.remove("flex");
-                        $("success-to").textContent =
-                            "@" + recipient.handle + " received your message.";
-                        $("success-view").classList.remove("hidden");
-                        $("success-view").classList.add("flex");
-
-                        // Fire confetti
-                        burstConfetti();
-                    } catch (e) {
-                        console.error(e);
-                        alert("Failed to send. Please try again.");
-                        $("send-btn").textContent = "Send!";
-                        $("send-btn").disabled = false;
-                    }
-                });
-
-                $("send-another-btn").addEventListener("click", () =>
-                    location.reload(),
-                );
+                $("sender-wrap").setAttribute("aria-busy", "false");
             })();
         </script>
     </body>
