@@ -36,9 +36,40 @@
                     #fa0f5c 50%,
                     #ff6600 100%
                 );
+                background-attachment: fixed;
                 padding-top: env(safe-area-inset-top, 0px);
                 padding-bottom: env(safe-area-inset-bottom, 0px);
                 overflow-x: hidden;
+            }
+
+            /* Shake + Expand animation */
+            @keyframes shake-expand {
+                0%,
+                100% {
+                    transform: scale(1) rotate(0);
+                }
+                15% {
+                    transform: scale(1.04) rotate(-2deg);
+                }
+                30% {
+                    transform: scale(1.04) rotate(2deg);
+                }
+                45% {
+                    transform: scale(1.04) rotate(-2deg);
+                }
+                60% {
+                    transform: scale(1.04) rotate(2deg);
+                }
+                75% {
+                    transform: scale(1.06) rotate(0);
+                }
+            }
+            .shake-expand {
+                animation: shake-expand 2s ease-in-out infinite;
+                transform-origin: center;
+            }
+            .shake-expand-once {
+                animation: shake-expand 1.2s ease-in-out 1;
             }
         </style>
     </head>
@@ -190,7 +221,7 @@
 
             <div class="flex flex-col items-center">
                 <img
-                    src="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                    src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                     alt="NGL"
                     class="h-10 w-auto object-contain drop-shadow-md"
                     onerror="this.style.display = 'none'"
@@ -236,7 +267,8 @@
                 </button>
                 <a
                     href="/"
-                    class="w-full bg-slate-100 text-slate-800 font-bold py-4 rounded-full text-sm text-center block active:scale-95 transition-transform"
+                    id="own-link-btn"
+                    class="w-full bg-slate-100 text-slate-800 font-bold py-4 rounded-full text-sm text-center block shake-expand"
                     >Get your own NGL link</a
                 >
             </div>
@@ -256,6 +288,86 @@
 
             if (!targetHandle) window.location.href = "/";
 
+            // ====================== CONFETTI ======================
+            function burstConfetti() {
+                const canvas = document.createElement("canvas");
+                canvas.style.cssText =
+                    "position:fixed;inset:0;pointer-events:none;z-index:99999";
+                const DPR = window.devicePixelRatio || 1;
+                const W = window.innerWidth;
+                const H = window.innerHeight;
+                canvas.width = W * DPR;
+                canvas.height = H * DPR;
+                canvas.style.width = W + "px";
+                canvas.style.height = H + "px";
+                document.body.appendChild(canvas);
+                const ctx = canvas.getContext("2d");
+                ctx.scale(DPR, DPR);
+                const colors = [
+                    "#fa0f5c",
+                    "#ff5100",
+                    "#ffd700",
+                    "#ff3366",
+                    "#00d4ff",
+                    "#22c55e",
+                    "#a855f7",
+                ];
+                const particles = [];
+                for (let i = 0; i < 180; i++) {
+                    particles.push({
+                        x: W / 2 + (Math.random() - 0.5) * 60,
+                        y: H / 2 + (Math.random() - 0.5) * 60,
+                        vx: (Math.random() - 0.5) * 14,
+                        vy: (Math.random() - 1) * 17 - 2,
+                        size: Math.random() * 8 + 3,
+                        color: colors[
+                            Math.floor(Math.random() * colors.length)
+                        ],
+                        rotation: Math.random() * Math.PI * 2,
+                        rotationSpeed: (Math.random() - 0.5) * 0.4,
+                        life: 1,
+                        shape: Math.random() > 0.5 ? "rect" : "circle",
+                    });
+                }
+                function animate() {
+                    ctx.clearRect(0, 0, W, H);
+                    let alive = false;
+                    particles.forEach((p) => {
+                        p.vy += 0.55;
+                        p.vx *= 0.99;
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.rotation += p.rotationSpeed;
+                        p.life -= 0.008;
+                        if (p.life > 0 && p.y < H + 60) {
+                            alive = true;
+                            ctx.save();
+                            ctx.translate(p.x, p.y);
+                            ctx.rotate(p.rotation);
+                            ctx.globalAlpha = Math.max(p.life, 0);
+                            ctx.fillStyle = p.color;
+                            if (p.shape === "rect") {
+                                ctx.fillRect(
+                                    -p.size / 2,
+                                    -p.size / 2,
+                                    p.size,
+                                    p.size * 0.6,
+                                );
+                            } else {
+                                ctx.beginPath();
+                                ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                            ctx.restore();
+                        }
+                    });
+                    if (alive) requestAnimationFrame(animate);
+                    else canvas.remove();
+                }
+                animate();
+            }
+
+            // ====================== INIT ======================
             (async function () {
                 await Backend.init();
 
@@ -306,7 +418,6 @@
                 $("file-input").addEventListener("change", async (e) => {
                     for (const file of Array.from(e.target.files)) {
                         if (file.size > 3 * 1024 * 1024) {
-                            // 3MB limit for RTDB chunking safety
                             alert(file.name + " is too large (max 3MB).");
                             continue;
                         }
@@ -339,14 +450,14 @@
                     $("attach-list").innerHTML = files
                         .map(
                             (f, i) => `
-          <div class="bg-white rounded-xl p-2 flex items-center gap-3 border border-slate-100">
-            ${f.type.startsWith("image/") ? `<img src="${f.dataURL}" class="w-10 h-10 rounded-lg object-cover" />` : '<div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">📎</div>'}
-            <div class="flex-1 min-w-0 text-left">
-              <p class="text-xs font-bold truncate">${f.name}</p>
-            </div>
-            <button type="button" data-i="${i}" class="remove-file p-1.5 rounded-full bg-slate-100 hover:bg-red-100 text-black">✕</button>
-          </div>
-        `,
+                        <div class="bg-white rounded-xl p-2 flex items-center gap-3 border border-slate-100">
+                            ${f.type.startsWith("image/") ? `<img src="${f.dataURL}" class="w-10 h-10 rounded-lg object-cover" />` : '<div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">📎</div>'}
+                            <div class="flex-1 min-w-0 text-left">
+                                <p class="text-xs font-bold truncate">${f.name}</p>
+                            </div>
+                            <button type="button" data-i="${i}" class="remove-file p-1.5 rounded-full bg-slate-100 hover:bg-red-100 text-black">✕</button>
+                        </div>
+                    `,
                         )
                         .join("");
                     document.querySelectorAll(".remove-file").forEach((b) => {
@@ -359,12 +470,25 @@
 
                 $("send-btn").addEventListener("click", async () => {
                     const text = $("msg-input").value.trim();
-                    if (!text && files.length === 0) return;
 
-                    $("send-btn").textContent = "Chunking & Sending…";
+                    // Empty state: shake to prompt the user
+                    if (!text && files.length === 0) {
+                        $("send-btn").classList.add("shake-expand-once");
+                        setTimeout(
+                            () =>
+                                $("send-btn").classList.remove(
+                                    "shake-expand-once",
+                                ),
+                            1300,
+                        );
+                        return;
+                    }
+
+                    $("send-btn").textContent = "Sending…";
                     $("send-btn").disabled = true;
 
                     try {
+                        // Chunking happens inside Backend.sendMessage in the background
                         await Backend.sendMessage(targetHandle, {
                             text: text.slice(0, 500),
                             files,
@@ -376,6 +500,9 @@
                             "@" + recipient.handle + " received your message.";
                         $("success-view").classList.remove("hidden");
                         $("success-view").classList.add("flex");
+
+                        // Fire confetti
+                        burstConfetti();
                     } catch (e) {
                         console.error(e);
                         alert("Failed to send. Please try again.");
