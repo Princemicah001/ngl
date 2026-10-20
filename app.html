@@ -1,0 +1,2135 @@
+<!doctype html>
+<html lang="en" class="light">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
+        <title id="app-title">NGL</title>
+        <meta name="theme-color" content="#ee0e6a" />
+        <link id="app-favicon" rel="manifest" href="/manifest.json" />
+
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = { darkMode: "class" };
+        </script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Archivo+Black&family=Caveat:wght@600&family=Playfair+Display:ital,wght@1,600&family=Space+Grotesk:wght@500;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                height: 100dvh;
+                overflow: hidden;
+                font-family: "Inter", sans-serif;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
+                transition:
+                    background-color 0.3s,
+                    color 0.3s;
+            }
+            .view {
+                display: none;
+                width: 100%;
+                height: 100dvh;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+            .view.active {
+                display: flex;
+                flex-direction: column;
+                animation: fadeIn 0.3s ease;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            body {
+                background-color: #f3f4f6;
+                color: #000;
+            }
+            html.dark body {
+                background-color: #121212;
+                color: #fff;
+            }
+
+            .profile-ring {
+                padding: 3px;
+                background: linear-gradient(135deg, #ef0069, #ff5a00);
+                border-radius: 50%;
+                display: inline-block;
+            }
+
+            .inbox-row {
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                transition: background 0.2s;
+            }
+            html.dark .inbox-row {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            .inbox-row:active {
+                background: rgba(0, 0, 0, 0.05);
+            }
+            html.dark .inbox-row:active {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            ::-webkit-scrollbar {
+                display: none;
+            }
+
+            #toast-container {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                pointer-events: none;
+            }
+            .toast {
+                background: #1e2530;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 999px;
+                font-weight: 700;
+                font-size: 14px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                animation:
+                    slideDown 0.3s ease,
+                    fadeOut 0.3s ease 2.7s forwards;
+            }
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @keyframes fadeOut {
+                to {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+            }
+
+            /* ===== CLEAR HIGH-CONTRAST PLAY THEMES ===== */
+            .theme-ngl-sunrise {
+                background: linear-gradient(
+                    135deg,
+                    #ff006e 0%,
+                    #ff7b00 50%,
+                    #ffb700 100%
+                );
+                color: #ffffff;
+            }
+            .theme-electric-violet {
+                background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+                color: #ffffff;
+            }
+            .theme-ocean-blue {
+                background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+                color: #ffffff;
+            }
+            .theme-midnight-neon {
+                background: linear-gradient(
+                    135deg,
+                    #0f0c29 0%,
+                    #302b63 50%,
+                    #24243e 100%
+                );
+                color: #ffffff;
+                border: 1px solid rgba(0, 198, 255, 0.4);
+                box-shadow: inset 0 0 20px rgba(0, 198, 255, 0.15);
+            }
+            .theme-glass-frost {
+                background: linear-gradient(
+                    135deg,
+                    rgba(255, 255, 255, 0.7) 0%,
+                    rgba(255, 255, 255, 0.3) 100%
+                );
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.6);
+                color: #1a1a1a;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            }
+            .theme-glass-blue {
+                background: linear-gradient(
+                    135deg,
+                    rgba(0, 198, 255, 0.4) 0%,
+                    rgba(0, 114, 255, 0.15) 100%
+                );
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                color: #ffffff;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Shuffle Dice Spin */
+            @keyframes dice-spin {
+                0% {
+                    transform: rotate(0deg) scale(1);
+                }
+                50% {
+                    transform: rotate(180deg) scale(1.25);
+                }
+                100% {
+                    transform: rotate(360deg) scale(1);
+                }
+            }
+            .dice-spinning {
+                animation: dice-spin 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="toast-container"></div>
+
+        <!-- ================= VIEW: FAKE CALCULATOR (DISGUISE) ================= -->
+        <div
+            id="view-fake-calc"
+            class="view bg-black text-white"
+            style="font-family: monospace"
+        >
+            <div class="w-full h-full max-w-md mx-auto flex flex-col p-6">
+                <div class="flex-1 flex items-end justify-end pb-6">
+                    <input
+                        type="text"
+                        id="calc-display"
+                        class="w-full bg-transparent text-right text-6xl font-light outline-none text-white"
+                        readonly
+                        value="0"
+                    />
+                </div>
+                <div class="grid grid-cols-4 gap-3 mb-6">
+                    <button
+                        onclick="calcClear()"
+                        class="bg-gray-800 text-red-500 rounded-full h-20 text-2xl active:bg-gray-700"
+                    >
+                        C
+                    </button>
+                    <button
+                        onclick="calcPress('(')"
+                        class="bg-gray-800 text-white rounded-full h-20 text-2xl active:bg-gray-700"
+                    >
+                        (
+                    </button>
+                    <button
+                        onclick="calcPress(')')"
+                        class="bg-gray-800 text-white rounded-full h-20 text-2xl active:bg-gray-700"
+                    >
+                        )
+                    </button>
+                    <button
+                        onclick="calcPress('/')"
+                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
+                    >
+                        ÷
+                    </button>
+
+                    <button
+                        onclick="calcPress('7')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        7
+                    </button>
+                    <button
+                        onclick="calcPress('8')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        8
+                    </button>
+                    <button
+                        onclick="calcPress('9')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        9
+                    </button>
+                    <button
+                        onclick="calcPress('*')"
+                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
+                    >
+                        ×
+                    </button>
+
+                    <button
+                        onclick="calcPress('4')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        4
+                    </button>
+                    <button
+                        onclick="calcPress('5')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        5
+                    </button>
+                    <button
+                        onclick="calcPress('6')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        6
+                    </button>
+                    <button
+                        onclick="calcPress('-')"
+                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
+                    >
+                        −
+                    </button>
+
+                    <button
+                        onclick="calcPress('1')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        1
+                    </button>
+                    <button
+                        onclick="calcPress('2')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        2
+                    </button>
+                    <button
+                        onclick="calcPress('3')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        3
+                    </button>
+                    <button
+                        onclick="calcPress('+')"
+                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
+                    >
+                        +
+                    </button>
+
+                    <button
+                        onclick="calcPress('0')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl col-span-2 active:bg-gray-500"
+                    >
+                        0
+                    </button>
+                    <button
+                        onclick="calcPress('.')"
+                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
+                    >
+                        .
+                    </button>
+                    <button
+                        onclick="calcEval()"
+                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
+                    >
+                        =
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: SPLASH ================= -->
+        <div
+            id="view-splash"
+            class="view active bg-gradient-to-b from-[#ef0069] to-[#ff5a00] text-white"
+        >
+            <div
+                class="w-full h-full flex flex-col justify-between py-12 px-6 max-w-md mx-auto"
+            >
+                <div class="flex-1 flex items-center justify-center">
+                    <h1
+                        class="text-white font-black text-[110px] sm:text-[130px] tracking-tighter"
+                        style="
+                            -webkit-text-stroke: 10px black;
+                            paint-order: stroke fill;
+                            filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.2));
+                            transform: rotate(-6deg);
+                        "
+                    >
+                        NGL
+                    </h1>
+                </div>
+                <div class="w-full flex flex-col items-center pb-safe">
+                    <button
+                        onclick="showView('view-setup-username')"
+                        class="w-full bg-white text-black font-extrabold text-xl py-4 rounded-full text-center active:scale-95 transition-transform shadow-xl mb-4"
+                    >
+                        Get Started!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: ONBOARDING USERNAME ================= -->
+        <div id="view-setup-username" class="view bg-[#1e2530] text-white">
+            <div class="w-full h-full flex flex-col max-w-md mx-auto px-6 py-6">
+                <div>
+                    <button
+                        onclick="showView('view-splash')"
+                        class="text-white/60 hover:text-white"
+                    >
+                        <svg
+                            class="w-8 h-8"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="3"
+                                d="M15 19l-7-7 7-7"
+                            ></path>
+                        </svg>
+                    </button>
+                </div>
+                <div
+                    class="flex-1 flex flex-col justify-center items-center w-full -mt-10"
+                >
+                    <h2 class="text-3xl font-extrabold mb-10">
+                        Choose a username
+                    </h2>
+                    <div
+                        class="w-full bg-[#313945] rounded-full py-4 px-6 flex items-center justify-center mb-6 border-2 border-transparent focus-within:border-[#ff5a00] transition-colors"
+                    >
+                        <span class="text-gray-400 text-xl font-bold mr-1"
+                            >@</span
+                        >
+                        <input
+                            type="text"
+                            id="username-input"
+                            placeholder=""
+                            autocomplete="off"
+                            spellcheck="false"
+                            class="bg-transparent outline-none text-xl font-bold text-white w-full text-center placeholder-gray-400"
+                            maxlength="20"
+                            oninput="validateUsername()"
+                        />
+                    </div>
+                    <button
+                        id="username-btn"
+                        onclick="goToPhotoSetup()"
+                        class="w-full bg-[#9ca3af] text-black font-extrabold text-lg py-4 rounded-full transition-colors opacity-70 cursor-not-allowed"
+                    >
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: ONBOARDING PHOTO ================= -->
+        <div id="view-setup-photo" class="view bg-[#1e2530] text-white">
+            <div class="w-full h-full flex flex-col max-w-md mx-auto px-6 py-6">
+                <div class="flex justify-between items-center">
+                    <button
+                        onclick="showView('view-setup-username')"
+                        class="text-white/60 hover:text-white"
+                    >
+                        <svg
+                            class="w-8 h-8"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="3"
+                                d="M15 19l-7-7 7-7"
+                            ></path>
+                        </svg>
+                    </button>
+                    <button
+                        onclick="finishSetup()"
+                        class="text-white/60 font-bold text-lg hover:text-white"
+                    >
+                        skip
+                    </button>
+                </div>
+                <div
+                    class="flex-1 flex flex-col justify-center items-center w-full -mt-10"
+                >
+                    <h2
+                        class="text-3xl font-extrabold mb-12 text-center leading-tight"
+                    >
+                        Choose a<br />profile picture
+                    </h2>
+
+                    <div
+                        class="relative w-40 h-40 mb-16 cursor-pointer group"
+                        onclick="
+                            document.getElementById('avatar-input').click()
+                        "
+                    >
+                        <div
+                            class="w-full h-full rounded-full border-4 border-[#3a4352] bg-[#4b5563] flex items-center justify-center overflow-hidden group-hover:border-[#ff5a00] transition-colors"
+                        >
+                            <img
+                                id="avatar-preview"
+                                class="w-full h-full object-cover hidden"
+                            />
+                            <svg
+                                id="avatar-placeholder"
+                                class="w-24 h-24 text-[#9ca3af]"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                                />
+                            </svg>
+                        </div>
+                        <div
+                            class="absolute bottom-1 right-1 bg-white rounded-full p-2 shadow-lg group-hover:scale-110 transition-transform"
+                        >
+                            <svg
+                                class="w-6 h-6 text-[#3a4352]"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="3"
+                                    d="M12 4v16m8-8H4"
+                                ></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <input
+                        type="file"
+                        id="avatar-input"
+                        accept="image/*"
+                        class="hidden"
+                        onchange="handleImageUpload(event)"
+                    />
+
+                    <button
+                        onclick="finishSetup()"
+                        class="w-full bg-white text-black font-extrabold text-lg py-4 rounded-full active:scale-95 transition-transform shadow-xl"
+                    >
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: MAIN APP ================= -->
+        <div id="view-main" class="view">
+            <div
+                class="w-full h-full flex flex-col max-w-lg mx-auto relative transition-colors duration-300"
+            >
+                <header
+                    class="flex items-center justify-between px-6 py-4 z-10 sticky top-0 bg-inherit"
+                >
+                    <div
+                        class="profile-ring w-10 h-10 flex-shrink-0"
+                        onclick="showView('view-settings')"
+                    >
+                        <div
+                            class="w-full h-full bg-white dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden"
+                        >
+                            <img
+                                id="header-avatar"
+                                class="w-full h-full object-cover hidden"
+                            />
+                            <span id="header-avatar-fallback" class="text-xl"
+                                >⚡</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-2xl font-black">
+                        <button
+                            onclick="switchTab('play')"
+                            id="tab-play"
+                            class="text-black dark:text-white"
+                        >
+                            play
+                        </button>
+                        <button
+                            onclick="switchTab('inbox')"
+                            id="tab-inbox"
+                            class="text-gray-400 relative"
+                        >
+                            inbox
+                            <span
+                                id="inbox-dot"
+                                class="absolute -top-1 -right-3 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 hidden"
+                            ></span>
+                        </button>
+                    </div>
+
+                    <button
+                        onclick="showView('view-settings')"
+                        class="bg-white dark:bg-gray-800 p-2.5 rounded-full shadow-sm"
+                    >
+                        <svg
+                            class="w-6 h-6 text-gray-500 dark:text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.5"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                            ></path>
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.5"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            ></path>
+                        </svg>
+                    </button>
+                </header>
+
+                <div class="flex-1 overflow-y-auto pb-10">
+                    <!-- PLAY TAB -->
+                    <div id="content-play" class="block">
+                        <div
+                            class="flex overflow-x-auto snap-x snap-mandatory gap-4 p-5"
+                        >
+                            <!-- PLAY CARD -->
+                            <div
+                                id="play-card"
+                                class="snap-center shrink-0 w-[85%] rounded-[32px] overflow-hidden shadow-2xl flex flex-col items-center justify-center p-8 relative h-[400px] theme-ngl-sunrise transition-all duration-500"
+                            >
+                                <div class="relative mb-6">
+                                    <div
+                                        class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center"
+                                    >
+                                        <svg
+                                            class="w-12 h-12 text-white/50"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3
+                                    id="play-card-prompt"
+                                    class="text-3xl font-black text-center leading-tight drop-shadow-md"
+                                >
+                                    send me<br />anonymous<br />messages!
+                                </h3>
+
+                                <!-- DICE SHUFFLE BUTTON -->
+                                <button
+                                    id="dice-btn"
+                                    onclick="cycleTheme()"
+                                    class="absolute bottom-6 right-6 bg-black/40 backdrop-blur-md text-white p-3 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform border border-white/20"
+                                >
+                                    <svg
+                                        id="dice-icon"
+                                        class="w-6 h-6"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <rect
+                                            x="3"
+                                            y="3"
+                                            width="18"
+                                            height="18"
+                                            rx="4"
+                                            ry="4"
+                                        />
+                                        <circle
+                                            cx="8.5"
+                                            cy="8.5"
+                                            r="1.5"
+                                            fill="currentColor"
+                                        />
+                                        <circle
+                                            cx="15.5"
+                                            cy="8.5"
+                                            r="1.5"
+                                            fill="currentColor"
+                                        />
+                                        <circle
+                                            cx="8.5"
+                                            cy="15.5"
+                                            r="1.5"
+                                            fill="currentColor"
+                                        />
+                                        <circle
+                                            cx="15.5"
+                                            cy="15.5"
+                                            r="1.5"
+                                            fill="currentColor"
+                                        />
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="1.5"
+                                            fill="currentColor"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="px-4 mt-2">
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-[28px] p-6 text-center shadow-sm"
+                            >
+                                <h4
+                                    class="text-xl font-extrabold mb-1 dark:text-white"
+                                >
+                                    Step 1: Copy your link
+                                </h4>
+                                <p
+                                    id="share-link-text"
+                                    class="text-gray-400 font-bold text-sm mb-4 uppercase tracking-wide"
+                                >
+                                    NGL.LINK/USERNAME
+                                </p>
+                                <button
+                                    onclick="copyLink()"
+                                    class="mx-auto border-2 border-gray-300 dark:border-gray-600 rounded-full py-2.5 px-6 flex items-center gap-2 text-gray-500 dark:text-gray-300 font-bold mb-6 active:bg-gray-50 dark:active:bg-gray-700"
+                                >
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                                        ></path>
+                                    </svg>
+                                    copy link
+                                </button>
+                                <h4
+                                    class="text-xl font-extrabold mb-3 dark:text-white"
+                                >
+                                    Step 2: Share link on your story
+                                </h4>
+                                <button
+                                    onclick="openShareModal()"
+                                    class="w-full bg-gradient-to-r from-[#ef0069] to-[#ff5a00] text-white font-extrabold text-xl py-4 rounded-full active:scale-95 transition-transform"
+                                >
+                                    Share!
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INBOX TAB -->
+                    <div id="content-inbox" class="hidden">
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-t-[32px] min-h-[500px]"
+                        >
+                            <div
+                                id="inbox-list"
+                                class="divide-y divide-gray-100 dark:divide-gray-700"
+                            ></div>
+                            <div
+                                id="inbox-empty"
+                                class="hidden flex-col items-center justify-center py-20 text-center"
+                            >
+                                <span class="text-6xl mb-4">💌</span>
+                                <h3
+                                    class="text-xl font-bold text-gray-800 dark:text-white mb-2"
+                                >
+                                    No messages yet
+                                </h3>
+                                <p
+                                    class="text-gray-500 dark:text-gray-400 font-medium px-8"
+                                >
+                                    Share your link on your story to get
+                                    anonymous messages.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: REPLY ================= -->
+        <div
+            id="view-reply"
+            class="view bg-white dark:bg-gray-900 text-black dark:text-white transition-colors duration-300"
+        >
+            <div class="w-full h-full flex flex-col max-w-lg mx-auto">
+                <header
+                    class="flex items-center justify-between px-6 py-4 sticky top-0 bg-white dark:bg-gray-900 z-10 border-b border-gray-100 dark:border-gray-800"
+                >
+                    <button
+                        onclick="showView('view-main')"
+                        class="text-gray-400"
+                    >
+                        <svg
+                            class="w-7 h-7"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="3"
+                                d="M15 19l-7-7 7-7"
+                            ></path>
+                        </svg>
+                    </button>
+
+                    <div
+                        class="flex items-center gap-4 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2"
+                    >
+                        <button
+                            onclick="navigateMessage(-1)"
+                            id="btn-prev"
+                            class="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="3"
+                                    d="M15 19l-7-7 7-7"
+                                />
+                            </svg>
+                        </button>
+                        <span
+                            id="msg-counter"
+                            class="text-sm font-bold text-gray-700 dark:text-gray-200"
+                            >1 of 1</span
+                        >
+                        <button
+                            onclick="navigateMessage(1)"
+                            id="btn-next"
+                            class="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="3"
+                                    d="M9 5l7 7-7 7"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="w-7 h-7"></div>
+                </header>
+
+                <div
+                    class="flex-1 overflow-y-auto flex flex-col items-center pt-8 px-4 bg-[#f8f9fb] dark:bg-gray-950"
+                >
+                    <div
+                        id="message-card-container"
+                        class="w-full max-w-sm rounded-[32px] overflow-hidden shadow-xl border border-gray-200 dark:border-gray-700 mb-6 bg-white dark:bg-gray-800"
+                    >
+                        <div
+                            id="card-header"
+                            class="bg-gradient-to-r from-[#ef0069] to-[#ff5a00] p-6 text-center"
+                        >
+                            <h2
+                                id="reply-prompt"
+                                class="text-white font-extrabold text-xl leading-tight"
+                            ></h2>
+                        </div>
+                        <div
+                            class="p-8 text-center min-h-[160px] flex flex-col items-center justify-center gap-4"
+                        >
+                            <p
+                                id="reply-message-text"
+                                class="text-black dark:text-white font-bold text-xl leading-snug"
+                            ></p>
+                            <div
+                                id="reply-attachments"
+                                class="w-full flex flex-col gap-2"
+                            ></div>
+                        </div>
+                        <div
+                            class="bg-gray-50 dark:bg-gray-900 p-4 text-center border-t border-gray-100 dark:border-gray-800"
+                        >
+                            <span
+                                class="text-[11px] font-light text-gray-400 tracking-wide"
+                                >Sent with ❤️ from NGL</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="w-full max-w-sm flex gap-2 mb-8">
+                        <button
+                            onclick="saveMessageAsImage()"
+                            class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-black dark:text-white font-extrabold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-sm active:scale-95 transition"
+                        >
+                            <svg
+                                class="w-5 h-5 text-[#ef0069]"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                            </svg>
+                            Save Image
+                        </button>
+                        <button
+                            onclick="deleteMessageUI()"
+                            class="bg-red-50 dark:bg-red-900/20 text-red-500 font-extrabold px-4 py-3 rounded-2xl shadow-sm active:scale-95 transition"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                ></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW: SETTINGS ================= -->
+        <div
+            id="view-settings"
+            class="view bg-[#f8f9fb] dark:bg-gray-900 text-black dark:text-white transition-colors duration-300"
+        >
+            <div class="w-full h-full max-w-lg mx-auto">
+                <header
+                    class="flex items-center justify-between px-6 py-5 sticky top-0 bg-[#f8f9fb] dark:bg-gray-900 z-10"
+                >
+                    <button
+                        onclick="showView('view-main')"
+                        class="text-black dark:text-white"
+                    >
+                        <svg
+                            class="w-7 h-7"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="3"
+                                d="M15 19l-7-7 7-7"
+                            ></path>
+                        </svg>
+                    </button>
+                    <h2 class="text-xl font-bold">Settings</h2>
+                    <div class="w-7 h-7"></div>
+                </header>
+
+                <div class="px-6 pb-12">
+                    <h3
+                        class="text-gray-500 dark:text-gray-400 font-bold text-sm mb-3 flex items-center gap-2"
+                    >
+                        <span class="text-lg">⭐</span> Profile & Appearance
+                    </h3>
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden mb-6 shadow-sm border border-transparent dark:border-gray-700"
+                    >
+                        <div
+                            class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700 cursor-pointer"
+                            onclick="
+                                document
+                                    .getElementById('settings-avatar-input')
+                                    .click()
+                            "
+                        >
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden"
+                                >
+                                    <img
+                                        id="settings-avatar"
+                                        class="w-full h-full object-cover hidden"
+                                    />
+                                    <svg
+                                        id="settings-avatar-fallback"
+                                        class="w-5 h-5 text-gray-500"
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                                        />
+                                    </svg>
+                                </div>
+                                <span class="text-lg font-bold"
+                                    >Profile Picture</span
+                                >
+                            </div>
+                            <svg
+                                class="w-5 h-5 text-gray-300"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M9 5l7 7-7 7"
+                                ></path>
+                            </svg>
+                            <input
+                                type="file"
+                                id="settings-avatar-input"
+                                accept="image/*"
+                                class="hidden"
+                                onchange="handleImageUpload(event)"
+                            />
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700"
+                        >
+                            <div class="flex items-center gap-4">
+                                <span class="text-lg font-bold">Theme</span>
+                            </div>
+                            <select
+                                id="theme-select"
+                                onchange="changeTheme(this.value)"
+                                class="bg-gray-100 dark:bg-gray-700 text-black dark:text-white font-bold rounded-lg px-3 py-1 outline-none"
+                            >
+                                <option value="system">System</option>
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between p-5 cursor-pointer"
+                            onclick="requestNotifs()"
+                        >
+                            <div class="flex items-center gap-4">
+                                <span class="text-lg font-bold"
+                                    >Notifications</span
+                                >
+                            </div>
+                            <div
+                                id="notif-status"
+                                class="text-sm font-bold text-gray-400"
+                            >
+                                Off
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3
+                        class="text-gray-500 dark:text-gray-400 font-bold text-sm mb-3 flex items-center gap-2"
+                    >
+                        <span class="text-lg">⚠️</span> Safety & Privacy
+                    </h3>
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden mb-6 shadow-sm border border-transparent dark:border-gray-700"
+                    >
+                        <div
+                            class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700"
+                        >
+                            <div class="flex items-center gap-4">
+                                <span class="text-lg font-bold"
+                                    >Pause my link</span
+                                >
+                            </div>
+                            <label
+                                class="relative inline-flex items-center cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    id="pause-toggle"
+                                    class="sr-only peer"
+                                    onchange="togglePause(this)"
+                                />
+                                <div
+                                    class="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ef0069]"
+                                ></div>
+                            </label>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700 cursor-pointer"
+                            onclick="openHiddenWords()"
+                        >
+                            <div class="flex items-center gap-4">
+                                <span class="text-lg font-bold"
+                                    >Filter words</span
+                                >
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span
+                                    id="filter-count"
+                                    class="text-sm font-bold text-gray-400"
+                                    >0</span
+                                >
+                                <svg
+                                    class="w-5 h-5 text-gray-300"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M9 5l7 7-7 7"
+                                    ></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3
+                        class="text-gray-500 dark:text-gray-400 font-bold text-sm mb-3 flex items-center gap-2"
+                    >
+                        <span class="text-lg">🕵️</span> Disguise Mode
+                    </h3>
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden mb-6 shadow-sm border border-transparent dark:border-gray-700"
+                    >
+                        <div
+                            class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700"
+                        >
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
+                                >
+                                    <span class="text-lg">🧮</span>
+                                </div>
+                                <div>
+                                    <span class="text-lg font-bold block"
+                                        >Calculator App</span
+                                    >
+                                    <span class="text-xs text-gray-500"
+                                        >Hide NGL behind a working
+                                        calculator</span
+                                    >
+                                </div>
+                            </div>
+                            <label
+                                class="relative inline-flex items-center cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    id="disguise-toggle"
+                                    class="sr-only peer"
+                                    onchange="toggleDisguise(this)"
+                                />
+                                <div
+                                    class="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ef0069]"
+                                ></div>
+                            </label>
+                        </div>
+                        <div
+                            class="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-xs font-bold text-yellow-700 dark:text-yellow-500"
+                        >
+                            Note: Changing the app name/icon requires
+                            uninstalling and reinstalling the PWA. While active,
+                            type
+                            <span
+                                class="bg-yellow-200 dark:bg-yellow-800 px-1 rounded"
+                                >5555=</span
+                            >
+                            on the calculator to unlock.
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden shadow-sm border border-transparent dark:border-gray-700"
+                    >
+                        <div
+                            onclick="deleteAccount()"
+                            class="flex items-center justify-between p-5 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-10 h-10 rounded-full bg-red-100 text-red-500 flex items-center justify-center"
+                                >
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        ></path>
+                                    </svg>
+                                </div>
+                                <span class="text-lg font-bold text-red-500"
+                                    >Delete Account</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIDDEN WORDS MODAL -->
+        <div
+            id="hidden-words-modal"
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4"
+        >
+            <div
+                class="w-full max-w-sm bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-2xl"
+            >
+                <h3 class="text-xl font-extrabold mb-4 dark:text-white">
+                    Filter Words
+                </h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    Messages containing these words will be hidden from your
+                    inbox. Separate with commas.
+                </p>
+                <textarea
+                    id="hidden-words-input"
+                    rows="3"
+                    class="w-full bg-gray-100 dark:bg-gray-700 text-black dark:text-white font-bold p-3 rounded-xl outline-none mb-4"
+                    placeholder="badword, spam, hate..."
+                ></textarea>
+                <div class="flex gap-2">
+                    <button
+                        onclick="closeHiddenWords()"
+                        class="flex-1 bg-gray-200 dark:bg-gray-600 text-black dark:text-white font-bold py-3 rounded-xl"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onclick="saveHiddenWords()"
+                        class="flex-1 bg-[#ef0069] text-white font-bold py-3 rounded-xl"
+                    >
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SHARE MODAL -->
+        <div
+            id="share-modal"
+            class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-end justify-center pb-safe"
+        >
+            <div
+                class="w-full max-w-lg bg-white dark:bg-gray-800 rounded-t-[32px] p-6 animate-[slideUp_0.3s_ease]"
+            >
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-extrabold dark:text-white">
+                        Share your link
+                    </h3>
+                    <button
+                        onclick="closeShareModal()"
+                        class="bg-gray-100 dark:bg-gray-700 p-2 rounded-full"
+                    >
+                        <svg
+                            class="w-5 h-5 text-gray-500 dark:text-gray-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.5"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <button
+                        onclick="shareTo('whatsapp')"
+                        class="flex flex-col items-center gap-2"
+                    >
+                        <div
+                            class="w-14 h-14 bg-[#25D366] rounded-2xl flex items-center justify-center shadow-md"
+                        >
+                            <svg
+                                class="w-7 h-7 text-white"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+                                />
+                            </svg>
+                        </div>
+                        <span
+                            class="text-xs font-bold text-gray-600 dark:text-gray-400"
+                            >WhatsApp</span
+                        >
+                    </button>
+                    <button
+                        onclick="shareTo('facebook')"
+                        class="flex flex-col items-center gap-2"
+                    >
+                        <div
+                            class="w-14 h-14 bg-[#1877F2] rounded-2xl flex items-center justify-center shadow-md"
+                        >
+                            <svg
+                                class="w-7 h-7 text-white"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                                />
+                            </svg>
+                        </div>
+                        <span
+                            class="text-xs font-bold text-gray-600 dark:text-gray-400"
+                            >Facebook</span
+                        >
+                    </button>
+                    <button
+                        onclick="shareTo('twitter')"
+                        class="flex flex-col items-center gap-2"
+                    >
+                        <div
+                            class="w-14 h-14 bg-black rounded-2xl flex items-center justify-center shadow-md"
+                        >
+                            <svg
+                                class="w-6 h-6 text-white"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+                                />
+                            </svg>
+                        </div>
+                        <span
+                            class="text-xs font-bold text-gray-600 dark:text-gray-400"
+                            >X</span
+                        >
+                    </button>
+                    <button
+                        onclick="shareTo('instagram')"
+                        class="flex flex-col items-center gap-2"
+                    >
+                        <div
+                            class="w-14 h-14 bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-md"
+                        >
+                            <svg
+                                class="w-7 h-7 text-white"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"
+                                />
+                            </svg>
+                        </div>
+                        <span
+                            class="text-xs font-bold text-gray-600 dark:text-gray-400"
+                            >Instagram</span
+                        >
+                    </button>
+                </div>
+
+                <div
+                    class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-2xl p-2 pl-4 gap-2 border border-gray-200 dark:border-gray-600"
+                >
+                    <span
+                        id="modal-link-text"
+                        class="flex-1 text-sm font-bold text-gray-500 dark:text-gray-300 truncate"
+                    ></span>
+                    <button
+                        onclick="copyLink()"
+                        class="bg-black dark:bg-white text-white dark:text-black text-xs font-extrabold px-5 py-3 rounded-xl active:scale-95 transition"
+                    >
+                        Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script src="/firebase-config.js"></script>
+        <script src="/backend.js"></script>
+        <script>
+            const STORAGE_KEY = "ngl_user";
+            let currentUser = null;
+            let currentMessages = [];
+            let activeMessageId = null;
+            let currentIndex = -1;
+            let unsubscribeRTDB = null;
+
+            // High-contrast distinct themes
+            const playThemes = [
+                {
+                    class: "theme-ngl-sunrise",
+                    prompt: "send me anonymous messages!",
+                    font: "'Inter', sans-serif",
+                },
+                {
+                    class: "theme-electric-violet",
+                    prompt: "ask me anything, I'm an open book",
+                    font: "'Space Grotesk', sans-serif",
+                },
+                {
+                    class: "theme-ocean-blue",
+                    prompt: "confess to me, I won't tell",
+                    font: "'Inter', sans-serif",
+                },
+                {
+                    class: "theme-midnight-neon",
+                    prompt: "rate me honestly",
+                    font: "'Space Grotesk', sans-serif",
+                },
+                {
+                    class: "theme-glass-frost",
+                    prompt: "never have I ever...",
+                    font: "'Caveat', cursive",
+                },
+                {
+                    class: "theme-glass-blue",
+                    prompt: "tell me a secret",
+                    font: "'Inter', sans-serif",
+                },
+            ];
+
+            // --- SYSTEM THEME LOGIC ---
+            function applyTheme(theme) {
+                if (theme === "system") {
+                    const isDark = window.matchMedia(
+                        "(prefers-color-scheme: dark)",
+                    ).matches;
+                    document.documentElement.classList.toggle("dark", isDark);
+                    document.documentElement.classList.toggle("light", !isDark);
+                } else {
+                    document.documentElement.classList.toggle(
+                        "dark",
+                        theme === "dark",
+                    );
+                    document.documentElement.classList.toggle(
+                        "light",
+                        theme === "light",
+                    );
+                }
+                const themeSelect = document.getElementById("theme-select");
+                if (themeSelect) themeSelect.value = theme;
+            }
+
+            window
+                .matchMedia("(prefers-color-scheme: dark)")
+                .addEventListener("change", (e) => {
+                    if (localStorage.getItem("ngl_theme") === "system") {
+                        applyTheme("system");
+                    }
+                });
+
+            function changeTheme(theme) {
+                localStorage.setItem("ngl_theme", theme);
+                applyTheme(theme);
+            }
+
+            // --- DISGUISE MODE (CALCULATOR) ---
+            let calcValue = "0";
+            function calcPress(val) {
+                if (calcValue === "0" && val !== ".") calcValue = val;
+                else calcValue += val;
+                document.getElementById("calc-display").value = calcValue;
+            }
+            function calcClear() {
+                calcValue = "0";
+                document.getElementById("calc-display").value = calcValue;
+            }
+            function calcEval() {
+                if (calcValue === "5555=" || calcValue === "5555") {
+                    calcClear();
+                    localStorage.setItem("ngl_disguise", "false");
+                    document.getElementById("disguise-toggle").checked = false;
+                    updateAppIdentity();
+                    showView("view-main");
+                    showToast("Disguise disabled");
+                    return;
+                }
+                try {
+                    let expr = calcValue.replace(/[^-()\d/*+.]/g, "");
+                    let res = eval(expr);
+                    calcValue = String(res);
+                    document.getElementById("calc-display").value = calcValue;
+                } catch (e) {
+                    calcValue = "Error";
+                    document.getElementById("calc-display").value = calcValue;
+                    setTimeout(calcClear, 1500);
+                }
+            }
+
+            function toggleDisguise(el) {
+                localStorage.setItem(
+                    "ngl_disguise",
+                    el.checked ? "true" : "false",
+                );
+                updateAppIdentity();
+                if (el.checked) {
+                    showToast(
+                        "Disguise active. Reinstall PWA for icon change.",
+                    );
+                }
+            }
+
+            function updateAppIdentity() {
+                const isDisguised =
+                    localStorage.getItem("ngl_disguise") === "true";
+                const titleEl = document.getElementById("app-title");
+                const manifestEl = document.getElementById("app-favicon");
+
+                if (isDisguised) {
+                    titleEl.textContent = "Calculator";
+                    manifestEl.href =
+                        "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>";
+                } else {
+                    titleEl.textContent = "NGL";
+                    manifestEl.href = "/manifest.json";
+                }
+            }
+
+            // --- INIT ---
+            window.addEventListener("DOMContentLoaded", async () => {
+                const savedTheme =
+                    localStorage.getItem("ngl_theme") || "system";
+                applyTheme(savedTheme);
+                updateAppIdentity();
+
+                await Backend.init();
+                const savedUser = localStorage.getItem(STORAGE_KEY);
+
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    setupMainApp();
+                } else {
+                    if (localStorage.getItem("ngl_disguise") === "true") {
+                        showView("view-fake-calc");
+                    } else {
+                        showView("view-splash");
+                    }
+                }
+            });
+
+            function showView(viewId) {
+                const isDisguised =
+                    localStorage.getItem("ngl_disguise") === "true";
+                if (isDisguised && viewId !== "view-fake-calc") {
+                    if (viewId !== "view-splash") return;
+                }
+                document
+                    .querySelectorAll(".view")
+                    .forEach((el) => el.classList.remove("active"));
+                const target = document.getElementById(viewId);
+                if (target) target.classList.add("active");
+            }
+
+            // --- TOASTS ---
+            function showToast(msg) {
+                const container = document.getElementById("toast-container");
+                const el = document.createElement("div");
+                el.className = "toast";
+                el.textContent = msg;
+                container.appendChild(el);
+                setTimeout(() => el.remove(), 3000);
+            }
+
+            // --- ONBOARDING ---
+            function validateUsername() {
+                const input = document.getElementById("username-input");
+                const btn = document.getElementById("username-btn");
+                input.value = input.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9_]/g, "");
+                if (input.value.trim().length >= 2) {
+                    btn.disabled = false;
+                    btn.classList.remove(
+                        "bg-[#9ca3af]",
+                        "opacity-70",
+                        "cursor-not-allowed",
+                    );
+                    btn.classList.add("bg-white");
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add(
+                        "bg-[#9ca3af]",
+                        "opacity-70",
+                        "cursor-not-allowed",
+                    );
+                    btn.classList.remove("bg-white");
+                }
+            }
+
+            function goToPhotoSetup() {
+                if (document.getElementById("username-input").value.length >= 2)
+                    showView("view-setup-photo");
+            }
+
+            function handleImageUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement("canvas");
+                        const MAX_SIZE = 300;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height && width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        } else if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const base64 = canvas.toDataURL("image/jpeg", 0.7);
+
+                        if (!currentUser) currentUser = {};
+                        currentUser.photoURL = base64;
+
+                        document.getElementById("avatar-preview").src = base64;
+                        document
+                            .getElementById("avatar-preview")
+                            .classList.remove("hidden");
+                        document
+                            .getElementById("avatar-placeholder")
+                            .classList.add("hidden");
+                        document.getElementById("header-avatar").src = base64;
+                        document
+                            .getElementById("header-avatar")
+                            .classList.remove("hidden");
+                        document
+                            .getElementById("header-avatar-fallback")
+                            .classList.add("hidden");
+                        document.getElementById("settings-avatar").src = base64;
+                        document
+                            .getElementById("settings-avatar")
+                            .classList.remove("hidden");
+                        document
+                            .getElementById("settings-avatar-fallback")
+                            .classList.add("hidden");
+
+                        if (currentUser.handle) saveProfileToServer();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function finishSetup() {
+                const handle = document.getElementById("username-input").value;
+                currentUser = {
+                    ...currentUser,
+                    handle,
+                    prompt: playThemes[0].prompt,
+                    themeIndex: 0,
+                    paused: false,
+                    createdAt: new Date().toISOString(),
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+                saveProfileToServer();
+                setupMainApp();
+            }
+
+            async function saveProfileToServer() {
+                if (!currentUser || !currentUser.handle) return;
+                try {
+                    await Backend.saveProfile(currentUser.handle, currentUser);
+                } catch (e) {}
+            }
+
+            // --- MAIN APP ---
+            function setupMainApp() {
+                if (localStorage.getItem("ngl_disguise") === "true") {
+                    showView("view-fake-calc");
+                    return;
+                }
+
+                showView("view-main");
+
+                if (currentUser.photoURL) {
+                    document.getElementById("header-avatar").src =
+                        currentUser.photoURL;
+                    document
+                        .getElementById("header-avatar")
+                        .classList.remove("hidden");
+                    document
+                        .getElementById("header-avatar-fallback")
+                        .classList.add("hidden");
+                    document.getElementById("settings-avatar").src =
+                        currentUser.photoURL;
+                    document
+                        .getElementById("settings-avatar")
+                        .classList.remove("hidden");
+                    document
+                        .getElementById("settings-avatar-fallback")
+                        .classList.add("hidden");
+                }
+
+                document.getElementById("share-link-text").textContent =
+                    `NGL.LINK/${currentUser.handle.toUpperCase()}`;
+                document.getElementById("modal-link-text").textContent =
+                    `${window.location.origin}/send.html?to=${currentUser.handle}`;
+
+                updatePlayCard();
+
+                document.getElementById("pause-toggle").checked =
+                    currentUser.paused || false;
+                document.getElementById("disguise-toggle").checked =
+                    localStorage.getItem("ngl_disguise") === "true";
+                updateFilterCount();
+
+                if (unsubscribeRTDB) unsubscribeRTDB();
+                unsubscribeRTDB = Backend.subscribeMessages(
+                    currentUser.handle,
+                    (msgs, meta) => {
+                        currentMessages = msgs;
+                        renderInbox();
+                        if (meta && meta.newOnes && meta.newOnes.length > 0) {
+                            document
+                                .getElementById("inbox-dot")
+                                .classList.remove("hidden");
+                            if (
+                                "serviceWorker" in navigator &&
+                                Notification.permission === "granted"
+                            ) {
+                                navigator.serviceWorker.ready.then((reg) => {
+                                    meta.newOnes.forEach((m) =>
+                                        reg.showNotification(
+                                            "New anonymous message!",
+                                            { body: m.text || "📎 Attachment" },
+                                        ),
+                                    );
+                                });
+                            }
+                        }
+                    },
+                );
+            }
+
+            function switchTab(tab) {
+                document.getElementById("tab-play").className =
+                    tab === "play"
+                        ? "text-black dark:text-white"
+                        : "text-gray-400";
+                document.getElementById("tab-inbox").className =
+                    tab === "inbox"
+                        ? "text-black dark:text-white relative"
+                        : "text-gray-400 relative";
+                document
+                    .getElementById("content-play")
+                    .classList.toggle("hidden", tab !== "play");
+                document
+                    .getElementById("content-inbox")
+                    .classList.toggle("hidden", tab !== "inbox");
+                if (tab === "inbox")
+                    document
+                        .getElementById("inbox-dot")
+                        .classList.add("hidden");
+            }
+
+            // --- PLAY THEME SWITCHING ---
+            function updatePlayCard() {
+                const theme = playThemes[currentUser.themeIndex || 0];
+                const card = document.getElementById("play-card");
+
+                card.className =
+                    "snap-center shrink-0 w-[85%] rounded-[32px] overflow-hidden shadow-2xl flex flex-col items-center justify-center p-8 relative h-[400px] transition-all duration-500 " +
+                    theme.class;
+                card.style.fontFamily = theme.font;
+
+                document.getElementById("play-card-prompt").innerHTML =
+                    theme.prompt.split(" ").join("<br>");
+            }
+
+            function cycleTheme() {
+                // Dice spin animation
+                const dice = document.getElementById("dice-icon");
+                dice.classList.remove("dice-spinning");
+                void dice.offsetWidth; // trigger reflow
+                dice.classList.add("dice-spinning");
+
+                currentUser.themeIndex =
+                    ((currentUser.themeIndex || 0) + 1) % playThemes.length;
+                currentUser.prompt = playThemes[currentUser.themeIndex].prompt;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+                saveProfileToServer();
+
+                // Delay actual theme switch slightly for effect
+                setTimeout(() => {
+                    updatePlayCard();
+                    showToast("Theme changed!");
+                }, 250);
+            }
+
+            // --- SHARE MODAL ---
+            function openShareModal() {
+                document
+                    .getElementById("share-modal")
+                    .classList.remove("hidden");
+                document.getElementById("share-modal").classList.add("flex");
+            }
+            function closeShareModal() {
+                document.getElementById("share-modal").classList.add("hidden");
+                document.getElementById("share-modal").classList.remove("flex");
+            }
+
+            function copyLink() {
+                const link = `${window.location.origin}/send.html?to=${currentUser.handle}`;
+                navigator.clipboard
+                    .writeText(link)
+                    .then(() => showToast("Link copied to clipboard!"));
+            }
+
+            function shareTo(platform) {
+                const url = encodeURIComponent(
+                    `${window.location.origin}/send.html?to=${currentUser.handle}`,
+                );
+                const text = encodeURIComponent(
+                    `Send me anonymous messages on NGL! 👀`,
+                );
+                let shareUrl = "";
+
+                if (platform === "whatsapp")
+                    shareUrl = `https://wa.me/?text=${text}%20${url}`;
+                if (platform === "facebook")
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+                if (platform === "twitter")
+                    shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+                if (platform === "instagram") {
+                    copyLink();
+                    return showToast("Link copied! Open Instagram to paste.");
+                }
+
+                if (shareUrl) window.open(shareUrl, "_blank");
+            }
+
+            // --- INBOX & MESSAGING ---
+            function renderInbox() {
+                const list = document.getElementById("inbox-list");
+                const empty = document.getElementById("inbox-empty");
+
+                const hiddenWords = JSON.parse(
+                    localStorage.getItem("ngl_filter_" + currentUser.handle) ||
+                        "[]",
+                );
+                const filtered = currentMessages.filter((m) => {
+                    if (!m.text) return true;
+                    return !hiddenWords.some(
+                        (w) =>
+                            w && m.text.toLowerCase().includes(w.toLowerCase()),
+                    );
+                });
+
+                if (filtered.length === 0) {
+                    list.innerHTML = "";
+                    empty.classList.remove("hidden");
+                    empty.classList.add("flex");
+                    return;
+                }
+                empty.classList.add("hidden");
+                empty.classList.remove("flex");
+
+                list.innerHTML = filtered
+                    .map(
+                        (m) => `
+        <div class="inbox-row flex items-center p-4 gap-4" onclick="openMessage('${m.id}')">
+          <div class="w-14 h-14 rounded-full ${!m.read ? "bg-gradient-to-tr from-pink-500 to-orange-400" : "bg-blue-50 dark:bg-blue-900/30"} flex items-center justify-center flex-shrink-0 shadow-inner">
+            <span class="text-2xl">💌</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-[15px] mb-0.5 ${!m.read ? "text-[#ef0069] font-bold" : "text-black dark:text-white font-bold truncate"}">
+              ${!m.read ? "New Message!" : m.text || "📎 Attachment"}
+            </h4>
+            <p class="text-gray-500 dark:text-gray-400 text-sm font-medium">${new Date(m.createdAt).toLocaleDateString()}</p>
+          </div>
+          <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+        </div>
+      `,
+                    )
+                    .join("");
+            }
+
+            async function openMessage(id) {
+                activeMessageId = id;
+                currentIndex = currentMessages.findIndex((m) => m.id === id);
+                const msg = currentMessages[currentIndex];
+
+                if (!msg) return;
+
+                if (!msg.read) {
+                    msg.read = true;
+                    Backend.markAsRead(currentUser.handle, id);
+                    renderInbox();
+                }
+
+                document.getElementById("reply-prompt").textContent =
+                    currentUser.prompt || "send me anonymous messages!";
+                document.getElementById("reply-message-text").textContent =
+                    msg.text || "";
+
+                const attachContainer =
+                    document.getElementById("reply-attachments");
+                attachContainer.innerHTML = "";
+
+                if (msg.files && msg.files.length > 0) {
+                    attachContainer.innerHTML =
+                        '<div class="w-8 h-8 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mt-2"></div>';
+
+                    for (let i = 0; i < msg.files.length; i++) {
+                        const f = msg.files[i];
+                        const cacheKey = `ngl_file_${msg.id}_${i}`;
+                        let base64 = localStorage.getItem(cacheKey);
+
+                        if (!base64) {
+                            base64 = await Backend.fetchFileChunks(
+                                msg.id,
+                                i,
+                                f.chunksCount,
+                            );
+                            if (base64) {
+                                try {
+                                    localStorage.setItem(cacheKey, base64);
+                                } catch (e) {}
+                            }
+                        }
+
+                        if (base64) {
+                            if (f.type.startsWith("image/")) {
+                                attachContainer.innerHTML += `<img src="${base64}" class="w-full rounded-xl object-cover shadow-sm max-h-64" />`;
+                            } else {
+                                attachContainer.innerHTML += `<a href="${base64}" download="${f.name}" class="bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 text-sm font-bold p-3 rounded-xl block">Download ${f.name}</a>`;
+                            }
+                        }
+                    }
+                    if (attachContainer.innerHTML.includes("animate-spin"))
+                        attachContainer.innerHTML = "";
+                }
+
+                document.getElementById("msg-counter").textContent =
+                    `${currentIndex + 1} of ${currentMessages.length}`;
+                document.getElementById("btn-prev").disabled =
+                    currentIndex === currentMessages.length - 1;
+                document.getElementById("btn-next").disabled =
+                    currentIndex === 0;
+
+                showView("view-reply");
+            }
+
+            function navigateMessage(dir) {
+                const newIndex = currentIndex - dir;
+                if (newIndex >= 0 && newIndex < currentMessages.length) {
+                    openMessage(currentMessages[newIndex].id);
+                }
+            }
+
+            // --- SAVE IMAGE ---
+            function saveMessageAsImage() {
+                const node = document.getElementById("message-card-container");
+                showToast("Generating image...");
+
+                const isDark =
+                    document.documentElement.classList.contains("dark");
+                if (isDark) document.documentElement.classList.remove("dark");
+
+                html2canvas(node, {
+                    scale: 3,
+                    backgroundColor: null,
+                    useCORS: true,
+                    logging: false,
+                })
+                    .then((canvas) => {
+                        if (isDark)
+                            document.documentElement.classList.add("dark");
+                        const link = document.createElement("a");
+                        link.download = `NGL_Message_${Date.now()}.png`;
+                        link.href = canvas.toDataURL("image/png");
+                        link.click();
+                        showToast("Image saved to downloads!");
+                    })
+                    .catch((err) => {
+                        if (isDark)
+                            document.documentElement.classList.add("dark");
+                        showToast("Failed to save image.");
+                    });
+            }
+
+            // --- SETTINGS ACTIONS ---
+            async function deleteMessageUI() {
+                if (!confirm("Delete this message forever?")) return;
+                const msg = currentMessages[currentIndex];
+                await Backend.deleteMessage(
+                    currentUser.handle,
+                    activeMessageId,
+                    msg.files,
+                );
+                if (msg.files) {
+                    for (let i = 0; i < msg.files.length; i++)
+                        localStorage.removeItem(`ngl_file_${msg.id}_${i}`);
+                }
+
+                currentMessages.splice(currentIndex, 1);
+                if (currentMessages.length > 0)
+                    openMessage(
+                        currentMessages[Math.max(0, currentIndex - 1)].id,
+                    );
+                else showView("view-main");
+                renderInbox();
+            }
+
+            function requestNotifs() {
+                if (!("Notification" in window))
+                    return showToast("Not supported in this browser");
+                Notification.requestPermission().then((perm) => {
+                    document.getElementById("notif-status").textContent =
+                        perm === "granted" ? "On" : "Off";
+                    document.getElementById("notif-status").className =
+                        perm === "granted"
+                            ? "text-sm font-bold text-green-500"
+                            : "text-sm font-bold text-gray-400";
+                });
+            }
+
+            function togglePause(el) {
+                currentUser.paused = el.checked;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+                saveProfileToServer();
+            }
+
+            function openHiddenWords() {
+                const existing = JSON.parse(
+                    localStorage.getItem("ngl_filter_" + currentUser.handle) ||
+                        "[]",
+                );
+                document.getElementById("hidden-words-input").value =
+                    existing.join(", ");
+                document
+                    .getElementById("hidden-words-modal")
+                    .classList.remove("hidden");
+                document
+                    .getElementById("hidden-words-modal")
+                    .classList.add("flex");
+            }
+
+            function closeHiddenWords() {
+                document
+                    .getElementById("hidden-words-modal")
+                    .classList.add("hidden");
+                document
+                    .getElementById("hidden-words-modal")
+                    .classList.remove("flex");
+            }
+
+            function saveHiddenWords() {
+                const input =
+                    document.getElementById("hidden-words-input").value;
+                const arr = input
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+                localStorage.setItem(
+                    "ngl_filter_" + currentUser.handle,
+                    JSON.stringify(arr),
+                );
+                updateFilterCount();
+                renderInbox();
+                closeHiddenWords();
+                showToast("Filters saved");
+            }
+
+            function updateFilterCount() {
+                const existing = JSON.parse(
+                    localStorage.getItem("ngl_filter_" + currentUser.handle) ||
+                        "[]",
+                );
+                document.getElementById("filter-count").textContent =
+                    existing.length;
+            }
+
+            async function deleteAccount() {
+                if (
+                    !confirm(
+                        "Are you sure you want to delete your account? This cannot be undone.",
+                    )
+                )
+                    return;
+                if (
+                    window.FIREBASE_CONFIG &&
+                    window.FIREBASE_CONFIG.databaseURL
+                ) {
+                    try {
+                        const appMod =
+                            await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js");
+                        const dbMod =
+                            await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js");
+                        const app = appMod.getApps().length
+                            ? appMod.getApp()
+                            : appMod.initializeApp(window.FIREBASE_CONFIG);
+                        const db = dbMod.getDatabase(app);
+                        await dbMod.remove(
+                            dbMod.ref(db, "profiles/" + currentUser.handle),
+                        );
+                        await dbMod.remove(
+                            dbMod.ref(db, "messages/" + currentUser.handle),
+                        );
+                    } catch (e) {}
+                }
+                localStorage.removeItem(STORAGE_KEY);
+                window.location.reload();
+            }
+        </script>
+    </body>
+</html>

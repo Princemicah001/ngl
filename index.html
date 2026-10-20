@@ -1,84 +1,1742 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>NGL - anonymous q&a | www.nogl.online</title>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Send anonymous messages and receive honest feedback. Get your personal NGL link" />
-    <meta name="keywords" content="NGL, anonymous messages, anonymous Q&A, Instagram story link, honest feedback, send anonymous, nogl" />
-    <meta name="author" content="NGL" />
-    <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#fa0f5c" />
-    <link rel="canonical" href="https://www.nogl.online" />
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
+        <title>NGL - anonymous q&a</title>
+        <meta name="theme-color" content="#ee0e6a" />
+        <meta
+            name="description"
+            content="NGL is a new way to q&a. Get anonymous messages and play q&a games with your friends."
+        />
+        <link rel="icon" href="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png" />
+        <link
+            rel="apple-touch-icon"
+            href="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+        />
+        <link rel="manifest" href="/manifest.json" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Archivo+Black&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                -webkit-tap-highlight-color: transparent;
+                box-sizing: border-box;
+            }
+            html {
+                scroll-behavior: smooth;
+                background: #ee0e6a;
+                min-height: 100%;
+            }
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                font-family:
+                    "Inter",
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                background: linear-gradient(
+                    180deg,
+                    #ee0e6a 0%,
+                    #f70a63 30%,
+                    #ff5734 55%,
+                    #ff6200 75%,
+                    #ff7a1a 100%
+                );
+                background-attachment: fixed;
+                color: #fff;
+                overflow-x: hidden;
+                padding-top: env(safe-area-inset-top, 0px);
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                -webkit-font-smoothing: antialiased;
+                min-height: 100vh;
+            }
+            :root {
+                --pink: #ee0e6a;
+                --pink-2: #f70a63;
+                --pink-3: #f8116d;
+                --orange: #ff6200;
+                --orange-2: #ff7a1a;
+                --pro-1: #fbbf24;
+                --pro-2: #f59e0b;
+                --pro-3: #d97706;
+            }
+            .display {
+                font-family: "Archivo Black", "Inter", sans-serif;
+                font-weight: 900;
+                letter-spacing: -0.055em;
+                line-height: 0.85;
+                text-transform: lowercase;
+            }
+            .display-up {
+                text-transform: none;
+            }
+            .hero-title {
+                font-size: clamp(64px, 13vw, 200px);
+            }
+            .section-title {
+                font-size: clamp(48px, 11vw, 150px);
+            }
 
-    <!-- PWA & Mobile Web App Meta -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#fa0f5c" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="NGL" />
+            /* Full-bleed section gradients */
+            .bg-hero {
+                background: linear-gradient(
+                    180deg,
+                    #ee0e6a 0%,
+                    #f70a63 45%,
+                    #ff5734 75%,
+                    #ff6200 100%
+                );
+            }
+            .bg-play {
+                background: linear-gradient(
+                    180deg,
+                    #ff6200 0%,
+                    #ff5a2e 35%,
+                    #f70a63 75%,
+                    #ee0e6a 100%
+                );
+            }
+            .bg-words {
+                background: linear-gradient(
+                    180deg,
+                    #ee0e6a 0%,
+                    #f70a63 30%,
+                    #ff5734 65%,
+                    #ff6200 100%
+                );
+            }
+            .bg-know {
+                background: linear-gradient(
+                    180deg,
+                    #ff6200 0%,
+                    #ff5734 30%,
+                    #f70a63 65%,
+                    #ee0e6a 100%
+                );
+            }
+            .bg-join {
+                background: linear-gradient(
+                    180deg,
+                    #ee0e6a 0%,
+                    #f70a63 45%,
+                    #ff5734 75%,
+                    #ff6200 100%
+                );
+            }
 
-    <!-- Favicons & App Icons -->
-    <link rel="icon" href="/favicon.png" type="image/png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
-    <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+            /* Ticker */
+            .ticker-wrap {
+                display: flex;
+                overflow: hidden;
+                white-space: nowrap;
+            }
+            .ticker-track {
+                display: inline-flex;
+                flex-shrink: 0;
+                gap: 22px;
+                padding-right: 22px;
+                animation: ticker-slide 55s linear infinite;
+                align-items: center;
+            }
+            @keyframes ticker-slide {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(-100%);
+                }
+            }
+            .ticker-track span {
+                font-weight: 800;
+                font-size: 12px;
+                letter-spacing: -0.02em;
+                color: #fff;
+            }
+            .ticker-track .dot {
+                font-size: 14px;
+                color: #fff;
+                opacity: 0.9;
+            }
 
-    <!-- Open Graph / Facebook / WhatsApp / iMessage / Discord / Telegram -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="NGL" />
-    <meta property="og:url" content="https://www.nogl.online" />
-    <meta property="og:title" content="NGL - anonymous q&amp;a | Send me anonymous messages!" />
-    <meta property="og:description" content="Send anonymous messages and media with 100% privacy. Tap to ask me anything or share your secret thoughts!" />
-    <meta property="og:image" content="https://www.nogl.online/favicon.png" />
-    <meta property="og:image:secure_url" content="https://www.nogl.online/favicon.png" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="512" />
-    <meta property="og:image:height" content="512" />
-    <meta property="og:image:alt" content="NGL - Anonymous Messages &amp; Q&amp;A" />
+            .nav-link {
+                color: #fff;
+                font-weight: 900;
+                font-size: 15px;
+                letter-spacing: -0.02em;
+                text-decoration: none;
+                transition: color 0.25s;
+            }
+            .nav-link:hover {
+                color: #ffd54a;
+            }
+            .ngl-logo-img {
+                filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
+            }
 
-    <!-- Twitter / X Cards -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:domain" content="www.nogl.online" />
-    <meta name="twitter:url" content="https://www.nogl.online" />
-    <meta name="twitter:title" content="NGL - anonymous q&amp;a | Send me anonymous messages!" />
-    <meta name="twitter:description" content="Send anonymous messages and media with 100% privacy. Tap to ask me anything!" />
-    <meta name="twitter:image" content="https://www.nogl.online/favicon.png" />
-    <meta name="twitter:image:src" content="https://www.nogl.online/favicon.png" />
-    <meta name="twitter:image:alt" content="NGL - Anonymous Messages &amp; Q&amp;A" />
+            .pro-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                padding: 4px 10px;
+                border-radius: 9999px;
+                background: linear-gradient(
+                    90deg,
+                    var(--pro-1),
+                    var(--pro-2),
+                    var(--pro-3)
+                );
+                color: #000;
+                font-weight: 900;
+                font-size: 11px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                box-shadow:
+                    0 4px 14px rgba(251, 191, 36, 0.35),
+                    0 0 0 1px rgba(255, 255, 255, 0.15);
+            }
+            .store-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: #000;
+                border-radius: 9999px;
+                padding: 10px 16px;
+                transition: transform 0.2s;
+            }
+            .store-pill:hover {
+                transform: scale(1.04);
+            }
+            .store-pill .divider {
+                width: 1px;
+                height: 18px;
+                background: rgba(255, 255, 255, 0.4);
+            }
+            .cta-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                background: #fff;
+                color: #ff6200;
+                font-family: "Archivo Black", sans-serif;
+                font-weight: 900;
+                font-size: clamp(18px, 1.2rem + 0.6vw, 26px);
+                letter-spacing: -0.03em;
+                text-transform: lowercase;
+                padding: 20px 44px;
+                border-radius: 9999px;
+                text-decoration: none;
+                transition:
+                    transform 0.22s,
+                    box-shadow 0.22s;
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+                cursor: pointer;
+                border: 0;
+            }
+            .cta-pill:hover {
+                transform: scale(1.05);
+            }
+            .cta-pill:active {
+                transform: scale(0.97);
+            }
+            .cta-pill.dark {
+                background: #000;
+                color: #fff;
+            }
 
-    <!-- Schema.org / Google & Messaging Apps fallback -->
-    <meta itemprop="name" content="NGL - anonymous q&amp;a" />
-    <meta itemprop="description" content="Send anonymous messages and media with 100% privacy." />
-    <meta itemprop="image" content="https://www.nogl.online/favicon.png" />
-    <link rel="image_src" href="https://www.nogl.online/favicon.png" />
+            .chat-bubble {
+                display: inline-block;
+                background: #fff;
+                color: #000;
+                font-weight: 800;
+                font-size: clamp(13px, 0.85rem + 0.3vw, 16px);
+                letter-spacing: -0.02em;
+                line-height: 1.15;
+                padding: 12px 20px;
+                border-radius: 22px;
+                position: relative;
+                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+                max-width: 260px;
+            }
+            .chat-bubble::after {
+                content: "";
+                position: absolute;
+                width: 14px;
+                height: 14px;
+                background: #fff;
+                border-radius: 2px;
+                bottom: -5px;
+            }
+            .chat-bubble.left::after {
+                left: 18px;
+                transform: rotate(-20deg);
+            }
+            .chat-bubble.right::after {
+                right: 18px;
+                transform: rotate(20deg);
+            }
 
-    <!-- JSON-LD Structured Data for SEO -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "NGL - anonymous q&a",
-        "url": "https://www.nogl.online",
-        "description": "Send anonymous messages and receive honest feedback with custom links, media attachments, and Instagram story integration.",
-        "applicationCategory": "SocialNetworkingApplication",
-        "operatingSystem": "All",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        }
-      }
-    </script>
+            .float-a {
+                animation: float-a 6s ease-in-out infinite;
+            }
+            .float-b {
+                animation: float-a 5s ease-in-out infinite;
+                animation-delay: -1.6s;
+            }
+            .float-c {
+                animation: float-a 4.4s ease-in-out infinite;
+                animation-delay: -3.1s;
+            }
+            @keyframes float-a {
+                0%,
+                100% {
+                    transform: translateY(0) rotate(var(--rot, 0deg));
+                }
+                50% {
+                    transform: translateY(-12px) rotate(var(--rot, 0deg));
+                }
+            }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lilita+One&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-gradient-to-b from-[#f70a59] to-[#ff6200] min-h-screen text-slate-900 antialiased selection:bg-black selection:text-white">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+            .photo-card {
+                border-radius: 26px;
+                overflow: hidden;
+                display: block;
+                box-shadow:
+                    0 24px 48px rgba(0, 0, 0, 0.5),
+                    0 8px 16px rgba(0, 0, 0, 0.3);
+                background: #111;
+            }
+            .photo-card img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .scroll-indicator {
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 6px;
+                color: #fff;
+                font-weight: 800;
+                font-size: 16px;
+                letter-spacing: -0.02em;
+            }
+
+            /* ===== SCROLL-ANIMATED WORDS ===== */
+            .split-word {
+                display: inline-block;
+                opacity: 0;
+                transform: translateY(60px) rotate(4deg) scale(0.7);
+                transition:
+                    opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+                will-change: transform, opacity;
+            }
+            .split-word.in-view {
+                opacity: 1;
+                transform: translateY(0) rotate(0) scale(1);
+            }
+
+            /* ===== POP-IN ICONS ===== */
+            .pop-icon {
+                opacity: 0;
+                transform: scale(0.3) rotate(var(--rot, 0deg));
+                transition:
+                    opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            .pop-icon.in-view {
+                opacity: 1;
+                transform: scale(1) rotate(var(--rot, 0deg));
+            }
+            /* After pop, resume float */
+            .pop-icon.in-view.float-a {
+                animation: float-a 6s ease-in-out infinite 0.7s;
+            }
+            .pop-icon.in-view.float-b {
+                animation: float-a 5s ease-in-out infinite 0.7s;
+                animation-delay: -1.6s;
+            }
+            .pop-icon.in-view.float-c {
+                animation: float-a 4.4s ease-in-out infinite 0.7s;
+                animation-delay: -3.1s;
+            }
+
+            /* ===== BLACK CURVED SECTION ===== */
+            .dark-band {
+                background: #000;
+                border-top-left-radius: 48px;
+                border-top-right-radius: 48px;
+                border-bottom-left-radius: 48px;
+                border-bottom-right-radius: 48px;
+                margin-left: 12px;
+                margin-right: 12px;
+                position: relative;
+                z-index: 5;
+            }
+            @media (min-width: 768px) {
+                .dark-band {
+                    border-top-left-radius: 72px;
+                    border-top-right-radius: 72px;
+                    border-bottom-left-radius: 72px;
+                    border-bottom-right-radius: 72px;
+                    margin-left: 24px;
+                    margin-right: 24px;
+                }
+            }
+
+            ::selection {
+                background: #000;
+                color: #fff;
+            }
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #000;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #333;
+                border-radius: 9999px;
+            }
+            .no-select {
+                user-select: none;
+                -webkit-user-drag: none;
+                pointer-events: none;
+            }
+
+            /* Install toast */
+            .install-toast {
+                position: fixed;
+                left: 50%;
+                bottom: 24px;
+                transform: translateX(-50%) translateY(120%);
+                background: #fff;
+                color: #000;
+                border-radius: 20px;
+                padding: 14px 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+                z-index: 999;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                max-width: 90vw;
+                transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+                font-weight: 700;
+                font-size: 14px;
+            }
+            .install-toast.show {
+                transform: translateX(-50%) translateY(0);
+            }
+            .install-toast button {
+                background: #000;
+                color: #fff;
+                border: 0;
+                border-radius: 9999px;
+                padding: 8px 16px;
+                font-weight: 800;
+                cursor: pointer;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- HEADER -->
+        <header class="fixed top-0 left-0 right-0 z-50">
+            <div class="ticker-wrap bg-black py-1.5">
+                <div class="ticker-track">
+                    <span>send me your confessions</span
+                    ><span class="dot">•</span> <span>ask me anything</span
+                    ><span class="dot">•</span> <span>not gonna lie</span
+                    ><span class="dot">•</span>
+                    <span>send me a never have I ever</span
+                    ><span class="dot">•</span>
+                    <span>describe me in 3 words</span
+                    ><span class="dot">•</span>
+                    <span>share an opinion that'll get you cancelled</span
+                    ><span class="dot">•</span>
+                    <span>tell me who your crush is</span
+                    ><span class="dot">•</span>
+                </div>
+                <div class="ticker-track" aria-hidden="true">
+                    <span>send me your confessions</span
+                    ><span class="dot">•</span> <span>ask me anything</span
+                    ><span class="dot">•</span> <span>not gonna lie</span
+                    ><span class="dot">•</span>
+                    <span>send me a never have I ever</span
+                    ><span class="dot">•</span>
+                    <span>describe me in 3 words</span
+                    ><span class="dot">•</span>
+                    <span>share an opinion that'll get you cancelled</span
+                    ><span class="dot">•</span>
+                    <span>tell me who your crush is</span
+                    ><span class="dot">•</span>
+                </div>
+            </div>
+
+            <nav
+                class="w-full px-4 sm:px-6 lg:px-10 py-3 sm:py-4 flex items-center justify-between"
+            >
+                <a href="/" class="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <img
+                        src="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                        alt="NGL"
+                        class="ngl-logo-img h-8 sm:h-10 lg:h-12 w-auto object-contain"
+                    />
+                    <span class="pro-badge">
+                        <svg class="w-3 h-3 fill-black" viewBox="0 0 24 24">
+                            <path
+                                d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3H5v-2h14v2z"
+                            />
+                        </svg>
+                        Pro
+                    </span>
+                </a>
+                <div
+                    class="hidden md:flex items-center gap-8 lg:gap-10 absolute left-1/2 -translate-x-1/2"
+                >
+                    <a href="#about" class="nav-link">About</a>
+                    <a href="#safety" class="nav-link">Safety</a>
+                    <a href="#blog" class="nav-link">Blog</a>
+                    <a href="#contact" class="nav-link">Contact us</a>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <a
+                        href="/app.html"
+                        id="nav-account"
+                        class="hidden sm:inline-flex items-center gap-2 bg-white text-black font-black text-xs sm:text-sm px-4 py-2.5 rounded-full hover:scale-105 transition shadow-lg"
+                    >
+                        <svg
+                            class="w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="3"
+                        >
+                            <path
+                                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                            />
+                        </svg>
+                        Get messages
+                    </a>
+                    <div class="store-pill shrink-0 hidden sm:flex">
+                        <a
+                            href="#"
+                            aria-label="App Store"
+                            class="flex items-center"
+                        >
+                            <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                                <path
+                                    d="M17.05 12.53c-.03-2.4 1.96-3.55 2.05-3.6-1.12-1.63-2.86-1.86-3.47-1.88-1.48-.15-2.88.87-3.63.87-.75 0-1.9-.85-3.12-.83-1.61.02-3.1.93-3.93 2.37-1.67 2.9-.43 7.2 1.2 9.55.8 1.16 1.75 2.45 3 2.4 1.2-.05 1.65-.78 3.1-.78s1.86.78 3.13.75c1.29-.02 2.1-1.17 2.9-2.33.9-1.32 1.28-2.6 1.3-2.66-.03-.02-2.5-.96-2.53-3.82zM14.75 5.62c.66-.8 1.1-1.9.98-3-.95.04-2.1.63-2.78 1.42-.61.7-1.14 1.83-1 2.9 1.06.08 2.15-.54 2.8-1.32z"
+                                />
+                            </svg>
+                        </a>
+                        <span class="divider"></span>
+                        <a
+                            href="#"
+                            aria-label="Google Play"
+                            class="flex items-center"
+                        >
+                            <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                                <path
+                                    d="M3.6 2.3c-.24.25-.38.65-.38 1.16v17.07c0 .51.14.91.4 1.15l.06.06L13.2 12.2v-.22L3.66 2.24l-.06.06zm13.3 13.6l-3.7-3.7v-.22l3.7-3.7.08.05 4.38 2.5c1.25.7 1.25 1.86 0 2.57l-4.38 2.5-.08.02zM13.2 12.2l3.72 3.72L4.7 22.9c-.5.28-.96.24-1.32-.06L13.2 12.2zm0-.2L3.4 1.16c.36-.3.82-.34 1.32-.06l12.2 6.96L13.2 12z"
+                                />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- HERO -->
+        <section
+            class="relative bg-hero overflow-hidden pt-32 sm:pt-36 lg:pt-40 pb-32 sm:pb-40 lg:pb-56 min-h-[100svh] flex flex-col justify-center"
+        >
+            <img
+                src="/public/1ojZwN35M1543O3qePxnuoypA9A.png"
+                alt=""
+                data-pop
+                class="pop-icon float-a no-select absolute z-20 w-20 sm:w-28 md:w-36 lg:w-44 left-[4%] sm:left-[6%] md:left-[8%] lg:left-[10%] top-[22%] sm:top-[20%]"
+                style="--rot: -8deg"
+            />
+            <img
+                src="/public/lb7blSnnkBEQMJ7sQMzXUQo6ok.png"
+                alt=""
+                data-pop
+                class="pop-icon float-b no-select absolute z-20 w-20 sm:w-28 md:w-36 lg:w-44 right-[4%] sm:right-[6%] md:right-[8%] lg:right-[10%] top-[22%] sm:top-[20%]"
+                style="--rot: 12deg"
+            />
+            <img
+                src="/public/9Zn10awOegDDlupSZubQ1vQ0c.png"
+                alt=""
+                data-pop
+                class="pop-icon float-c no-select absolute z-20 w-20 sm:w-24 md:w-32 lg:w-40 left-[6%] sm:left-[8%] md:left-[10%] top-[62%] sm:top-[60%]"
+                style="--rot: -3deg"
+            />
+
+            <div
+                class="photo-card float-a no-select absolute z-10 hidden sm:block w-28 sm:w-32 md:w-40 lg:w-48 aspect-[3/4] left-[2%] sm:left-[3%] md:left-[5%] bottom-[6%]"
+                style="--rot: -7deg"
+            >
+                <img src="/public/jdTxRdllkie3eF2vOBncxQwIr4.png" alt="" />
+            </div>
+            <div
+                class="photo-card float-b no-select absolute z-10 hidden sm:block w-28 sm:w-32 md:w-40 lg:w-48 aspect-[3/4] right-[2%] sm:right-[3%] md:right-[5%] bottom-[6%]"
+                style="--rot: 7deg"
+            >
+                <img src="/public/Ok7TXTFvuZmj5ehhe3vc1x4XDk.png" alt="" />
+            </div>
+
+            <div class="relative z-30 max-w-5xl mx-auto px-5 text-center">
+                <h1 class="display hero-title text-white" data-split-words>
+                    real<br />friends<br />real fun
+                </h1>
+                <div
+                    class="mt-8 sm:mt-12 flex flex-col sm:flex-row justify-center gap-3 sm:gap-4"
+                >
+                    <button id="install-btn" class="cta-pill">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path
+                                d="M12 3v14m0 0l-5-5m5 5l5-5"
+                                stroke="#ff6200"
+                                stroke-width="2.5"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                fill="none"
+                            />
+                        </svg>
+                        Download the app!
+                    </button>
+                    <a href="/app.html" class="cta-pill dark">
+                        Get messages
+                        <svg
+                            class="w-5 h-5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#fff"
+                            stroke-width="2.5"
+                        >
+                            <path
+                                d="M5 12h14M12 5l7 7-7 7"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    </a>
+                </div>
+                <div class="mt-10 sm:mt-14 flex justify-center">
+                    <div class="scroll-indicator">
+                        <svg
+                            class="w-6 h-6 stroke-white"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                        >
+                            <path d="M12 4v16m0 0l-6-6m6 6l6-6" />
+                        </svg>
+                        <span>Scroll for more</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PLAY Q&A (black curved band) -->
+        <section id="about" class="relative py-28 sm:py-36 lg:py-44">
+            <div class="dark-band py-16 sm:py-20 lg:py-24 overflow-hidden">
+                <div class="relative z-10 max-w-4xl mx-auto px-5 text-center">
+                    <div
+                        class="flex flex-wrap justify-center gap-4 mb-10 sm:mb-14"
+                    >
+                        <div
+                            class="chat-bubble left"
+                            style="transform: rotate(-3deg)"
+                        >
+                            You're a genius, flawless, iconic
+                        </div>
+                    </div>
+                    <h2
+                        class="display section-title text-white"
+                        data-split-words
+                    >
+                        play q&amp;a<br />games
+                    </h2>
+                    <ul
+                        class="mt-12 sm:mt-16 flex flex-col items-center gap-3 sm:gap-4"
+                    >
+                        <li>
+                            <a
+                                href="#"
+                                class="display display-up block text-white text-[clamp(24px,5.5vw,72px)] hover:text-[#ff6200] transition-colors"
+                                >ask me anything</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="#"
+                                class="display display-up block text-white text-[clamp(24px,5.5vw,72px)] hover:text-[#ff6200] transition-colors"
+                                >never have i ever</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="#"
+                                class="display display-up block text-white text-[clamp(24px,5.5vw,72px)] hover:text-[#ff6200] transition-colors"
+                                >confessions</a
+                            >
+                        </li>
+                        <li>
+                            <a
+                                href="#"
+                                class="display display-up block text-white text-[clamp(24px,5.5vw,72px)] hover:text-[#ff6200] transition-colors"
+                                >3 words</a
+                            >
+                        </li>
+                    </ul>
+                    <div
+                        class="mt-14 sm:mt-20 flex flex-col items-start gap-4 max-w-md mx-auto"
+                    >
+                        <div
+                            class="chat-bubble left"
+                            style="transform: rotate(1deg)"
+                        >
+                            You're funny, sheesh, hype
+                        </div>
+                        <div
+                            class="chat-bubble right self-end"
+                            style="transform: rotate(-2deg)"
+                        >
+                            You're bff, boujee, simp
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3 WORDS -->
+        <section
+            id="blog"
+            class="relative bg-words overflow-hidden py-28 sm:py-36 lg:py-44"
+        >
+            <div class="max-w-4xl mx-auto px-5 text-center">
+                <div class="flex justify-center mb-8">
+                    <div
+                        class="chat-bubble left"
+                        style="transform: rotate(-4deg)"
+                    >
+                        smart, funny, lit
+                    </div>
+                </div>
+                <h2 class="display section-title text-white" data-split-words>
+                    3 words
+                </h2>
+                <div
+                    class="mt-12 sm:mt-16 flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory justify-start sm:justify-center"
+                >
+                    <article
+                        class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
+                        style="transform: rotate(-2deg)"
+                    >
+                        <span
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                            >3 words</span
+                        >
+                        <p
+                            class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
+                        >
+                            smart, funny, lit
+                        </p>
+                        <span
+                            class="block mt-4 text-xs font-bold text-slate-400"
+                            >— anonymous</span
+                        >
+                    </article>
+                    <article
+                        class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
+                        style="transform: rotate(1.5deg)"
+                    >
+                        <span
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                            >3 words</span
+                        >
+                        <p
+                            class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
+                        >
+                            stunning, radiant, kind
+                        </p>
+                        <span
+                            class="block mt-4 text-xs font-bold text-slate-400"
+                            >— anonymous</span
+                        >
+                    </article>
+                    <article
+                        class="shrink-0 snap-center w-[240px] sm:w-[280px] bg-white rounded-[28px] p-6 text-left shadow-2xl"
+                        style="transform: rotate(-1.5deg)"
+                    >
+                        <span
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400"
+                            >3 words</span
+                        >
+                        <p
+                            class="display display-up text-black text-2xl sm:text-3xl mt-2 leading-tight"
+                        >
+                            chaotic, brilliant, warm
+                        </p>
+                        <span
+                            class="block mt-4 text-xs font-bold text-slate-400"
+                            >— anonymous</span
+                        >
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- GET TO KNOW -->
+        <section
+            id="safety"
+            class="relative bg-know overflow-hidden py-28 sm:py-36 lg:py-44"
+        >
+            <div class="relative z-10 max-w-6xl mx-auto px-5 text-center">
+                <h2 class="display section-title text-white" data-split-words>
+                    get to know
+                </h2>
+                <div class="my-10 sm:my-14 flex justify-center">
+                    <div
+                        class="chat-bubble left"
+                        style="transform: rotate(-2deg)"
+                    >
+                        Who's your best friend?
+                    </div>
+                </div>
+                <h2 class="display section-title text-white" data-split-words>
+                    your friends
+                </h2>
+                <img
+                    src="/public/KIHJNCllq4hXkrhDsSlNXXJKo0.png"
+                    alt=""
+                    data-pop
+                    class="pop-icon float-a no-select absolute w-16 sm:w-20 md:w-28 left-[4%] sm:left-[6%] md:left-[8%] top-[22%]"
+                    style="--rot: -18deg"
+                />
+                <img
+                    src="/public/i7tfa9iMXfDY9eQQLdPpJzwIAdU.png"
+                    alt=""
+                    data-pop
+                    class="pop-icon float-b no-select absolute w-16 sm:w-20 md:w-28 right-[4%] sm:right-[6%] md:right-[8%] top-[26%]"
+                    style="--rot: 15deg"
+                />
+                <img
+                    src="/public/60xKPbSxymtSc475jnSbvuOgh6Y.png"
+                    alt=""
+                    data-pop
+                    class="pop-icon float-c no-select absolute w-16 sm:w-24 md:w-32 left-[6%] sm:left-[10%] md:left-[12%] bottom-[10%]"
+                    style="--rot: 6deg"
+                />
+                <img
+                    src="/public/wNwzlleA6uzU0Xk7TO32UzbNQA.png"
+                    alt=""
+                    data-pop
+                    class="pop-icon float-a no-select absolute w-16 sm:w-20 md:w-28 right-[6%] sm:right-[10%] md:right-[12%] bottom-[12%]"
+                    style="--rot: -22deg"
+                />
+            </div>
+        </section>
+
+        <!-- JOIN -->
+        <section
+            id="contact"
+            class="relative bg-join overflow-hidden py-28 sm:py-36 lg:py-44"
+        >
+            <div
+                class="relative z-10 max-w-3xl mx-auto px-5 flex flex-col items-center text-center"
+            >
+                <h2
+                    class="display section-title text-white mb-12 sm:mb-16"
+                    data-split-words
+                >
+                    join<br />the fun
+                </h2>
+                <div
+                    class="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-8"
+                >
+                    <img
+                        src="/public/60xKPbSxymtSc475jnSbvuOgh6Y.png"
+                        alt=""
+                        data-pop
+                        class="pop-icon float-a no-select w-20 sm:w-28 md:w-36 lg:w-44"
+                    />
+                    <div
+                        class="bg-white rounded-[26px] p-3 sm:p-4 shadow-2xl border-[3px] border-white/60"
+                        style="
+                            width: clamp(180px, 30vw, 240px);
+                            height: clamp(180px, 30vw, 240px);
+                            position: relative;
+                        "
+                    >
+                        <svg
+                            viewBox="0 0 29 29"
+                            shape-rendering="crispEdges"
+                            style="width: 100%; height: 100%; display: block"
+                            aria-label="QR"
+                        >
+                            <rect width="29" height="29" fill="#fff" />
+                            <rect
+                                x="0"
+                                y="0"
+                                width="7"
+                                height="7"
+                                fill="#000"
+                            />
+                            <rect
+                                x="1"
+                                y="1"
+                                width="5"
+                                height="5"
+                                fill="#fff"
+                            />
+                            <rect
+                                x="2"
+                                y="2"
+                                width="3"
+                                height="3"
+                                fill="#000"
+                            />
+                            <rect
+                                x="22"
+                                y="0"
+                                width="7"
+                                height="7"
+                                fill="#000"
+                            />
+                            <rect
+                                x="23"
+                                y="1"
+                                width="5"
+                                height="5"
+                                fill="#fff"
+                            />
+                            <rect
+                                x="24"
+                                y="2"
+                                width="3"
+                                height="3"
+                                fill="#000"
+                            />
+                            <rect
+                                x="0"
+                                y="22"
+                                width="7"
+                                height="7"
+                                fill="#000"
+                            />
+                            <rect
+                                x="1"
+                                y="23"
+                                width="5"
+                                height="5"
+                                fill="#fff"
+                            />
+                            <rect
+                                x="2"
+                                y="24"
+                                width="3"
+                                height="3"
+                                fill="#000"
+                            />
+                            <rect
+                                x="9"
+                                y="0"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="11"
+                                y="1"
+                                width="1"
+                                height="2"
+                                fill="#000"
+                            />
+                            <rect
+                                x="13"
+                                y="1"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="15"
+                                y="0"
+                                width="1"
+                                height="2"
+                                fill="#000"
+                            />
+                            <rect
+                                x="18"
+                                y="1"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="19"
+                                y="0"
+                                width="1"
+                                height="2"
+                                fill="#000"
+                            />
+                            <rect
+                                x="0"
+                                y="9"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="2"
+                                y="10"
+                                width="2"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="6"
+                                y="9"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="9"
+                                y="9"
+                                width="2"
+                                height="2"
+                                fill="#000"
+                            />
+                            <rect
+                                x="13"
+                                y="10"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="15"
+                                y="9"
+                                width="1"
+                                height="2"
+                                fill="#000"
+                            />
+                            <rect
+                                x="17"
+                                y="10"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="19"
+                                y="9"
+                                width="2"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="22"
+                                y="9"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="24"
+                                y="10"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="26"
+                                y="9"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="0"
+                                y="13"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="2"
+                                y="14"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="4"
+                                y="13"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="6"
+                                y="14"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="9"
+                                y="13"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="11"
+                                y="14"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="13"
+                                y="13"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="15"
+                                y="14"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="17"
+                                y="13"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="19"
+                                y="14"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="21"
+                                y="13"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="23"
+                                y="14"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="25"
+                                y="13"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="27"
+                                y="14"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="9"
+                                y="17"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="11"
+                                y="16"
+                                width="1"
+                                height="2"
+                                fill="#000"
+                            />
+                            <rect
+                                x="13"
+                                y="17"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="15"
+                                y="16"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="17"
+                                y="17"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="19"
+                                y="16"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="21"
+                                y="17"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="23"
+                                y="16"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="25"
+                                y="17"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="9"
+                                y="20"
+                                width="2"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="14"
+                                y="19"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="16"
+                                y="20"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="18"
+                                y="19"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="20"
+                                y="20"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="22"
+                                y="19"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="24"
+                                y="20"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="26"
+                                y="19"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="28"
+                                y="20"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="9"
+                                y="22"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="10"
+                                y="23"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="11"
+                                y="24"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="13"
+                                y="22"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="14"
+                                y="23"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="15"
+                                y="24"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="17"
+                                y="22"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="18"
+                                y="23"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="19"
+                                y="24"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="21"
+                                y="22"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="22"
+                                y="23"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="23"
+                                y="24"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="25"
+                                y="22"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="26"
+                                y="23"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                            <rect
+                                x="27"
+                                y="24"
+                                width="1"
+                                height="1"
+                                fill="#000"
+                            />
+                        </svg>
+                        <div
+                            style="
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                width: 22%;
+                                height: 22%;
+                                border-radius: 50%;
+                                background: #fff;
+                                padding: 4px;
+                                box-shadow: 0 0 0 3px #fff;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                            "
+                        >
+                            <img
+                                src="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                                alt="NGL"
+                                style="
+                                    width: 100%;
+                                    height: 100%;
+                                    object-fit: contain;
+                                "
+                            />
+                        </div>
+                    </div>
+                    <img
+                        src="/public/wNwzlleA6uzU0Xk7TO32UzbNQA.png"
+                        alt=""
+                        data-pop
+                        class="pop-icon float-b no-select w-20 sm:w-28 md:w-36 lg:w-44"
+                    />
+                </div>
+                <div
+                    class="mt-14 sm:mt-20 flex flex-col sm:flex-row justify-center gap-3"
+                >
+                    <button id="install-btn-2" class="cta-pill">
+                        Install app
+                    </button>
+                    <a href="/app.html" class="cta-pill dark">Get Questions!</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="relative bg-black">
+            <div class="max-w-6xl mx-auto px-5 sm:px-8 lg:px-12 py-10 sm:py-14">
+                <div
+                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-8"
+                >
+                    <a href="/" class="flex items-center gap-3 shrink-0">
+                        <img
+                            src="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                            alt="NGL"
+                            class="h-10 sm:h-12 w-auto object-contain"
+                        />
+                        <span class="pro-badge">
+                            <svg class="w-3 h-3 fill-black" viewBox="0 0 24 24">
+                                <path
+                                    d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3H5v-2h14v2z"
+                                />
+                            </svg>
+                            Pro
+                        </span>
+                    </a>
+                    <div class="flex flex-wrap items-center gap-x-8 gap-y-3">
+                        <a href="#about" class="nav-link">About</a>
+                        <a href="#safety" class="nav-link">Safety</a>
+                        <a href="#blog" class="nav-link">Blog</a>
+                        <a href="#contact" class="nav-link">Contact us</a>
+                    </div>
+                    <div class="store-pill shrink-0">
+                        <a
+                            href="#"
+                            aria-label="App Store"
+                            class="flex items-center"
+                            ><svg
+                                class="w-5 h-5 fill-white"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M17.05 12.53c-.03-2.4 1.96-3.55 2.05-3.6-1.12-1.63-2.86-1.86-3.47-1.88-1.48-.15-2.88.87-3.63.87-.75 0-1.9-.85-3.12-.83-1.61.02-3.1.93-3.93 2.37-1.67 2.9-.43 7.2 1.2 9.55.8 1.16 1.75 2.45 3 2.4 1.2-.05 1.65-.78 3.1-.78s1.86.78 3.13.75c1.29-.02 2.1-1.17 2.9-2.33.9-1.32 1.28-2.6 1.3-2.66-.03-.02-2.5-.96-2.53-3.82zM14.75 5.62c.66-.8 1.1-1.9.98-3-.95.04-2.1.63-2.78 1.42-.61.7-1.14 1.83-1 2.9 1.06.08 2.15-.54 2.8-1.32z"
+                                /></svg
+                        ></a>
+                        <span class="divider"></span>
+                        <a
+                            href="#"
+                            aria-label="Google Play"
+                            class="flex items-center"
+                            ><svg
+                                class="w-5 h-5 fill-white"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    d="M3.6 2.3c-.24.25-.38.65-.38 1.16v17.07c0 .51.14.91.4 1.15l.06.06L13.2 12.2v-.22L3.66 2.24l-.06.06zm13.3 13.6l-3.7-3.7v-.22l3.7-3.7.08.05 4.38 2.5c1.25.7 1.25 1.86 0 2.57l-4.38 2.5-.08.02zM13.2 12.2l3.72 3.72L4.7 22.9c-.5.28-.96.24-1.32-.06L13.2 12.2zm0-.2L3.4 1.16c.36-.3.82-.34 1.32-.06l12.2 6.96L13.2 12z"
+                                /></svg
+                        ></a>
+                    </div>
+                </div>
+                <div
+                    class="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                >
+                    <div class="flex items-center gap-6">
+                        <a
+                            href="#"
+                            class="nav-link text-white/70 hover:text-white"
+                            >Terms of Service</a
+                        >
+                        <a
+                            href="#"
+                            class="nav-link text-white/70 hover:text-white"
+                            >Privacy Policy</a
+                        >
+                    </div>
+                    <p class="text-white/50 text-xs font-bold">
+                        Made with love in Venice ❤
+                    </p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Install toast -->
+        <div class="install-toast" id="installToast">
+            <span id="installToastMsg"
+                >Install NGL for the best experience?</span
+            >
+            <button id="installToastBtn">Install</button>
+        </div>
+
+        <script>
+
+                    /* =====================================================
+                       REDIRECT IF INSTALLED (PWA)
+                    ===================================================== */
+                    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+                        window
+                        /* =====================================================
+               SPLIT WORDS — scroll-triggered word reveal
+            ===================================================== */
+                        document.querySelectorAll("[data-split-words]").forEach((el) => {
+                            const html = el.innerHTML;
+                            // Preserve <br/> tags, split remaining text into words
+                            const parts = html.split(/(<br\s*\/?>)/i);
+                            el.innerHTML = parts
+                                .map((part) => {
+                                    if (/<br/i.test(part)) return part;
+                                    return part
+                                        .split(/(\s+)/)
+                                        .map((tok) => {
+                                            if (!tok.trim()) return tok;
+                                            return `<span class="split-word">${tok}</span>`;
+                                        })
+                                        .join("");
+                                })
+                                .join("");
+                        });
+
+                        const wordObs = new IntersectionObserver(
+                            (entries) => {
+                                entries.forEach((entry) => {
+                                    if (entry.isIntersecting) {
+                                        const words =
+                                            entry.target.querySelectorAll(".split-word");
+                                        words.forEach((w, i) => {
+                                            setTimeout(
+                                                () => w.classList.add("in-view"),
+                                                i * 80,
+                                            );
+                                        });
+                                        wordObs.unobserve(entry.target);
+                                    }
+                                });
+                            },
+                            { threshold: 0.15 },
+                        );
+
+                        document
+                            .querySelectorAll("[data-split-words]")
+                            .forEach((el) => wordObs.observe(el));
+
+                        /* =====================================================
+               POP-IN ICONS
+            ===================================================== */
+                        const popObs = new IntersectionObserver(
+                            (entries) => {
+                                entries.forEach((entry) => {
+                                    if (entry.isIntersecting) {
+                                        entry.target.classList.add("in-view");
+                                        popObs.unobserve(entry.target);
+                                    }
+                                });
+                            },
+                            { threshold: 0.1 },
+                        );
+
+                        document
+                            .querySelectorAll("[data-pop]")
+                            .forEach((el) => popObs.observe(el));
+
+                        /* =====================================================
+               SMOOTH ANCHORS
+            ===================================================== */
+                        document.querySelectorAll('a[href^="#"]').forEach((a) => {
+                            a.addEventListener("click", (e) => {
+                                const id = a.getAttribute("href").slice(1);
+                                const el = document.getElementById(id);
+                                if (el) {
+                                    e.preventDefault();
+                                    el.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "start",
+                                    });
+                                }
+                            });
+                        });
+
+                        /* =====================================================
+               PWA — register service worker
+            ===================================================== */
+                        if ("serviceWorker" in navigator) {
+                            window.addEventListener("load", () => {
+                                navigator.serviceWorker
+                                    .register("/sw.js")
+                                    .catch((e) => console.warn("SW reg failed", e));
+                            });
+                        }
+
+                        /* =====================================================
+               PWA — install prompt
+            ===================================================== */
+                        let deferredPrompt = null;
+                        window.addEventListener("beforeinstallprompt", (e) => {
+                            e.preventDefault();
+                            deferredPrompt = e;
+                        });
+
+                        async function triggerInstall() {
+                            if (deferredPrompt) {
+                                deferredPrompt.prompt();
+                                const { outcome } = await deferredPrompt.userChoice;
+                                deferredPrompt = null;
+                                if (outcome === "accepted") {
+                                    showToast("Installing NGL…", null);
+                                } else {
+                                    showToast(
+                                        "You can install later from the browser menu",
+                                        null,
+                                    );
+                                }
+                                return;
+                            }
+
+                            // Already installed?
+                            if (
+                                window.matchMedia("(display-mode: standalone)").matches ||
+                                window.navigator.standalone
+                            ) {
+                                showToast(
+                                    "App is already installed — opening inbox…",
+                                    null,
+                                );
+                                setTimeout(() => (location.href = "/app.html"), 1200);
+                                return;
+                            }
+
+                            // Not installable (no HTTPS, unsupported browser, etc.)
+                            const isSecure =
+                                location.protocol === "https:" ||
+                                location.hostname === "localhost";
+                            if (!isSecure) {
+                                showToast(
+                                    "PWA install requires HTTPS. Opening inbox in browser instead…",
+                                    null,
+                                );
+                                setTimeout(() => (location.href = "/app.html"), 1600);
+                                return;
+                            }
+
+                            showToast('Use your browser menu → "Add to Home Screen"', null);
+                        }
+
+                        function showToast(msg, actionLabel, onClick) {
+                            const t = document.getElementById("installToast");
+                            const btn = document.getElementById("installToastBtn");
+                            document.getElementById("installToastMsg").textContent = msg;
+                            if (actionLabel) {
+                                btn.style.display = "inline-flex";
+                                btn.textContent = actionLabel;
+                                btn.onclick = () => {
+                                    onClick && onClick();
+                                    t.classList.remove("show");
+                                };
+                            } else {
+                                btn.style.display = "none";
+                            }
+                            t.classList.add("show");
+                            clearTimeout(showToast._t);
+                            showToast._t = setTimeout(
+                                () => t.classList.remove("show"),
+                                5000,
+                            );
+                        }
+
+                        document
+                            .getElementById("install-btn")
+                            .addEventListener("click", triggerInstall);
+                        document
+                            .getElementById("install-btn-2")
+                            .addEventListener("click", triggerInstall);
+
+                        /* =====================================================
+               Nav — show account button if profile exists
+            ===================================================== */
+                        (function navAccount() {
+                            try {
+                                const raw = localStorage.getItem("ngl_profile");
+                                if (raw) {
+                                    const p = JSON.parse(raw);
+                                    if (p && p.handle) {
+                                        const btn = document.getElementById("nav-account");
+                                        btn.classList.remove("hidden");
+                                        btn.innerHTML = `
+                      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      @${p.handle}
+                    `;
+                                    }
+                                }
+                            } catch (e) {}
+                        })();
+        </script>
+    </body>
 </html>

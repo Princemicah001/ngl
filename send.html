@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
+        <title>Send anonymous message - NGL</title>
+        <meta name="theme-color" content="#fa0f5c" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                -webkit-tap-highlight-color: transparent;
+                box-sizing: border-box;
+            }
+            html,
+            body {
+                min-height: 100dvh;
+                margin: 0;
+                padding: 0;
+            }
+            body {
+                font-family:
+                    "Inter",
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                background: linear-gradient(
+                    180deg,
+                    #e60067 0%,
+                    #fa0f5c 50%,
+                    #ff6600 100%
+                );
+                padding-top: env(safe-area-inset-top, 0px);
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+                overflow-x: hidden;
+            }
+        </style>
+    </head>
+    <body
+        class="flex flex-col items-center justify-center min-h-screen px-4 text-slate-900 antialiased"
+    >
+        <div
+            id="loading"
+            class="text-white font-bold text-xl flex items-center gap-3"
+        >
+            <div
+                class="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"
+            ></div>
+            Loading...
+        </div>
+
+        <div
+            id="error-view"
+            class="hidden w-full max-w-sm bg-white rounded-[32px] p-8 text-center shadow-2xl flex-col items-center"
+        >
+            <span class="text-6xl mb-4">⚠️</span>
+            <h2 class="text-2xl font-black text-slate-900 mb-2">
+                User Not Found
+            </h2>
+            <p class="text-slate-500 font-medium mb-6">
+                This link is invalid or the user has deleted their account.
+            </p>
+            <a
+                href="/"
+                class="w-full bg-black text-white font-black py-4 rounded-full block"
+                >Get your own link</a
+            >
+        </div>
+
+        <div
+            id="paused-view"
+            class="hidden w-full max-w-sm bg-white rounded-[32px] p-8 text-center shadow-2xl flex-col items-center"
+        >
+            <span class="text-6xl mb-4">⏸️</span>
+            <h2 class="text-2xl font-black text-slate-900 mb-2">Link Paused</h2>
+            <p class="text-slate-500 font-medium mb-6">
+                This user has temporarily paused their anonymous messages.
+            </p>
+            <a
+                href="/"
+                class="w-full bg-black text-white font-black py-4 rounded-full block"
+                >Get your own link</a
+            >
+        </div>
+
+        <div
+            id="sender-wrap"
+            class="hidden w-full max-w-[340px] sm:max-w-md flex-col items-center"
+        >
+            <form
+                id="send-form"
+                class="w-full bg-white rounded-[32px] shadow-2xl flex flex-col overflow-hidden mb-4"
+            >
+                <div
+                    class="bg-gradient-to-r from-[#fa0f5c] to-[#ff5100] p-6 flex items-center gap-4"
+                >
+                    <div
+                        class="w-16 h-16 rounded-full bg-white p-1 shadow-md flex items-center justify-center overflow-hidden flex-shrink-0"
+                    >
+                        <img
+                            id="avatar-img"
+                            class="w-full h-full rounded-full object-cover hidden"
+                        />
+                        <div
+                            id="avatar-fallback"
+                            class="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-2xl"
+                        >
+                            U
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 text-left">
+                        <p
+                            id="recipient-handle"
+                            class="text-white/80 text-sm font-bold truncate"
+                        ></p>
+                        <h2
+                            id="recipient-prompt"
+                            class="text-white font-extrabold text-xl leading-tight mt-0.5"
+                        ></h2>
+                    </div>
+                </div>
+
+                <div class="p-5 flex flex-col gap-4">
+                    <div
+                        class="bg-[#f4f5f8] rounded-[24px] p-4 flex flex-col justify-between min-h-[160px]"
+                    >
+                        <textarea
+                            id="msg-input"
+                            placeholder="Type your anonymous message..."
+                            maxlength="500"
+                            rows="4"
+                            class="w-full text-lg font-bold text-slate-800 placeholder:text-[#a0abbd] placeholder:font-medium bg-transparent border-0 outline-none resize-none leading-relaxed"
+                        ></textarea>
+                        <div
+                            id="attach-list"
+                            class="flex flex-col gap-2 mt-2"
+                        ></div>
+                    </div>
+
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-bold text-slate-400"
+                            >Attach files</span
+                        >
+                        <button
+                            type="button"
+                            id="attach-btn"
+                            class="flex items-center gap-1.5 text-sm font-extrabold text-black bg-[#dce2ec] hover:bg-[#cfd7e3] px-4 py-2 rounded-full transition-all active:scale-95"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                            >
+                                <path
+                                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                                />
+                            </svg>
+                            Attach
+                        </button>
+                        <input
+                            id="file-input"
+                            type="file"
+                            multiple
+                            class="hidden"
+                        />
+                    </div>
+                </div>
+            </form>
+
+            <button
+                id="send-btn"
+                class="w-full bg-black text-white font-extrabold text-xl py-4 rounded-full shadow-xl active:scale-95 transition-all mb-4"
+            >
+                Send!
+            </button>
+            <p
+                id="char-count"
+                class="text-white/80 font-bold text-sm tracking-wider text-center mb-6"
+            >
+                0/500
+            </p>
+
+            <div class="flex flex-col items-center">
+                <img
+                    src="/public/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
+                    alt="NGL"
+                    class="h-10 w-auto object-contain drop-shadow-md"
+                    onerror="this.style.display = 'none'"
+                />
+                <span class="text-white font-black text-sm mt-2"
+                    >anonymous q&a</span
+                >
+            </div>
+        </div>
+
+        <div
+            id="success-view"
+            class="hidden w-full max-w-sm flex-col items-center"
+        >
+            <div
+                class="w-full bg-white rounded-[32px] p-8 text-center shadow-2xl flex flex-col items-center"
+            >
+                <div
+                    class="w-20 h-20 bg-gradient-to-tr from-[#fa0f5c] to-[#fc6320] rounded-full flex items-center justify-center text-white mb-6 shadow-lg"
+                >
+                    <svg
+                        class="w-10 h-10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                    >
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                </div>
+                <h2
+                    class="text-3xl font-black text-slate-900 mb-2 lowercase tracking-tight"
+                >
+                    sent anonymously!
+                </h2>
+                <p id="success-to" class="text-slate-500 font-medium mb-8"></p>
+                <button
+                    id="send-another-btn"
+                    class="w-full bg-black text-white font-extrabold text-lg py-4 rounded-full shadow-md active:scale-95 transition-transform mb-3"
+                >
+                    Send Another
+                </button>
+                <a
+                    href="/"
+                    class="w-full bg-slate-100 text-slate-800 font-bold py-4 rounded-full text-sm text-center block active:scale-95 transition-transform"
+                    >Get your own NGL link</a
+                >
+            </div>
+        </div>
+
+        <script src="/firebase-config.js"></script>
+        <script src="/backend.js"></script>
+        <script>
+            const params = new URLSearchParams(location.search);
+            const targetHandle = (params.get("to") || "")
+                .trim()
+                .toLowerCase()
+                .replace(/^@/, "");
+            let recipient = null;
+            let files = [];
+            const $ = (id) => document.getElementById(id);
+
+            if (!targetHandle) window.location.href = "/";
+
+            (async function () {
+                await Backend.init();
+
+                try {
+                    recipient = await Backend.getProfile(targetHandle);
+                } catch (e) {}
+
+                if (!recipient) {
+                    $("loading").classList.add("hidden");
+                    $("error-view").classList.remove("hidden");
+                    $("error-view").classList.add("flex");
+                    return;
+                }
+
+                $("loading").classList.add("hidden");
+
+                if (recipient.paused) {
+                    $("paused-view").classList.remove("hidden");
+                    $("paused-view").classList.add("flex");
+                    return;
+                }
+
+                $("sender-wrap").classList.remove("hidden");
+                $("sender-wrap").classList.add("flex");
+
+                $("recipient-handle").textContent = "@" + recipient.handle;
+                $("recipient-prompt").textContent =
+                    recipient.prompt || "send me anonymous messages!";
+
+                if (recipient.photoURL) {
+                    $("avatar-img").src = recipient.photoURL;
+                    $("avatar-img").classList.remove("hidden");
+                    $("avatar-fallback").classList.add("hidden");
+                } else {
+                    $("avatar-fallback").textContent = (
+                        recipient.handle[0] || "U"
+                    ).toUpperCase();
+                }
+
+                $("msg-input").addEventListener("input", (e) => {
+                    $("char-count").textContent =
+                        e.target.value.length + "/500";
+                });
+
+                $("attach-btn").addEventListener("click", () =>
+                    $("file-input").click(),
+                );
+                $("file-input").addEventListener("change", async (e) => {
+                    for (const file of Array.from(e.target.files)) {
+                        if (file.size > 3 * 1024 * 1024) {
+                            // 3MB limit for RTDB chunking safety
+                            alert(file.name + " is too large (max 3MB).");
+                            continue;
+                        }
+                        const dataURL = await readFileAsDataURL(file);
+                        files.push({
+                            id:
+                                Date.now() +
+                                "_" +
+                                Math.random().toString(36).slice(2, 7),
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            dataURL,
+                        });
+                    }
+                    e.target.value = "";
+                    renderFiles();
+                });
+
+                function readFileAsDataURL(file) {
+                    return new Promise((res, rej) => {
+                        const r = new FileReader();
+                        r.onload = () => res(r.result);
+                        r.onerror = rej;
+                        r.readAsDataURL(file);
+                    });
+                }
+
+                function renderFiles() {
+                    $("attach-list").innerHTML = files
+                        .map(
+                            (f, i) => `
+          <div class="bg-white rounded-xl p-2 flex items-center gap-3 border border-slate-100">
+            ${f.type.startsWith("image/") ? `<img src="${f.dataURL}" class="w-10 h-10 rounded-lg object-cover" />` : '<div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">📎</div>'}
+            <div class="flex-1 min-w-0 text-left">
+              <p class="text-xs font-bold truncate">${f.name}</p>
+            </div>
+            <button type="button" data-i="${i}" class="remove-file p-1.5 rounded-full bg-slate-100 hover:bg-red-100 text-black">✕</button>
+          </div>
+        `,
+                        )
+                        .join("");
+                    document.querySelectorAll(".remove-file").forEach((b) => {
+                        b.addEventListener("click", () => {
+                            files.splice(parseInt(b.dataset.i), 1);
+                            renderFiles();
+                        });
+                    });
+                }
+
+                $("send-btn").addEventListener("click", async () => {
+                    const text = $("msg-input").value.trim();
+                    if (!text && files.length === 0) return;
+
+                    $("send-btn").textContent = "Chunking & Sending…";
+                    $("send-btn").disabled = true;
+
+                    try {
+                        await Backend.sendMessage(targetHandle, {
+                            text: text.slice(0, 500),
+                            files,
+                        });
+
+                        $("sender-wrap").classList.add("hidden");
+                        $("sender-wrap").classList.remove("flex");
+                        $("success-to").textContent =
+                            "@" + recipient.handle + " received your message.";
+                        $("success-view").classList.remove("hidden");
+                        $("success-view").classList.add("flex");
+                    } catch (e) {
+                        console.error(e);
+                        alert("Failed to send. Please try again.");
+                        $("send-btn").textContent = "Send!";
+                        $("send-btn").disabled = false;
+                    }
+                });
+
+                $("send-another-btn").addEventListener("click", () =>
+                    location.reload(),
+                );
+            })();
+        </script>
+    </body>
+</html>
