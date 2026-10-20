@@ -1,222 +1,281 @@
-// backend.js — BROWSER module. Do NOT run with `node backend.js`.
-window.Backend = (function () {
-  const cfg = window.FIREBASE_CONFIG || {};
-  let rtdb = null,
-    api = null;
-  let isReady = false;
-  let useLocalApi = false;
-  const CHUNK_SIZE = 80000;
+// server.js — Node.js HTTP server
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
 
-  async function init() {
-    if (!cfg.databaseURL) {
-      console.warn(
-        "[NGL] No FIREBASE_CONFIG.databaseURL — falling back to local /api/ endpoints",
-      );
-      useLocalApi = true;
-      isReady = true;
-      return;
-    }
-    try {
-      const appMod =
-        await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js");
-      const dbMod =
-        await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js");
-      const app = appMod.getApps().length
-        ? appMod.getApp()
-        : appMod.initializeApp(cfg);
-      rtdb = dbMod.getDatabase(app);
-      api = dbMod;
-      isReady = true;
-      console.info("[NGL] Firebase RTDB Connected");
-    } catch (e) {
-      console.error("[NGL] RTDB Init Failed — using local fallback:", e);
-      useLocalApi = true;
-      isReady = true;
-    }
+const PORT = process.env.PORT || 3030;
+const ROOT = __dirname;
+const DATA_FILE = path.join(ROOT, "data.json");
+
+const MIME = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".mjs": "application/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".txt": "text/plain; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json",
+};
+
+// --- SAFETY GUARD: refuse to start if someone pasted backend.js here ---
+if (typeof window !== "undefined" || typeof document !== "undefined") {
+  console.error("\n[FATAL] server.js appears to contain BROWSER code.");
+  console.error("You probably pasted backend.js into server.js by mistake.");
+  console.error("Replace server.js with the Node server version.\n");
+  process.exit(1);
+}
+
+function loadData() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  } catch {
+    return { profiles: {}, messages: {} };
   }
+}
+function saveData(d) {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 2));
+  } catch (e) {
+    console.warn("[NGL] saveData failed (read-only fs?):", e.message);
+  }
+}
+let store = loadData();
 
-  async function localFetch(pathname, opts = {}) {
-    const res = await fetch(pathname, {
-      headers: { "Content-Type": "application/json" },
-      ...opts,
+function send(res, status, body, type = "application/json; charset=utf-8") {
+  res.writeHead(status, {
+    "Content-Type": type,
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+  });
+  res.end(typeof body === "string" ? body : JSON.stringify(body));
+}
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = "";
+    req.on("data", (c) => {
+      data += c;
+      if (data.length > 10 * 1024 * 1024) {
+        reject(new Error("payload too large"));
+        req.destroy();
+      }
     });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`API ${res.status}: ${text}`);
-    }
-    const ct = res.headers.get("content-type") || "";
-    return ct.includes("application/json") ? res.json() : res.text();
-  }
-
-  async function saveProfile(handle, profile) {
-    if (!isReady) throw new Error("Backend not initialised");
-    if (useLocalApi) {
-      return localFetch("/api/profile", {
-        method: "POST",
-        body: JSON.stringify({ handle, ...profile }),
-      });
-    }
-    await api.set(api.ref(rtdb, "profiles/" + handle), profile);
-    return profile;
-  }
-
-  async function getProfile(handle) {
-    if (!isReady) return null;
-    if (useLocalApi) {
+    req.on("end", () => {
       try {
-        return await localFetch("/api/profile/" + encodeURIComponent(handle));
-      } catch {
-        return null;
+        resolve(data ? JSON.parse(data) : {});
+      } catch (e) {
+        reject(e);
       }
-    }
-    const snap = await api.get(api.ref(rtdb, "profiles/" + handle));
-    return snap.exists() ? snap.val() : null;
-  }
+    });
+    req.on("error", reject);
+  });
+}
 
-  async function sendMessage(handle, msg) {
-    if (!isReady) throw new Error("Backend not initialised");
+const cleanHandle = (h) => (h || "").trim().toLowerCase().replace(/[@\s]/g, "");
+const newId = () => crypto.randomBytes(8).toString("hex");
 
-    if (useLocalApi) {
-      const payload = {
-        text: msg.text || "",
-        files: (msg.files || []).map((f) => ({
-          name: f.name,
-          type: f.type,
-          size: f.size,
-          dataURL: f.dataURL,
-        })),
+async function handleApi(req, res, parts) {
+  const method = req.method;
+
+  if (parts[1] === "profile") {
+    if (parts.length === 2 && method === "POST") {
+      const body = await readBody(req);
+      const h = cleanHandle(body.handle);
+      if (!h) return send(res, 400, { error: "handle required" });
+
+      const existing = store.profiles[h] || {};
+      const profile = {
+        handle: h,
+        photoURL:
+          body.photoURL !== undefined ? body.photoURL : existing.photoURL || null,
+        prompt:
+          body.prompt !== undefined
+            ? body.prompt
+            : existing.prompt || "send me anonymous messages!",
+        theme: body.theme !== undefined ? body.theme : existing.theme || "dark",
+        paused:
+          body.paused !== undefined ? body.paused : existing.paused || false,
+        createdAt: existing.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
-      const { id } = await localFetch(
-        "/api/messages/" + encodeURIComponent(handle),
-        { method: "POST", body: JSON.stringify(payload) },
-      );
-      return id;
+      store.profiles[h] = profile;
+      saveData(store);
+      return send(res, 200, profile);
     }
-
-    const msgId = api.push(api.ref(rtdb, "messages/" + handle)).key;
-    const uploadedFilesMeta = [];
-
-    if (msg.files && msg.files.length > 0) {
-      for (let i = 0; i < msg.files.length; i++) {
-        const f = msg.files[i];
-        const chunks = [];
-        for (let offset = 0; offset < f.dataURL.length; offset += CHUNK_SIZE) {
-          chunks.push(f.dataURL.substring(offset, offset + CHUNK_SIZE));
-        }
-        const chunkUpdates = {};
-        chunks.forEach((chunk, index) => {
-          chunkUpdates[`file_chunks/${msgId}/${i}/${index}`] = chunk;
-        });
-        await api.update(api.ref(rtdb), chunkUpdates);
-        uploadedFilesMeta.push({
-          name: f.name,
-          type: f.type,
-          size: f.size,
-          chunksCount: chunks.length,
-        });
-      }
+    if (parts.length === 3 && method === "GET") {
+      const p = store.profiles[cleanHandle(parts[2])];
+      return p ? send(res, 200, p) : send(res, 404, { error: "not found" });
     }
-
-    const finalMsg = {
-      id: msgId,
-      text: msg.text,
-      files: uploadedFilesMeta,
-      createdAt: Date.now(),
-      read: false,
-    };
-    await api.set(api.ref(rtdb, "messages/" + handle + "/" + msgId), finalMsg);
-    return msgId;
+    if (parts.length === 3 && method === "DELETE") {
+      const h = cleanHandle(parts[2]);
+      delete store.profiles[h];
+      delete store.messages[h];
+      saveData(store);
+      return send(res, 200, { ok: true });
+    }
   }
 
-  async function fetchFileChunks(msgId, fileIndex, chunksCount) {
-    if (!isReady || useLocalApi) return null;
-    const snap = await api.get(
-      api.ref(rtdb, `file_chunks/${msgId}/${fileIndex}`),
-    );
-    if (!snap.exists()) return null;
-    const chunkData = snap.val();
-    let base64 = "";
-    for (let i = 0; i < chunksCount; i++) {
-      if (chunkData[i]) base64 += chunkData[i];
+  if (parts[1] === "messages") {
+    const h = cleanHandle(parts[2]);
+
+    if (parts.length === 3 && method === "POST") {
+      const body = await readBody(req);
+      const msg = {
+        id: newId(),
+        text: (body.text || "").slice(0, 500),
+        files: Array.isArray(body.files) ? body.files.slice(0, 5) : [],
+        reply: null,
+        createdAt: Date.now(),
+      };
+      if (!store.messages[h]) store.messages[h] = [];
+      store.messages[h].unshift(msg);
+      saveData(store);
+      return send(res, 200, { id: msg.id });
     }
-    await api.remove(api.ref(rtdb, `file_chunks/${msgId}/${fileIndex}`));
-    return base64;
+
+    if (parts.length === 3 && method === "GET") {
+      return send(res, 200, store.messages[h] || []);
+    }
+
+    if (parts.length === 4 && method === "DELETE") {
+      const id = parts[3];
+      store.messages[h] = (store.messages[h] || []).filter((x) => x.id !== id);
+      saveData(store);
+      return send(res, 200, { ok: true });
+    }
+
+    if (parts.length === 5 && method === "POST" && parts[4] === "reply") {
+      const id = parts[3];
+      const body = await readBody(req);
+      const m = (store.messages[h] || []).find((x) => x.id === id);
+      if (!m) return send(res, 404, { error: "not found" });
+      m.reply = (body.reply || "").slice(0, 240);
+      m.repliedAt = new Date().toISOString();
+      saveData(store);
+      return send(res, 200, { ok: true, message: m });
+    }
   }
 
-  function subscribeMessages(handle, cb) {
-    if (!isReady) return () => {};
+  return send(res, 404, { error: "unknown endpoint" });
+}
 
-    if (useLocalApi) {
-      let known = new Set();
-      let first = true;
-      let stopped = false;
-      async function poll() {
-        if (stopped) return;
+function serveStatic(req, res, pathname) {
+  if (pathname === "/health" || pathname === "/_health") {
+    return send(res, 200, {
+      status: "ok",
+      uptime: process.uptime(),
+      indexHtmlExists: fs.existsSync(path.join(ROOT, "index.html")),
+    });
+  }
+
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return send(res, 400, "bad request");
+  }
+  if (decoded.includes("..")) return send(res, 403, "forbidden");
+
+  let file = decoded === "/" ? "index.html" : decoded.replace(/^\//, "");
+  if (!file) file = "index.html";
+  if (file === "app") file = "app.html";
+  if (file === "send") file = "send.html";
+
+  const base = path.basename(file);
+  if (
+    base === "data.json" ||
+    base === "server.js" ||
+    base === "package.json" ||
+    base === "package-lock.json" ||
+    base.startsWith(".")
+  ) {
+    return send(res, 403, "forbidden");
+  }
+
+  const fullPath = path.join(ROOT, file);
+  if (!fullPath.startsWith(ROOT)) return send(res, 403, "forbidden");
+
+  fs.readFile(fullPath, (err, data) => {
+    if (err) {
+      if (file === "index.html") {
+        let listing = "(could not read directory)";
         try {
-          const arr = await localFetch(
-            "/api/messages/" + encodeURIComponent(handle),
-          );
-          const list = Array.isArray(arr) ? arr : [];
-          const newOnes = first ? [] : list.filter((m) => !known.has(m.id));
-          list.forEach((m) => known.add(m.id));
-          cb(list, { first, newOnes });
-          first = false;
-        } catch (e) {
-          // swallow polling errors
-        }
-        if (!stopped) setTimeout(poll, 2500);
+          listing = fs.readdirSync(ROOT).sort().join("\n");
+        } catch {}
+        return send(
+          res,
+          404,
+          `<!doctype html><html><head><meta charset="utf-8"><title>index.html not found</title></head>
+<body style="font-family:system-ui,sans-serif;padding:40px;line-height:1.5;color:#111;background:#fff">
+  <h1>index.html not found</h1>
+  <p>Server is running fine. Missing file:</p>
+  <pre style="background:#f3f4f6;padding:12px;border-radius:6px">${path.join(ROOT, "index.html")}</pre>
+  <p>Files in deploy directory:</p>
+  <pre style="background:#f3f4f6;padding:12px;border-radius:6px">${listing || "(empty)"}</pre>
+</body></html>`,
+          "text/html; charset=utf-8",
+        );
       }
-      poll();
-      return () => {
-        stopped = true;
-      };
-    }
 
-    let first = true;
-    const known = new Set();
-    const unsub = api.onValue(api.ref(rtdb, "messages/" + handle), (snap) => {
-      const val = snap.val() || {};
-      const arr = Object.values(val).sort((a, b) => b.createdAt - a.createdAt);
-      const newOnes = first ? [] : arr.filter((m) => !known.has(m.id));
-      arr.forEach((m) => known.add(m.id));
-      cb(arr, { first, newOnes });
-      first = false;
-    });
-    return () => unsub();
-  }
-
-  async function markAsRead(handle, msgId) {
-    if (!isReady || useLocalApi) return;
-    await api.update(api.ref(rtdb, "messages/" + handle + "/" + msgId), {
-      read: true,
-    });
-  }
-
-  async function deleteMessage(handle, msgId, filesMeta) {
-    if (!isReady) return;
-    if (useLocalApi) {
-      await localFetch(
-        "/api/messages/" + encodeURIComponent(handle) + "/" + msgId,
-        { method: "DELETE" },
-      );
-      return;
-    }
-    await api.remove(api.ref(rtdb, "messages/" + handle + "/" + msgId));
-    if (filesMeta) {
-      for (let i = 0; i < filesMeta.length; i++) {
-        await api.remove(api.ref(rtdb, `file_chunks/${msgId}/${i}`));
+      const indexPath = path.join(ROOT, "index.html");
+      if (!path.extname(file) && fs.existsSync(indexPath)) {
+        return fs.readFile(indexPath, (err2, data2) => {
+          if (err2) return send(res, 404, `not found: ${decoded}`);
+          send(res, 200, data2, MIME[".html"]);
+        });
       }
-    }
-  }
 
-  return {
-    init,
-    saveProfile,
-    getProfile,
-    sendMessage,
-    subscribeMessages,
-    fetchFileChunks,
-    markAsRead,
-    deleteMessage,
-  };
-})();
+      return send(res, 404, `not found: ${decoded}`);
+    }
+
+    send(
+      res,
+      200,
+      data,
+      MIME[path.extname(fullPath).toLowerCase()] || "application/octet-stream",
+    );
+  });
+}
+
+const startedAt = new Date().toISOString();
+
+const server = http.createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url, "http://" + (req.headers.host || "localhost"));
+    console.log(`[${new Date().toISOString()}] ${req.method} ${url.pathname}`);
+
+    if (url.pathname.startsWith("/api/")) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      return await handleApi(req, res, parts);
+    }
+    serveStatic(req, res, url.pathname);
+  } catch (e) {
+    console.error("[500]", e);
+    send(res, 500, { error: "server error", message: e.message });
+  }
+});
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`\n  ✨ NGL running on port ${PORT} (bound to 0.0.0.0)`);
+  console.log(`  📁 ROOT   : ${ROOT}`);
+  console.log(`  🕒 Started: ${startedAt}`);
+  let files = [];
+  try {
+    files = fs.readdirSync(ROOT).sort();
+  } catch {}
+  console.log(`  📄 Files  : ${files.join(", ") || "(empty)"}`);
+  console.log(
+    `  ✅ index.html present: ${fs.existsSync(path.join(ROOT, "index.html"))}\n`,
+  );
+});
