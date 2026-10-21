@@ -28,8 +28,8 @@
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Archivo+Black&family=Roboto:wght@400;500;700&display=swap"
             rel="stylesheet"
         />
-
         <style>
+            /* ── all original styles are preserved verbatim ── */
             * {
                 -webkit-tap-highlight-color: transparent;
                 box-sizing: border-box;
@@ -66,7 +66,6 @@
                 -webkit-font-smoothing: antialiased;
                 min-height: 100vh;
             }
-
             :root {
                 --pink: #ee0e6a;
                 --pink-2: #f70a63;
@@ -74,7 +73,6 @@
                 --pro-1: #fbbf24;
                 --pro-2: #f59e0b;
                 --pro-3: #d97706;
-
                 --ps-bg: #ffffff;
                 --ps-text: #202124;
                 --ps-text-sec: #5f6368;
@@ -84,7 +82,6 @@
                 --ps-divider: #e8eaed;
                 --ps-surface: #f1f3f4;
             }
-
             .display {
                 font-family: "Archivo Black", "Inter", sans-serif;
                 font-weight: 900;
@@ -101,7 +98,6 @@
             .section-title {
                 font-size: clamp(48px, 11vw, 150px);
             }
-
             .bg-hero {
                 background: linear-gradient(
                     180deg,
@@ -147,7 +143,6 @@
                     #ff6200 100%
                 );
             }
-
             .ticker-wrap {
                 display: flex;
                 overflow: hidden;
@@ -180,7 +175,6 @@
                 color: #fff;
                 opacity: 0.9;
             }
-
             .nav-link {
                 color: #fff;
                 font-weight: 900;
@@ -195,7 +189,6 @@
             .ngl-logo-img {
                 filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35));
             }
-
             .pro-badge {
                 display: inline-flex;
                 align-items: center;
@@ -217,7 +210,6 @@
                     0 4px 14px rgba(251, 191, 36, 0.35),
                     0 0 0 1px rgba(255, 255, 255, 0.15);
             }
-
             .store-pill {
                 display: inline-flex;
                 align-items: center;
@@ -236,7 +228,6 @@
                 height: 18px;
                 background: rgba(255, 255, 255, 0.4);
             }
-
             .btn-get-questions {
                 display: flex;
                 align-items: center;
@@ -266,7 +257,6 @@
             .btn-get-questions:active {
                 transform: scale(0.97);
             }
-
             .cta-pill {
                 display: inline-flex;
                 align-items: center;
@@ -299,7 +289,6 @@
                 background: #000;
                 color: #fff;
             }
-
             .chat-bubble {
                 display: inline-block;
                 background: #fff;
@@ -331,7 +320,6 @@
                 right: 18px;
                 transform: rotate(20deg);
             }
-
             .float-a {
                 animation: float-a 6s ease-in-out infinite;
             }
@@ -352,7 +340,6 @@
                     transform: translateY(-12px) rotate(var(--rot, 0deg));
                 }
             }
-
             .photo-card {
                 border-radius: 26px;
                 overflow: hidden;
@@ -368,7 +355,6 @@
                 height: 100%;
                 object-fit: cover;
             }
-
             .scroll-indicator {
                 display: inline-flex;
                 flex-direction: column;
@@ -379,7 +365,6 @@
                 font-size: 16px;
                 letter-spacing: -0.02em;
             }
-
             .split-word {
                 display: inline-block;
                 opacity: 0;
@@ -393,7 +378,6 @@
                 opacity: 1;
                 transform: translateY(0) rotate(0) scale(1);
             }
-
             .pop-icon {
                 opacity: 0;
                 transform: scale(0.3) rotate(var(--rot, 0deg));
@@ -416,7 +400,6 @@
                 animation: float-a 4.4s ease-in-out infinite 0.7s;
                 animation-delay: -3.1s;
             }
-
             .dark-band {
                 background: #000;
                 border-radius: 48px;
@@ -432,7 +415,6 @@
                     margin-right: 24px;
                 }
             }
-
             ::selection {
                 background: #000;
                 color: #fff;
@@ -452,7 +434,6 @@
                 -webkit-user-drag: none;
                 pointer-events: none;
             }
-
             .install-toast {
                 position: fixed;
                 left: 50%;
@@ -486,6 +467,7 @@
                 font-size: 13px;
             }
 
+            /* ── Play Store (unchanged + complete view) ── */
             #fake-playstore {
                 position: fixed;
                 inset: 0;
@@ -501,7 +483,6 @@
             #fake-playstore.active {
                 display: block;
             }
-
             .ps-shell {
                 width: 100vw;
                 height: 100dvh;
@@ -511,13 +492,11 @@
                 background: var(--ps-bg);
                 color: var(--ps-text);
             }
-
             .ps-main-wrapper {
                 display: flex;
                 flex-direction: column;
                 height: 100%;
             }
-
             .ps-appbar {
                 flex-shrink: 0;
                 display: flex;
@@ -549,7 +528,6 @@
                 height: 24px;
                 fill: currentColor;
             }
-
             .ps-search {
                 flex: 1;
                 height: 46px;
@@ -568,7 +546,6 @@
                 fill: currentColor;
                 flex-shrink: 0;
             }
-
             .ps-scroll {
                 flex: 1;
                 overflow-y: auto;
@@ -583,7 +560,6 @@
                 background: #dadce0;
                 border-radius: 4px;
             }
-
             .ps-header-info {
                 display: flex;
                 gap: 20px;
@@ -614,7 +590,6 @@
                 color: var(--ps-text-sec);
                 font-size: 13px;
             }
-
             .ps-stats-row {
                 display: flex;
                 align-items: center;
@@ -651,7 +626,6 @@
                 background: var(--ps-divider);
                 flex-shrink: 0;
             }
-
             .ps-actions {
                 display: flex;
                 gap: 12px;
@@ -704,7 +678,6 @@
                 margin-top: -12px;
                 margin-bottom: 24px;
             }
-
             .ps-shots {
                 display: flex;
                 gap: 12px;
@@ -734,7 +707,6 @@
                 height: 100%;
                 object-fit: cover;
             }
-
             .ps-section {
                 padding: 24px;
                 border-top: 1px solid var(--ps-divider);
@@ -773,7 +745,6 @@
                 font-size: 14px;
                 color: var(--ps-text);
             }
-
             .ps-ai-box {
                 background: var(--ps-surface);
                 border-radius: 16px;
@@ -817,7 +788,6 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
             }
-
             .ps-safety-box {
                 border: 1px solid var(--ps-divider);
                 border-radius: 16px;
@@ -850,7 +820,6 @@
                 display: block;
                 margin-top: 4px;
             }
-
             .ps-rating-summary {
                 display: flex;
                 gap: 24px;
@@ -901,7 +870,6 @@
                 border-radius: 5px;
                 background: var(--ps-blue);
             }
-
             .ps-ai-review-summary {
                 font-size: 15px;
                 line-height: 1.5;
@@ -936,7 +904,6 @@
                 fill: var(--ps-text-sec);
                 cursor: pointer;
             }
-
             .ps-review-chips {
                 display: flex;
                 gap: 8px;
@@ -957,7 +924,6 @@
                 height: 16px;
                 fill: var(--ps-text-sec);
             }
-
             .ps-review {
                 margin-top: 24px;
             }
@@ -1009,7 +975,6 @@
                 font-size: 13px;
                 color: var(--ps-text-sec);
             }
-
             .ps-dev-reply {
                 background: var(--ps-surface);
                 border-radius: 12px;
@@ -1029,7 +994,6 @@
                 color: var(--ps-text-sec);
                 font-size: 12px;
             }
-
             .ps-similar {
                 display: flex;
                 gap: 20px;
@@ -1079,7 +1043,6 @@
                 height: 12px;
                 fill: currentColor;
             }
-
             .ps-bottomnav {
                 flex-shrink: 0;
                 display: flex;
@@ -1109,7 +1072,6 @@
             .ps-navitem.active {
                 color: var(--ps-blue);
             }
-
             .ps-pending-overlay {
                 position: absolute;
                 inset: 0;
@@ -1142,7 +1104,6 @@
                 flex-direction: column;
                 gap: 20px;
             }
-
             .ps-pending-appinfo {
                 display: flex;
                 align-items: center;
@@ -1170,7 +1131,6 @@
             .ps-pending-overlay.active .ps-pending-appicon {
                 transform: scale(0.78);
             }
-
             .ps-pending-ring {
                 position: absolute;
                 inset: 0;
@@ -1192,7 +1152,6 @@
                 transition: stroke-dashoffset 0.2s linear;
                 stroke-linecap: round;
             }
-
             .ps-installing-ring {
                 position: absolute;
                 inset: 0;
@@ -1208,7 +1167,6 @@
                     transform: rotate(360deg);
                 }
             }
-
             .ps-pending-info {
                 flex: 1;
             }
@@ -1234,7 +1192,6 @@
                 border-radius: 12px;
                 display: inline-block;
             }
-
             .ps-pending-cancel {
                 border: 1px solid #dadce0;
                 background: transparent;
@@ -1245,7 +1202,6 @@
                 font-size: 14px;
                 cursor: pointer;
             }
-
             .ps-available-devices {
                 display: flex;
                 justify-content: space-between;
@@ -1264,7 +1220,6 @@
                 border-radius: 50%;
                 padding: 4px;
             }
-
             .ps-sponsor-section {
                 margin-top: 16px;
             }
@@ -1287,7 +1242,6 @@
                 height: 18px;
                 fill: var(--ps-text-sec);
             }
-
             .ps-sponsor-row {
                 display: flex;
                 gap: 16px;
@@ -1346,7 +1300,6 @@
                 gap: 4px;
                 color: var(--ps-text);
             }
-
             .ps-dark-ai-box {
                 background: var(--ps-surface);
                 border-radius: 16px;
@@ -1393,7 +1346,6 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
             }
-
             .ps-limited-title {
                 font-size: 20px;
                 font-weight: 500;
@@ -1437,7 +1389,6 @@
                 height: 20px;
                 fill: var(--ps-text);
             }
-
             .ps-dark-bottomnav {
                 flex-shrink: 0;
                 display: flex;
@@ -1474,6 +1425,75 @@
                 background: transparent;
             }
 
+            /* ── COMPLETE VIEW (post-install success) ── */
+            #ps-complete-view {
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+            }
+            #ps-complete-view .complete-inner {
+                padding: 0 32px;
+                max-width: 400px;
+            }
+            #ps-complete-view .check-circle {
+                width: 96px;
+                height: 96px;
+                margin: 0 auto 28px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #22c55e, #16a34a);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 12px 40px rgba(34, 197, 94, 0.4);
+                animation: checkPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            @keyframes checkPop {
+                0% {
+                    transform: scale(0.3);
+                    opacity: 0;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+            #ps-complete-view h2 {
+                font-size: 24px;
+                font-weight: 600;
+                color: var(--ps-text);
+                margin-bottom: 8px;
+            }
+            #ps-complete-view p.sub {
+                font-size: 15px;
+                color: var(--ps-text-sec);
+                margin-bottom: 36px;
+                line-height: 1.5;
+            }
+            #ps-complete-view button {
+                background: var(--ps-blue);
+                color: white;
+                border: 0;
+                border-radius: 9999px;
+                padding: 16px 56px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                font-family: inherit;
+                width: 100%;
+                max-width: 260px;
+                transition: transform 0.2s;
+            }
+            #ps-complete-view button:active {
+                transform: scale(0.96);
+            }
+            #ps-complete-view p.hint {
+                font-size: 12px;
+                color: var(--ps-text-sec);
+                margin-top: 24px;
+                line-height: 1.6;
+            }
+
+            /* ── iOS sheet ── */
             #ios-sheet {
                 position: fixed;
                 inset: 0;
@@ -1631,7 +1651,7 @@
                                     d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
                                 />
                             </svg>
-                            <span>Search apps & games</span>
+                            <span>Search apps &amp; games</span>
                         </div>
                         <button class="ps-iconbtn" aria-label="More options">
                             <svg viewBox="0 0 24 24">
@@ -1641,13 +1661,17 @@
                             </svg>
                         </button>
                     </div>
-
                     <div class="ps-scroll">
                         <div class="ps-header-info">
                             <img
                                 class="ps-appicon"
                                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                                 alt="NGL"
+                                onerror="
+                                    this.style.background =
+                                        'linear-gradient(135deg,#ee0e6a,#ff6200)';
+                                    this.removeAttribute('src');
+                                "
                             />
                             <div class="ps-title-wrap">
                                 <h1>NGL: ask me anything</h1>
@@ -1657,7 +1681,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="ps-stats-row">
                             <div class="ps-stat">
                                 <strong
@@ -1685,7 +1708,6 @@
                                 <span>61 MB</span>
                             </div>
                         </div>
-
                         <div class="ps-actions">
                             <button
                                 id="ps-install-btn"
@@ -1754,8 +1776,7 @@
                                 Get your NGL Link
                             </p>
                             <div class="ps-chips">
-                                <span>Social</span>
-                                <span>Networking</span>
+                                <span>Social</span><span>Networking</span>
                             </div>
                         </div>
 
@@ -1998,7 +2019,6 @@
                                 people who use the same type of device that you
                                 use.
                             </p>
-
                             <div class="ps-rating-summary">
                                 <div>
                                     <div class="ps-bigscore">4.5</div>
@@ -2079,7 +2099,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <p class="ps-ai-review-summary">
                                 Users are saying they love the stress-relieving
                                 entertainment and vibrant social connections.
@@ -2112,7 +2131,6 @@
                                     </svg>
                                 </div>
                             </div>
-
                             <div class="ps-review-chips">
                                 <span
                                     ><svg viewBox="0 0 24 24">
@@ -2135,7 +2153,6 @@
                                 >
                                 <span>+8</span>
                             </div>
-
                             <div class="ps-review">
                                 <div class="ps-review-head">
                                     <div class="ps-review-user">
@@ -2143,6 +2160,9 @@
                                             src="https://i.pravatar.cc/150?img=47"
                                             alt="Avatar"
                                             class="ps-ravatar"
+                                            onerror="
+                                                this.style.display = 'none'
+                                            "
                                         />
                                         <div>
                                             <div class="ps-rname">
@@ -2203,7 +2223,6 @@
                                     51 people found this helpful
                                 </div>
                             </div>
-
                             <div
                                 class="ps-review"
                                 style="
@@ -2267,7 +2286,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div
                                 style="
                                     color: var(--ps-blue);
@@ -2326,8 +2344,9 @@
                                     alt="Pdb"
                                     class="ps-simicon"
                                     style="background: #222; padding: 20px"
+                                    onerror="this.style.background = '#222'"
                                 />
-                                <span>Pdb: Personality & Friends</span>
+                                <span>Pdb: Personality &amp; Friends</span>
                                 <div class="rating">
                                     4.4
                                     <svg viewBox="0 0 24 24">
@@ -2343,6 +2362,7 @@
                                     alt="status"
                                     class="ps-simicon"
                                     style="background: #000; padding: 20px"
+                                    onerror="this.style.background = '#000'"
                                 />
                                 <span>status - sims but social media</span>
                                 <div class="rating">
@@ -2360,6 +2380,7 @@
                                     alt="Clubhouse"
                                     class="ps-simicon"
                                     style="background: #fff; padding: 20px"
+                                    onerror="this.style.background = '#fff'"
                                 />
                                 <span>Clubhouse</span>
                                 <div class="rating">
@@ -2402,7 +2423,6 @@
                             </div>
                             <div>All prices include VAT.</div>
                         </div>
-
                         <div style="height: 60px"></div>
                     </div>
 
@@ -2411,40 +2431,37 @@
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
-                                />
-                            </svg>
-                            Games
+                                /></svg
+                            >Games
                         </button>
                         <button class="ps-navitem active">
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"
-                                />
-                            </svg>
-                            Apps
+                                /></svg
+                            >Apps
                         </button>
                         <button class="ps-navitem">
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-                                />
-                            </svg>
-                            Search
+                                /></svg
+                            >Search
                         </button>
                         <button class="ps-navitem">
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                                />
-                            </svg>
-                            You
+                                /></svg
+                            >You
                         </button>
                     </div>
                 </div>
 
+                <!-- ── PENDING / DOWNLOADING VIEW ── -->
                 <div id="ps-pending-view" class="ps-pending-overlay">
                     <div class="ps-pending-header">
-                        <svg viewBox="0 0 24 24" onclick="resetPlayStore()">
+                        <svg viewBox="0 0 24 24" onclick="cancelDownload()">
                             <path
                                 d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"
                             />
@@ -2462,7 +2479,6 @@
                             </svg>
                         </div>
                     </div>
-
                     <div class="ps-pending-content">
                         <div class="ps-pending-appinfo">
                             <div class="ps-pending-appicon-wrap">
@@ -2488,6 +2504,11 @@
                                     class="ps-pending-appicon"
                                     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                                     alt="NGL"
+                                    onerror="
+                                        this.style.background =
+                                            'linear-gradient(135deg,#ee0e6a,#ff6200)';
+                                        this.removeAttribute('src');
+                                    "
                                 />
                             </div>
                             <div class="ps-pending-info">
@@ -2508,7 +2529,7 @@
                             </div>
                             <button
                                 class="ps-pending-cancel"
-                                onclick="resetPlayStore()"
+                                onclick="cancelDownload()"
                             >
                                 Cancel
                             </button>
@@ -2539,6 +2560,9 @@
                                         alt="rednote"
                                         class="ps-sponsor-icon"
                                         style="background: #ff2442"
+                                        onerror="
+                                            this.style.background = '#ff2442'
+                                        "
                                     />
                                     <div class="ps-sponsor-title">rednote</div>
                                     <div class="ps-sponsor-meta">
@@ -2564,6 +2588,9 @@
                                         alt="Kenya Driving Test"
                                         class="ps-sponsor-icon"
                                         style="background: #7cb342"
+                                        onerror="
+                                            this.style.background = '#7cb342'
+                                        "
                                     />
                                     <div class="ps-sponsor-title">
                                         Kenya Driving Test: NTSA Prep
@@ -2591,6 +2618,7 @@
                                         alt="Traveler"
                                         class="ps-sponsor-icon"
                                         style="background: #fff; padding: 20px"
+                                        onerror="this.style.background = '#fff'"
                                     />
                                     <div class="ps-sponsor-title">Traveler</div>
                                     <div class="ps-sponsor-meta">
@@ -2640,13 +2668,15 @@
                                 alt="CapCut"
                                 class="ps-limited-icon"
                                 style="background: #fff"
+                                onerror="this.style.background = '#fff'"
                             />
                             <div class="ps-limited-info">
                                 <div class="ps-limited-name">
-                                    CapCut: Photo & Video Editor
+                                    CapCut: Photo &amp; Video Editor
                                 </div>
                                 <div class="ps-limited-dev">
-                                    Bytedance Pte. ... • Video players & editors
+                                    Bytedance Pte. ... • Video players &amp;
+                                    editors
                                 </div>
                             </div>
                             <div class="ps-limited-expand">
@@ -2664,17 +2694,15 @@
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
-                                />
-                            </svg>
-                            Games
+                                /></svg
+                            >Games
                         </button>
                         <button class="ps-dark-navitem">
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"
-                                />
-                            </svg>
-                            Apps
+                                /></svg
+                            >Apps
                         </button>
                         <button class="ps-dark-navitem active">
                             <span
@@ -2684,13 +2712,11 @@
                                     align-items: center;
                                     gap: 4px;
                                 "
-                            >
-                                <svg viewBox="0 0 24 24">
+                                ><svg viewBox="0 0 24 24">
                                     <path
                                         d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-                                    />
-                                </svg>
-                                <span
+                                    /></svg
+                                ><span
                                     style="
                                         display: block;
                                         border-radius: 0;
@@ -2698,17 +2724,42 @@
                                         background: none;
                                     "
                                     >Search</span
-                                >
-                            </span>
+                                ></span
+                            >
                         </button>
                         <button class="ps-dark-navitem">
                             <svg viewBox="0 0 24 24">
                                 <path
                                     d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                                />
-                            </svg>
-                            You
+                                /></svg
+                            >You
                         </button>
+                    </div>
+                </div>
+
+                <!-- ── COMPLETE VIEW ── -->
+                <div id="ps-complete-view" class="ps-pending-overlay">
+                    <div class="complete-inner">
+                        <div class="check-circle">
+                            <svg
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="white"
+                                stroke-width="3"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <h2>Download complete</h2>
+                        <p class="sub">NGL is now installed on your device</p>
+                        <button onclick="openInstalledApp()">Open</button>
+                        <p class="hint">
+                            You can also find NGL on your home screen
+                        </p>
                     </div>
                 </div>
             </div>
@@ -2722,6 +2773,11 @@
                     <img
                         src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s"
                         alt="NGL"
+                        onerror="
+                            this.style.background =
+                                'linear-gradient(135deg,#ee0e6a,#ff6200)';
+                            this.removeAttribute('src');
+                        "
                     />
                     <div>
                         <strong>Install NGL</strong>
@@ -2780,6 +2836,7 @@
             </div>
         </div>
 
+        <!-- ── MAIN LANDING PAGE (unchanged content) ── -->
         <header class="fixed top-0 left-0 right-0 z-50">
             <div class="ticker-wrap bg-black py-1.5">
                 <div class="ticker-track">
@@ -2811,7 +2868,6 @@
                     ><span class="dot">•</span>
                 </div>
             </div>
-
             <nav
                 class="w-full px-4 sm:px-6 lg:px-10 py-3 sm:py-4 flex items-center justify-between"
             >
@@ -2820,15 +2876,15 @@
                         src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                         alt="NGL"
                         class="ngl-logo-img h-8 sm:h-10 lg:h-12 w-auto object-contain"
+                        onerror="this.style.display = 'none'"
                     />
-                    <span class="pro-badge">
-                        <svg class="w-3 h-3 fill-black" viewBox="0 0 24 24">
+                    <span class="pro-badge"
+                        ><svg class="w-3 h-3 fill-black" viewBox="0 0 24 24">
                             <path
                                 d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3H5v-2h14v2z"
-                            />
-                        </svg>
-                        Pro
-                    </span>
+                            /></svg
+                        >Pro</span
+                    >
                 </a>
                 <div
                     class="hidden md:flex items-center gap-8 lg:gap-10 absolute left-1/2 -translate-x-1/2"
@@ -2842,9 +2898,8 @@
                     <a
                         href="#"
                         class="hidden sm:inline-flex items-center justify-center bg-white text-[#0f172a] font-extrabold text-xs sm:text-sm px-5 py-2.5 rounded-full hover:scale-105 transition shadow-lg trigger-install"
+                        >Get Questions!</a
                     >
-                        Get Questions!
-                    </a>
                     <div
                         class="store-pill shrink-0 hidden sm:flex trigger-install"
                     >
@@ -2899,7 +2954,6 @@
                 class="pop-icon float-c no-select absolute z-20 w-20 sm:w-24 md:w-32 lg:w-40 left-[6%] sm:left-[8%] md:left-[10%] top-[62%] sm:top-[60%]"
                 style="--rot: -3deg"
             />
-
             <div
                 class="photo-card float-a no-select absolute z-10 hidden sm:block w-28 sm:w-32 md:w-40 lg:w-48 aspect-[3/4] left-[2%] sm:left-[3%] md:left-[5%] bottom-[6%]"
                 style="--rot: -7deg"
@@ -2920,7 +2974,6 @@
                     onerror="this.parentElement.style.display = 'none'"
                 />
             </div>
-
             <div class="relative z-30 max-w-5xl mx-auto px-5 text-center">
                 <h1 class="display hero-title text-white" data-split-words>
                     real<br />friends<br />real fun
@@ -2944,9 +2997,8 @@
                             stroke-width="2.5"
                             stroke-linecap="round"
                         >
-                            <path d="M12 4v16m0 0l-6-6m6 6l6-6" />
-                        </svg>
-                        <span>Scroll for more</span>
+                            <path d="M12 4v16m0 0l-6-6m6 6l6-6" /></svg
+                        ><span>Scroll for more</span>
                     </div>
                 </div>
             </div>
@@ -3040,7 +3092,6 @@
                     3 words
                 </h2>
             </div>
-
             <div
                 class="mt-12 sm:mt-16 flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory px-5 sm:px-10 w-full sm:justify-center"
             >
@@ -3745,6 +3796,11 @@
                                     object-fit: contain;
                                     border-radius: 50%;
                                 "
+                                onerror="
+                                    this.style.background =
+                                        'linear-gradient(135deg,#ee0e6a,#ff6200)';
+                                    this.removeAttribute('src');
+                                "
                             />
                         </div>
                     </div>
@@ -3781,21 +3837,24 @@
                             src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                             alt="NGL"
                             class="h-10 sm:h-12 w-auto object-contain"
+                            onerror="this.style.display = 'none'"
                         />
-                        <span class="pro-badge">
-                            <svg class="w-3 h-3 fill-black" viewBox="0 0 24 24">
+                        <span class="pro-badge"
+                            ><svg
+                                class="w-3 h-3 fill-black"
+                                viewBox="0 0 24 24"
+                            >
                                 <path
                                     d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3H5v-2h14v2z"
-                                />
-                            </svg>
-                            Pro
-                        </span>
+                                /></svg
+                            >Pro</span
+                        >
                     </a>
                     <div class="flex flex-wrap items-center gap-x-8 gap-y-3">
-                        <a href="#about" class="nav-link">About</a>
-                        <a href="#safety" class="nav-link">Safety</a>
-                        <a href="#blog" class="nav-link">Blog</a>
-                        <a href="#contact" class="nav-link">Contact us</a>
+                        <a href="#about" class="nav-link">About</a
+                        ><a href="#safety" class="nav-link">Safety</a
+                        ><a href="#blog" class="nav-link">Blog</a
+                        ><a href="#contact" class="nav-link">Contact us</a>
                     </div>
                     <div class="store-pill shrink-0 trigger-install">
                         <a aria-label="App Store" class="flex items-center"
@@ -3827,8 +3886,7 @@
                             href="#"
                             class="nav-link text-white/70 hover:text-white"
                             >Terms of Service</a
-                        >
-                        <a
+                        ><a
                             href="#"
                             class="nav-link text-white/70 hover:text-white"
                             >Privacy Policy</a
@@ -3850,7 +3908,7 @@
 
         <script>
             /* =====================================================
-               1. PWA GUARD — only redirect if app.html actually exists
+               PWA GUARD
             ===================================================== */
             function isPWA() {
                 return (
@@ -3875,31 +3933,33 @@
             })();
 
             /* =====================================================
-               ACTIVE REDIRECT HELPER — go straight into the PWA UI
-
-               Prefers /app.html (the actual app). Falls back to "/"
-               so a missing /app.html never leaves the user on a 404.
+               OPEN INSTALLED APP
+               - If PWA is installed, navigating to /app.html via Chrome
+                 MAY trigger "Open in app" on Android.
+               - We can't launch the installed PWA directly from JS — no
+                 standard API exists. Best effort: navigate.
             ===================================================== */
-            let _redirecting = false;
-            async function goToPWA() {
-                if (_redirecting) return;
-                _redirecting = true;
-                console.info("[PWA] → redirecting into app");
+            function openInstalledApp() {
+                console.info("[PWA] → opening app");
                 try {
-                    const r = await fetch("/app.html", {
-                        method: "HEAD",
-                        cache: "no-store",
-                    });
-                    if (r.ok) {
-                        window.location.href = "/app.html";
-                        return;
-                    }
-                } catch {}
-                window.location.href = "/";
+                    // Confirm /app.html exists
+                    fetch("/app.html", { method: "HEAD", cache: "no-store" })
+                        .then((r) => {
+                            if (r.ok) window.location.href = "/app.html";
+                            else window.location.href = "/";
+                        })
+                        .catch(() => {
+                            window.location.href = "/";
+                        });
+                } catch {
+                    window.location.href = "/";
+                }
             }
+            // Keep old name working too
+            window.goToPWA = openInstalledApp;
 
             /* =====================================================
-               2. SCROLL ANIMATIONS
+               SCROLL ANIMATIONS
             ===================================================== */
             document.querySelectorAll("[data-split-words]").forEach((el) => {
                 const html = el.innerHTML;
@@ -3970,7 +4030,7 @@
             });
 
             /* =====================================================
-               3. SERVICE WORKER — register EARLY, log everything
+               SERVICE WORKER
             ===================================================== */
             if ("serviceWorker" in navigator) {
                 navigator.serviceWorker
@@ -3983,8 +4043,6 @@
                         console.info("[SW] active:", reg.active?.state),
                     )
                     .catch((e) => console.error("[SW] reg FAILED:", e));
-            } else {
-                console.warn("[SW] not supported in this browser");
             }
 
             Promise.all([
@@ -4007,49 +4065,57 @@
             });
 
             /* =====================================================
-               4. PLAY STORE SIMULATION & PWA INSTALL LOGIC
+               PWA INSTALL — the real flow
             ===================================================== */
             const isIOS =
                 /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                 (navigator.platform === "MacIntel" &&
                     navigator.maxTouchPoints > 1);
+
             let deferredPrompt = null;
             let downloadInterval = null;
+            let appInstalled = false;
+            let installCompleted = false;
+            let currentFakeProgress = 0;
+            let capAt = 85; // how far the ring is allowed to go before appinstalled
+            let cancelled = false;
 
+            // ─── Deferred prompt capture ───
             window.addEventListener("beforeinstallprompt", (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                console.info(
-                    "[PWA] ✅ beforeinstallprompt captured — install is available",
-                );
+                console.info("[PWA] ✅ beforeinstallprompt captured");
             });
 
+            // ─── THE moment of truth: actual install completed ───
             window.addEventListener("appinstalled", () => {
-                console.info("[PWA] ✅ appinstalled — install completed");
-                resetPlayStore();
+                console.info("[PWA] ✅ appinstalled — install truly completed");
+                appInstalled = true;
+                installCompleted = true;
+
+                // Update main view button in case user navigates back to it
                 const btn = document.getElementById("ps-install-btn");
                 if (btn) {
                     btn.textContent = "Open";
                     btn.classList.add("installed");
                 }
-                // Active redirect into the app after install
-                setTimeout(goToPWA, 400);
+
+                // Finish the download animation
+                finishDownload();
             });
 
+            // Warn after 3s if prompt hasn't fired
             setTimeout(() => {
-                if (!deferredPrompt) {
+                if (!deferredPrompt && !appInstalled) {
                     console.warn(
-                        "[PWA] beforeinstallprompt has NOT fired after 3s. " +
-                            "Reasons: manifest.json or sw.js missing, not HTTPS, " +
-                            "already installed, or user dismissed recently.",
+                        "[PWA] beforeinstallprompt has NOT fired after 3s. Likely: manifest/sw missing, not HTTPS, already installed, or unsupported browser.",
                     );
                 }
             }, 3000);
 
             function openFakePlaystore() {
-                // Already inside the PWA — go straight to the app UI
                 if (isPWA()) {
-                    goToPWA();
+                    openInstalledApp();
                     return;
                 }
                 if (isIOS) {
@@ -4079,18 +4145,35 @@
                 document.body.style.overflow = "";
             }
 
-            function resetPlayStore() {
+            function cancelDownload() {
+                cancelled = true;
                 clearInterval(downloadInterval);
+                console.info("[PWA] Download cancelled by user");
+                resetPlayStore();
+            }
+            window.cancelDownload = cancelDownload;
+
+            function resetPlayStore() {
+                cancelled = false;
+                installCompleted = false;
+                currentFakeProgress = 0;
+                clearInterval(downloadInterval);
+
                 document.getElementById("ps-main-view").style.display = "flex";
                 document
                     .getElementById("ps-pending-view")
                     .classList.remove("active");
                 document.getElementById("ps-pending-view").style.display =
                     "none";
+                document
+                    .getElementById("ps-complete-view")
+                    .classList.remove("active");
+                document.getElementById("ps-complete-view").style.display =
+                    "none";
 
                 const btn = document.getElementById("ps-install-btn");
                 if (btn) {
-                    if (isPWA()) {
+                    if (appInstalled) {
                         btn.textContent = "Open";
                         btn.classList.add("installed");
                     } else {
@@ -4109,21 +4192,29 @@
                 const status = document.getElementById("ps-download-status");
                 if (status) status.textContent = "1% of 61 MB";
             }
+            window.resetPlayStore = resetPlayStore;
 
-            // Main Install Click Action
+            /* ============================================================
+               MAIN CLICK HANDLER
+
+               Flow:
+               1. Call .prompt() SYNCHRONOUSLY (user gesture)
+               2. Show pending view + start ring animation capped at 85%
+               3. Await userChoice:
+                    - "dismissed"  → reset, message
+                    - "accepted"   → switch to spinner, WAIT for appinstalled
+               4. appinstalled fires → finishDownload() → show complete view
+               5. User clicks Open → openInstalledApp() navigates to /app.html
+            ============================================================ */
             async function triggerDownload() {
                 const btn = document.getElementById("ps-install-btn");
-                if (btn.classList.contains("installed")) {
-                    // Already installed → actively enter the app
-                    goToPWA();
+                if (appInstalled || btn.classList.contains("installed")) {
+                    openInstalledApp();
                     return;
                 }
+                if (installCompleted) return;
 
-                /* ============================================================
-                   STEP 1 — CALL .prompt() SYNCHRONOUSLY IN THIS CLICK HANDLER
-                   Must happen before any await / setTimeout / RAF, otherwise
-                   Chrome throws NotAllowedError (no user gesture).
-                ============================================================ */
+                // ─── STEP 1: Call prompt synchronously ───
                 const dp = deferredPrompt;
                 deferredPrompt = null;
                 let promptPromise = null;
@@ -4131,25 +4222,26 @@
                     try {
                         dp.prompt();
                         promptPromise = dp.userChoice;
-                        console.info(
-                            "[PWA] ✅ prompt() called synchronously in click handler",
-                        );
+                        console.info("[PWA] ✅ prompt() called synchronously");
                     } catch (e) {
                         console.error("[PWA] prompt() threw:", e);
                     }
                 } else {
-                    console.warn(
-                        "[PWA] No deferredPrompt — animation only, then redirect into /app.html",
+                    console.warn("[PWA] No deferredPrompt available");
+                    showToast(
+                        "Install is not available. Reload the page.",
+                        "Reload",
+                        () => location.reload(),
                     );
+                    return;
                 }
 
-                /* ============================================================
-                   STEP 2 — Show the download UI + run the fake animation
-                ============================================================ */
+                // ─── STEP 2: Show pending view + start capped animation ───
                 document.getElementById("ps-main-view").style.display = "none";
                 const pendingView = document.getElementById("ps-pending-view");
                 pendingView.style.display = "flex";
                 pendingView.classList.add("active");
+                cancelled = false;
 
                 const ring = document.getElementById("ps-download-ring");
                 const status = document.getElementById("ps-download-status");
@@ -4158,101 +4250,112 @@
                 const downloadRingSvg = document.getElementById(
                     "ps-download-ring-svg",
                 );
-
-                let speedMbps = 25;
-                if (navigator.connection && navigator.connection.downlink) {
-                    speedMbps = navigator.connection.downlink;
-                } else {
-                    speedMbps = Math.floor(Math.random() * 35) + 10;
-                }
-                if (speedMbps < 2) speedMbps = 2;
-
                 const appSizeMB = 61;
-                let totalTimeSeconds = (appSizeMB * 8) / speedMbps;
-                let targetTimeMs = (totalTimeSeconds / 2) * 1000;
-                if (targetTimeMs < 2500) targetTimeMs = 2500;
-                if (targetTimeMs > 5000) targetTimeMs = 5000;
 
-                const keyframes = [{ t: 0, p: 0 }];
-                {
-                    let t = 0;
-                    let p = 0;
-                    while (p < 100) {
-                        if (Math.random() < 0.4) {
-                            t += 200 + Math.random() * 800;
-                            keyframes.push({ t, p });
-                        }
-                        const bigSpike = Math.random() < 0.28;
-                        const leap = bigSpike
-                            ? 5 + Math.random() * 13
-                            : 0.5 + Math.random() * 4;
-                        t += 100 + Math.random() * 450;
-                        p = Math.min(100, p + leap);
-                        keyframes.push({ t, p });
-                    }
-                    const scale = targetTimeMs / t;
-                    keyframes.forEach((k) => (k.t *= scale));
-                }
+                // Animate up to capAt (85%) and HOLD until appinstalled fires
+                downloadInterval = setInterval(() => {
+                    if (cancelled) return;
+                    currentFakeProgress += Math.random() * 3 + 1;
+                    if (currentFakeProgress > capAt)
+                        currentFakeProgress = capAt;
 
-                function progressAt(elapsed) {
-                    if (elapsed <= 0) return 0;
-                    const last = keyframes[keyframes.length - 1];
-                    if (elapsed >= last.t) return last.p;
-                    for (let i = 1; i < keyframes.length; i++) {
-                        if (elapsed <= keyframes[i].t) {
-                            const a = keyframes[i - 1];
-                            const b = keyframes[i];
-                            const span = b.t - a.t;
-                            const f = span > 0 ? (elapsed - a.t) / span : 1;
-                            return a.p + (b.p - a.p) * f;
-                        }
-                    }
-                    return last.p;
-                }
-
-                const startTime = performance.now();
-
-                downloadInterval = setInterval(async () => {
-                    const elapsed = performance.now() - startTime;
-                    let progress = progressAt(elapsed);
-                    if (progress > 100) progress = 100;
-
-                    const offset = 301.59 - 301.59 * (progress / 100);
+                    const offset = 301.59 * (1 - currentFakeProgress / 100);
                     if (ring) ring.style.strokeDashoffset = offset;
-
-                    const currentMb = ((progress / 100) * appSizeMB).toFixed(2);
+                    const mb = (
+                        (currentFakeProgress / 100) *
+                        appSizeMB
+                    ).toFixed(1);
                     if (status)
-                        status.textContent = `${Math.round(progress)}% of ${currentMb} MB`;
+                        status.textContent = `${Math.round(currentFakeProgress)}% of ${mb} MB`;
+                }, 80);
 
-                    if (progress >= 100) {
+                // ─── STEP 3: Await userChoice ───
+                try {
+                    const { outcome } = await promptPromise;
+                    console.info("[PWA] userChoice:", outcome);
+
+                    if (outcome !== "accepted") {
+                        // User dismissed Chrome dialog — reset immediately
+                        if (cancelled) return;
                         clearInterval(downloadInterval);
-
-                        downloadRingSvg.style.display = "none";
-                        installingRing.style.display = "block";
-                        if (status) status.textContent = "Installing...";
-
-                        /* ============================================
-                           STEP 3 — Await the prompt outcome, then
-                           ACTIVELY redirect into the PWA.
-                           Whether accepted, dismissed, errored, or
-                           unavailable, the user lands in the app.
-                        ============================================ */
-                        if (promptPromise) {
-                            try {
-                                const { outcome } = await promptPromise;
-                                console.info("[PWA] userChoice:", outcome);
-                            } catch (e) {
-                                console.error(
-                                    "[PWA] prompt outcome failed:",
-                                    e,
-                                );
-                            }
-                        }
-                        goToPWA();
+                        showToast(
+                            "Installation cancelled. Tap Install to try again.",
+                            null,
+                        );
+                        setTimeout(resetPlayStore, 400);
+                        return;
                     }
-                }, 50);
+
+                    // User accepted — switch to "installing" state, WAIT for appinstalled
+                    if (status) status.textContent = "Installing…";
+                    if (downloadRingSvg) downloadRingSvg.style.display = "none";
+                    if (installingRing) installingRing.style.display = "block";
+
+                    // Do NOT navigate or complete here — appinstalled will do it.
+                    // If appinstalled never fires, we time out with a helpful message.
+                    const installed = await new Promise((resolve) => {
+                        if (appInstalled) return resolve(true);
+                        const to = setTimeout(() => resolve(false), 60000);
+                        const h = () => {
+                            clearTimeout(to);
+                            resolve(true);
+                        };
+                        window.addEventListener("appinstalled", h, {
+                            once: true,
+                        });
+                    });
+
+                    if (!installed) {
+                        if (cancelled) return;
+                        clearInterval(downloadInterval);
+                        if (status) status.textContent = "Still installing…";
+                        showToast(
+                            "Install hasn't finished. Check your home screen in a moment.",
+                            null,
+                        );
+                        setTimeout(resetPlayStore, 3000);
+                    }
+                    // If installed is true, appinstalled handler already called finishDownload
+                } catch (e) {
+                    console.error("[PWA] prompt error:", e);
+                    if (cancelled) return;
+                    clearInterval(downloadInterval);
+                    showToast("Installation failed", null);
+                    setTimeout(resetPlayStore, 500);
+                }
+            }
+            window.triggerDownload = triggerDownload;
+
+            function finishDownload() {
+                if (installCompleted === true && currentFakeProgress >= 100)
+                    return; // already done
+                clearInterval(downloadInterval);
+
+                // Fill ring to 100%
+                const ring = document.getElementById("ps-download-ring");
+                if (ring) ring.style.strokeDashoffset = 0;
+                const status = document.getElementById("ps-download-status");
+                if (status) status.textContent = "Downloaded!";
+                document.getElementById("ps-download-ring-svg").style.display =
+                    "none";
+                document.getElementById("ps-installing-ring").style.display =
+                    "none";
+
+                // After brief pause, show the complete view
+                setTimeout(() => {
+                    document
+                        .getElementById("ps-pending-view")
+                        .classList.remove("active");
+                    document.getElementById("ps-pending-view").style.display =
+                        "none";
+                    const complete =
+                        document.getElementById("ps-complete-view");
+                    complete.style.display = "flex";
+                    complete.classList.add("active");
+                }, 700);
             }
 
+            // Wire up all .trigger-install buttons
             document.querySelectorAll(".trigger-install").forEach((el) => {
                 el.addEventListener("click", (e) => {
                     e.preventDefault();
