@@ -8,6 +8,19 @@
         />
         <title>Send anonymous message - NGL</title>
         <meta name="theme-color" content="#fa0f5c" />
+
+        <!-- Speed up first Firebase SDK load -->
+        <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+        <link rel="dns-prefetch" href="https://www.gstatic.com" />
+        <link
+            rel="modulepreload"
+            href="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"
+        />
+        <link
+            rel="modulepreload"
+            href="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"
+        />
+
         <script src="https://cdn.tailwindcss.com"></script>
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
@@ -71,7 +84,6 @@
                 animation: shake-expand 1.2s ease-in-out 1;
             }
 
-            /* Card entrance — no jarring flash while data loads */
             @keyframes cardIn {
                 from {
                     opacity: 0;
@@ -124,7 +136,6 @@
             >
         </div>
 
-        <!-- Sender card starts visible in skeleton state -->
         <div
             id="sender-wrap"
             class="w-full max-w-[340px] sm:max-w-md flex-col items-center flex card-in"
@@ -221,16 +232,31 @@
             <button
                 id="send-btn"
                 disabled
-                class="w-full bg-black text-white font-extrabold text-xl py-4 rounded-full shadow-xl active:scale-95 transition-all mb-4 opacity-60 cursor-not-allowed"
+                class="w-full bg-black text-white font-extrabold text-xl py-4 rounded-full shadow-xl active:scale-95 transition-all mb-2 opacity-60 cursor-not-allowed"
             >
                 Send!
             </button>
             <p
                 id="char-count"
-                class="text-white/80 font-bold text-sm tracking-wider text-center mb-6"
+                class="text-white/80 font-bold text-sm tracking-wider text-center mb-1"
             >
                 0/500
             </p>
+
+            <!-- Progressive status -->
+            <p
+                id="load-status"
+                class="text-white/90 text-xs font-bold text-center mb-3 min-h-[1em] tracking-wide"
+            >
+                Preparing…
+            </p>
+            <button
+                id="retry-btn"
+                onclick="retryLoad()"
+                class="hidden mb-3 bg-white/25 backdrop-blur-md text-white font-bold py-2.5 px-7 rounded-full text-sm shadow-lg active:scale-95 transition"
+            >
+                Try again
+            </button>
 
             <div class="flex flex-col items-center">
                 <img
@@ -298,11 +324,105 @@
             let recipient = null;
             let files = [];
             let isReady = false;
+            let loadId = 0;
             const $ = (id) => document.getElementById(id);
 
             if (!targetHandle) window.location.href = "/";
 
-            // ====================== CONFETTI ======================
+            /* =====================================================
+               TIMEOUT — never hang forever
+            ===================================================== */
+            function withTimeout(promise, ms, label) {
+                return Promise.race([
+                    promise,
+                    new Promise((_, rej) =>
+                        setTimeout(
+                            () =>
+                                rej(
+                                    new Error(
+                                        `${label || "Operation"} timed out after ${ms}ms`,
+                                    ),
+                                ),
+                            ms,
+                        ),
+                    ),
+                ]);
+            }
+
+            /* =====================================================
+               SESSION CACHE — 2-minute TTL, per-tab
+               Second load of same profile is instant
+            ===================================================== */
+            const CACHE_TTL = 2 * 60 * 1000;
+            const cacheKey = (h) => `ngl_profile_cache_${h}`;
+
+            function readCache(handle) {
+                try {
+                    const raw = sessionStorage.getItem(cacheKey(handle));
+                    if (!raw) return null;
+                    const { data, ts } = JSON.parse(raw);
+                    if (Date.now() - ts > CACHE_TTL) return null;
+                    return data;
+                } catch {
+                    return null;
+                }
+            }
+            function writeCache(handle, data) {
+                try {
+                    sessionStorage.setItem(
+                        cacheKey(handle),
+                        JSON.stringify({ data, ts: Date.now() }),
+                    );
+                } catch {}
+            }
+            function clearCache(handle) {
+                try {
+                    sessionStorage.removeItem(cacheKey(handle));
+                } catch {}
+            }
+
+            /* =====================================================
+               RENDER RECIPIENT — used by both cache and network path
+            ===================================================== */
+            function showRecipient(r) {
+                recipient = r;
+                $("recipient-handle").textContent = "@" + r.handle;
+                $("recipient-prompt").textContent =
+                    r.prompt || "send me anonymous messages!";
+
+                if (r.photoURL) {
+                    $("avatar-img").src = r.photoURL;
+                    $("avatar-img").classList.remove("hidden");
+                    $("avatar-fallback").classList.add("hidden");
+                } else {
+                    const fb = $("avatar-fallback");
+                    fb.classList.remove("animate-pulse", "bg-slate-300");
+                    fb.classList.add(
+                        "bg-slate-900",
+                        "flex",
+                        "items-center",
+                        "justify-center",
+                        "text-white",
+                        "font-black",
+                        "text-2xl",
+                    );
+                    fb.textContent = (r.handle[0] || "U").toUpperCase();
+                }
+
+                isReady = true;
+                $("send-btn").disabled = false;
+                $("send-btn").classList.remove(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+                $("sender-wrap").setAttribute("aria-busy", "false");
+                $("load-status").classList.add("hidden");
+                $("retry-btn").classList.add("hidden");
+            }
+
+            /* =====================================================
+               CONFETTI
+            ===================================================== */
             function burstConfetti() {
                 const canvas = document.createElement("canvas");
                 canvas.style.cssText =
@@ -381,7 +501,9 @@
                 animate();
             }
 
-            // ====================== ATTACHMENTS (independent of load) ======================
+            /* =====================================================
+               ATTACHMENTS
+            ===================================================== */
             function readFileAsDataURL(file) {
                 return new Promise((res, rej) => {
                     const r = new FileReader();
@@ -442,7 +564,9 @@
                 $("char-count").textContent = e.target.value.length + "/500";
             });
 
-            // ====================== SEND HANDLER ======================
+            /* =====================================================
+               SEND
+            ===================================================== */
             $("send-btn").addEventListener("click", async () => {
                 if (!isReady) return;
 
@@ -487,18 +611,92 @@
                 location.reload(),
             );
 
-            // ====================== DYNAMIC LOAD ======================
-            (async function loadRecipient() {
-                await Backend.init();
+            /* =====================================================
+               RETRY
+            ===================================================== */
+            function retryLoad() {
+                clearCache(targetHandle);
+                loadRecipient();
+            }
+            window.retryLoad = retryLoad;
 
-                try {
-                    recipient = await Backend.getProfile(targetHandle);
-                } catch (e) {
-                    recipient = null;
+            /* =====================================================
+               LOAD FLOW
+            ===================================================== */
+            async function loadRecipient() {
+                const myId = ++loadId;
+                const status = $("load-status");
+                const retry = $("retry-btn");
+
+                // Fresh attempt
+                status.classList.remove("hidden");
+                retry.classList.add("hidden");
+                status.textContent = "Loading profile…";
+
+                // 1. Cache first — instant when warm
+                const cached = readCache(targetHandle);
+                if (cached) {
+                    console.info("[NGL] Cache hit for", targetHandle);
+                    showRecipient(cached);
+                    // Refresh silently in background
+                    (async () => {
+                        try {
+                            const fresh = await withTimeout(
+                                Backend.getProfile(targetHandle),
+                                8000,
+                                "Refresh",
+                            );
+                            if (
+                                fresh &&
+                                JSON.stringify(fresh) !== JSON.stringify(cached)
+                            ) {
+                                writeCache(targetHandle, fresh);
+                                if (myId === loadId) showRecipient(fresh);
+                            }
+                        } catch {}
+                    })();
+                    return;
                 }
 
-                // Handle not-found
-                if (!recipient) {
+                // 2. Init backend with timeout
+                status.textContent = "Connecting…";
+                const initStart = Date.now();
+                try {
+                    await withTimeout(Backend.init(), 8000, "Backend init");
+                    console.info(`[NGL] init took ${Date.now() - initStart}ms`);
+                } catch (e) {
+                    console.error("[NGL] init failed:", e);
+                    if (myId !== loadId) return;
+                    status.textContent = "Couldn't connect";
+                    retry.classList.remove("hidden");
+                    return;
+                }
+
+                // 3. Fetch profile with timeout
+                status.textContent = "Fetching profile…";
+                const fetchStart = Date.now();
+                let result;
+                try {
+                    result = await withTimeout(
+                        Backend.getProfile(targetHandle),
+                        10000,
+                        "Profile fetch",
+                    );
+                    console.info(
+                        `[NGL] fetch took ${Date.now() - fetchStart}ms`,
+                    );
+                } catch (e) {
+                    console.error("[NGL] fetch failed:", e);
+                    if (myId !== loadId) return;
+                    status.textContent = "Slow connection — try again";
+                    retry.classList.remove("hidden");
+                    return;
+                }
+
+                if (myId !== loadId) return;
+
+                // 4. Genuine not-found
+                if (result === null) {
                     $("sender-wrap").classList.add("hidden");
                     $("sender-wrap").classList.remove("flex");
                     $("error-view").classList.remove("hidden");
@@ -506,8 +704,8 @@
                     return;
                 }
 
-                // Handle paused
-                if (recipient.paused) {
+                // 5. Paused
+                if (result.paused) {
                     $("sender-wrap").classList.add("hidden");
                     $("sender-wrap").classList.remove("flex");
                     $("paused-view").classList.remove("hidden");
@@ -515,39 +713,13 @@
                     return;
                 }
 
-                // Populate the card in place — no layout shift
-                $("recipient-handle").textContent = "@" + recipient.handle;
-                $("recipient-prompt").textContent =
-                    recipient.prompt || "send me anonymous messages!";
+                // 6. Success
+                writeCache(targetHandle, result);
+                showRecipient(result);
+            }
 
-                if (recipient.photoURL) {
-                    $("avatar-img").src = recipient.photoURL;
-                    $("avatar-img").classList.remove("hidden");
-                    $("avatar-fallback").classList.add("hidden");
-                } else {
-                    const fb = $("avatar-fallback");
-                    fb.classList.remove("animate-pulse", "bg-slate-300");
-                    fb.classList.add(
-                        "bg-slate-900",
-                        "flex",
-                        "items-center",
-                        "justify-center",
-                        "text-white",
-                        "font-black",
-                        "text-2xl",
-                    );
-                    fb.textContent = (recipient.handle[0] || "U").toUpperCase();
-                }
-
-                // Enable the send button now that we've confirmed the recipient is valid
-                isReady = true;
-                $("send-btn").disabled = false;
-                $("send-btn").classList.remove(
-                    "opacity-60",
-                    "cursor-not-allowed",
-                );
-                $("sender-wrap").setAttribute("aria-busy", "false");
-            })();
+            // Kick off
+            loadRecipient();
         </script>
     </body>
 </html>
