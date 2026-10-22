@@ -58,7 +58,12 @@ function send(res, status, body, type = "application/json; charset=utf-8") {
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
   });
-  res.end(typeof body === "string" ? body : JSON.stringify(body));
+  // FIX: Buffers must be sent as-is, only plain objects get JSON-stringified
+  res.end(
+    typeof body === "string" || Buffer.isBuffer(body)
+      ? body
+      : JSON.stringify(body),
+  );
 }
 
 function readBody(req) {
