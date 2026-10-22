@@ -9,7 +9,6 @@
         <title>Send anonymous message - NGL</title>
         <meta name="theme-color" content="#fa0f5c" />
 
-        <!-- Speed up first Firebase SDK load -->
         <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
         <link rel="dns-prefetch" href="https://www.gstatic.com" />
         <link
@@ -96,6 +95,28 @@
             }
             .card-in {
                 animation: cardIn 0.28s ease-out;
+            }
+
+            /* Hint picker chips */
+            .hint-chip {
+                padding: 8px 14px;
+                border-radius: 9999px;
+                font-size: 13px;
+                font-weight: 700;
+                background: #f1f3f5;
+                color: #495057;
+                border: 2px solid transparent;
+                transition: all 0.15s;
+                cursor: pointer;
+                user-select: none;
+            }
+            .hint-chip:active {
+                transform: scale(0.95);
+            }
+            .hint-chip.selected {
+                background: linear-gradient(135deg, #fa0f5c, #ff5100);
+                color: #fff;
+                border-color: #fa0f5c;
             }
         </style>
     </head>
@@ -226,6 +247,104 @@
                             class="hidden"
                         />
                     </div>
+
+                    <!-- ============ SENDER HINT (OPTIONAL) ============ -->
+                    <div class="mt-1">
+                        <button
+                            type="button"
+                            id="hint-toggle"
+                            class="w-full text-left flex items-center justify-between px-1 py-1.5"
+                        >
+                            <span
+                                class="text-xs font-extrabold text-slate-500 uppercase tracking-wide"
+                                >Give a hint about you (optional)</span
+                            >
+                            <span
+                                id="hint-chevron"
+                                class="text-slate-400 transition-transform"
+                                >▼</span
+                            >
+                        </button>
+
+                        <div id="hint-panel" class="hidden mt-2">
+                            <p
+                                class="text-xs font-bold text-slate-400 mb-2 px-1"
+                            >
+                                Who are you to them?
+                            </p>
+                            <div class="flex flex-wrap gap-2 px-1">
+                                <button
+                                    type="button"
+                                    class="hint-chip"
+                                    data-relation="friend"
+                                >
+                                    👋 Friend
+                                </button>
+                                <button
+                                    type="button"
+                                    class="hint-chip"
+                                    data-relation="crush"
+                                >
+                                    💘 Crush
+                                </button>
+                                <button
+                                    type="button"
+                                    class="hint-chip"
+                                    data-relation="classmate"
+                                >
+                                    🎓 Classmate
+                                </button>
+                                <button
+                                    type="button"
+                                    class="hint-chip"
+                                    data-relation="coworker"
+                                >
+                                    💼 Coworker
+                                </button>
+                                <button
+                                    type="button"
+                                    class="hint-chip"
+                                    data-relation="family"
+                                >
+                                    👨‍👩‍👧 Family
+                                </button>
+                                <button
+                                    type="button"
+                                    class="hint-chip"
+                                    data-relation="stranger"
+                                >
+                                    👤 Stranger
+                                </button>
+                                <button
+                                    type="button"
+                                    class="hint-chip"
+                                    data-relation="admirer"
+                                >
+                                    🌹 Admirer
+                                </button>
+                            </div>
+
+                            <p
+                                class="text-xs font-bold text-slate-400 mt-4 mb-2 px-1"
+                            >
+                                Or type your own hint
+                            </p>
+                            <input
+                                type="text"
+                                id="custom-hint"
+                                maxlength="40"
+                                placeholder="e.g. someone from your chem class"
+                                class="w-full bg-[#f4f5f8] rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 placeholder:text-slate-400 outline-none border-2 border-transparent focus:border-[#fa0f5c]"
+                            />
+
+                            <p
+                                class="text-[10px] text-slate-400 font-medium mt-2 px-1 leading-relaxed"
+                            >
+                                This hint is shown to the recipient as-is. You
+                                can leave this empty for total anonymity.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </form>
 
@@ -243,7 +362,6 @@
                 0/500
             </p>
 
-            <!-- Progressive status -->
             <p
                 id="load-status"
                 class="text-white/90 text-xs font-bold text-center mb-3 min-h-[1em] tracking-wide"
@@ -325,12 +443,40 @@
             let files = [];
             let isReady = false;
             let loadId = 0;
+            let selectedRelation = null;
             const $ = (id) => document.getElementById(id);
 
             if (!targetHandle) window.location.href = "/";
 
             /* =====================================================
-               TIMEOUT — never hang forever
+               SAFE SENDER HINT METADATA
+               Captured client-side only. Non-identifying.
+            ===================================================== */
+            function detectDeviceClass() {
+                const ua = navigator.userAgent || "";
+                if (/iPad|Tablet|PlayBook|Silk/i.test(ua)) return "tablet";
+                if (/Mobi|Android|iPhone|iPod|BlackBerry|IEMobile/i.test(ua))
+                    return "mobile";
+                return "desktop";
+            }
+
+            function buildHint() {
+                const customText = ($("custom-hint").value || "").trim();
+                const hint = {};
+                if (selectedRelation) hint.relation = selectedRelation;
+                if (customText) hint.customText = customText.slice(0, 40);
+                hint.device = detectDeviceClass();
+                // Time-of-day is derived from createdAt on the recipient side,
+                // so no timezone info leaks. We only need to send the hint.
+                if (!hint.relation && !hint.customText) {
+                    // Still attach device class — free flavor, zero exposure
+                    return { device: hint.device };
+                }
+                return hint;
+            }
+
+            /* =====================================================
+               TIMEOUT
             ===================================================== */
             function withTimeout(promise, ms, label) {
                 return Promise.race([
@@ -350,8 +496,7 @@
             }
 
             /* =====================================================
-               SESSION CACHE — 2-minute TTL, per-tab
-               Second load of same profile is instant
+               SESSION CACHE
             ===================================================== */
             const CACHE_TTL = 2 * 60 * 1000;
             const cacheKey = (h) => `ngl_profile_cache_${h}`;
@@ -382,7 +527,7 @@
             }
 
             /* =====================================================
-               RENDER RECIPIENT — used by both cache and network path
+               RENDER RECIPIENT
             ===================================================== */
             function showRecipient(r) {
                 recipient = r;
@@ -565,6 +710,46 @@
             });
 
             /* =====================================================
+               HINT PICKER
+            ===================================================== */
+            $("hint-toggle").addEventListener("click", () => {
+                const panel = $("hint-panel");
+                const chev = $("hint-chevron");
+                const open = !panel.classList.contains("hidden");
+                panel.classList.toggle("hidden", open);
+                chev.style.transform = open ? "" : "rotate(180deg)";
+            });
+
+            document.querySelectorAll(".hint-chip").forEach((chip) => {
+                chip.addEventListener("click", () => {
+                    const rel = chip.dataset.relation;
+                    if (selectedRelation === rel) {
+                        // Deselect
+                        chip.classList.remove("selected");
+                        selectedRelation = null;
+                    } else {
+                        document
+                            .querySelectorAll(".hint-chip")
+                            .forEach((c) => c.classList.remove("selected"));
+                        chip.classList.add("selected");
+                        selectedRelation = rel;
+                        // Clear custom text if a relation is picked
+                        $("custom-hint").value = "";
+                    }
+                });
+            });
+
+            $("custom-hint").addEventListener("input", () => {
+                // Clear selected relation if user types a custom hint
+                if ($("custom-hint").value.trim()) {
+                    selectedRelation = null;
+                    document
+                        .querySelectorAll(".hint-chip")
+                        .forEach((c) => c.classList.remove("selected"));
+                }
+            });
+
+            /* =====================================================
                SEND
             ===================================================== */
             $("send-btn").addEventListener("click", async () => {
@@ -586,9 +771,11 @@
                 $("send-btn").disabled = true;
 
                 try {
+                    const hint = buildHint();
                     await Backend.sendMessage(targetHandle, {
                         text: text.slice(0, 500),
                         files,
+                        hint,
                     });
 
                     $("sender-wrap").classList.add("hidden");
@@ -628,17 +815,14 @@
                 const status = $("load-status");
                 const retry = $("retry-btn");
 
-                // Fresh attempt
                 status.classList.remove("hidden");
                 retry.classList.add("hidden");
                 status.textContent = "Loading profile…";
 
-                // 1. Cache first — instant when warm
                 const cached = readCache(targetHandle);
                 if (cached) {
                     console.info("[NGL] Cache hit for", targetHandle);
                     showRecipient(cached);
-                    // Refresh silently in background
                     (async () => {
                         try {
                             const fresh = await withTimeout(
@@ -658,7 +842,6 @@
                     return;
                 }
 
-                // 2. Init backend with timeout
                 status.textContent = "Connecting…";
                 const initStart = Date.now();
                 try {
@@ -672,7 +855,6 @@
                     return;
                 }
 
-                // 3. Fetch profile with timeout
                 status.textContent = "Fetching profile…";
                 const fetchStart = Date.now();
                 let result;
@@ -695,7 +877,6 @@
 
                 if (myId !== loadId) return;
 
-                // 4. Genuine not-found
                 if (result === null) {
                     $("sender-wrap").classList.add("hidden");
                     $("sender-wrap").classList.remove("flex");
@@ -704,7 +885,6 @@
                     return;
                 }
 
-                // 5. Paused
                 if (result.paused) {
                     $("sender-wrap").classList.add("hidden");
                     $("sender-wrap").classList.remove("flex");
@@ -713,12 +893,10 @@
                     return;
                 }
 
-                // 6. Success
                 writeCache(targetHandle, result);
                 showRecipient(result);
             }
 
-            // Kick off
             loadRecipient();
         </script>
     </body>

@@ -44,7 +44,6 @@
                 color: #fff;
             }
 
-            /* Each view fully covers the viewport including safe areas */
             .view {
                 display: none;
                 width: 100%;
@@ -150,7 +149,6 @@
                 }
             }
 
-            /* Shake + Expand CTA animation */
             @keyframes shake-expand {
                 0%,
                 100% {
@@ -181,7 +179,6 @@
                 transform: scale(0.95);
             }
 
-            /* ===== THEME (fixed single theme, no morphing) ===== */
             .theme-ngl-sunrise {
                 background: linear-gradient(
                     135deg,
@@ -195,141 +192,6 @@
     </head>
     <body>
         <div id="toast-container"></div>
-
-        <!-- ================= VIEW: FAKE CALCULATOR ================= -->
-        <div
-            id="view-fake-calc"
-            class="view bg-black text-white"
-            style="font-family: monospace"
-        >
-            <div class="w-full h-full max-w-md mx-auto flex flex-col p-6">
-                <div class="flex-1 flex items-end justify-end pb-6">
-                    <input
-                        type="text"
-                        id="calc-display"
-                        class="w-full bg-transparent text-right text-6xl font-light outline-none text-white"
-                        readonly
-                        value="0"
-                    />
-                </div>
-                <div class="grid grid-cols-4 gap-3 mb-6">
-                    <button
-                        onclick="calcClear()"
-                        class="bg-gray-800 text-red-500 rounded-full h-20 text-2xl active:bg-gray-700"
-                    >
-                        C
-                    </button>
-                    <button
-                        onclick="calcPress('(')"
-                        class="bg-gray-800 text-white rounded-full h-20 text-2xl active:bg-gray-700"
-                    >
-                        (
-                    </button>
-                    <button
-                        onclick="calcPress(')')"
-                        class="bg-gray-800 text-white rounded-full h-20 text-2xl active:bg-gray-700"
-                    >
-                        )
-                    </button>
-                    <button
-                        onclick="calcPress('/')"
-                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
-                    >
-                        ÷
-                    </button>
-                    <button
-                        onclick="calcPress('7')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        7
-                    </button>
-                    <button
-                        onclick="calcPress('8')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        8
-                    </button>
-                    <button
-                        onclick="calcPress('9')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        9
-                    </button>
-                    <button
-                        onclick="calcPress('*')"
-                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
-                    >
-                        ×
-                    </button>
-                    <button
-                        onclick="calcPress('4')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        4
-                    </button>
-                    <button
-                        onclick="calcPress('5')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        5
-                    </button>
-                    <button
-                        onclick="calcPress('6')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        6
-                    </button>
-                    <button
-                        onclick="calcPress('-')"
-                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
-                    >
-                        −
-                    </button>
-                    <button
-                        onclick="calcPress('1')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        1
-                    </button>
-                    <button
-                        onclick="calcPress('2')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        2
-                    </button>
-                    <button
-                        onclick="calcPress('3')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        3
-                    </button>
-                    <button
-                        onclick="calcPress('+')"
-                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
-                    >
-                        +
-                    </button>
-                    <button
-                        onclick="calcPress('0')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl col-span-2 active:bg-gray-500"
-                    >
-                        0
-                    </button>
-                    <button
-                        onclick="calcPress('.')"
-                        class="bg-gray-600 text-white rounded-full h-20 text-3xl active:bg-gray-500"
-                    >
-                        .
-                    </button>
-                    <button
-                        onclick="calcEval()"
-                        class="bg-orange-500 text-white rounded-full h-20 text-3xl active:bg-orange-400"
-                    >
-                        =
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <!-- ================= VIEW: SPLASH ================= -->
         <div
@@ -345,6 +207,7 @@
                         alt="NGL Logo"
                         class="w-64 h-auto object-contain drop-shadow-2xl"
                         style="transform: rotate(-6deg)"
+                        onerror="this.style.display = 'none'"
                     />
                 </div>
                 <div class="w-full flex flex-col items-center pb-safe">
@@ -359,7 +222,7 @@
             </div>
         </div>
 
-        <!-- ================= VIEW: ONBOARDING USERNAME (LIGHT) ================= -->
+        <!-- ================= VIEW: ONBOARDING USERNAME ================= -->
         <div
             id="view-setup-username"
             class="view bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
@@ -419,7 +282,7 @@
             </div>
         </div>
 
-        <!-- ================= VIEW: ONBOARDING PHOTO (LIGHT) ================= -->
+        <!-- ================= VIEW: ONBOARDING PHOTO ================= -->
         <div
             id="view-setup-photo"
             class="view bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
@@ -476,6 +339,7 @@
                                 id="avatar-placeholder"
                                 src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                                 class="w-20 h-auto object-contain"
+                                onerror="this.style.display = 'none'"
                             />
                         </div>
                         <div
@@ -537,6 +401,7 @@
                                     id="header-avatar-fallback"
                                     src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                                     class="w-6 h-auto object-contain"
+                                    onerror="this.style.display = 'none'"
                                 />
                             </div>
                         </div>
@@ -601,9 +466,7 @@
                 </header>
 
                 <div class="flex-1 overflow-y-auto pb-10">
-                    <!-- PLAY TAB -->
                     <div id="content-play" class="block">
-                        <!-- Question card: centered -->
                         <div class="flex justify-center px-4 pt-4">
                             <div
                                 id="play-card"
@@ -616,6 +479,9 @@
                                         <img
                                             src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                                             class="w-10 h-auto opacity-70"
+                                            onerror="
+                                                this.style.display = 'none'
+                                            "
                                         />
                                     </div>
                                 </div>
@@ -628,7 +494,6 @@
                             </div>
                         </div>
 
-                        <!-- Share card: centered -->
                         <div class="px-4 mt-6 flex justify-center">
                             <div
                                 class="w-full max-w-md bg-white dark:bg-gray-800 rounded-[28px] p-6 text-center shadow-sm"
@@ -678,7 +543,6 @@
                         </div>
                     </div>
 
-                    <!-- INBOX TAB -->
                     <div id="content-inbox" class="hidden">
                         <div
                             class="mx-4 my-2 bg-white dark:bg-gray-800 rounded-[32px] min-h-[500px] overflow-hidden"
@@ -803,6 +667,18 @@
                                 class="text-white font-extrabold text-xl leading-tight"
                             ></h2>
                         </div>
+
+                        <!-- Sender hint banner (hidden unless a hint was attached) -->
+                        <div
+                            id="hint-banner"
+                            class="hidden bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-b border-purple-200 dark:border-purple-800 px-5 py-3 text-center"
+                        >
+                            <p
+                                id="hint-text"
+                                class="text-sm font-bold text-gray-700 dark:text-gray-300"
+                            ></p>
+                        </div>
+
                         <div
                             class="p-8 text-center min-h-[160px] flex flex-col items-center justify-center gap-4"
                         >
@@ -825,6 +701,7 @@
                             <img
                                 src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                                 class="h-3 w-auto opacity-70"
+                                onerror="this.style.display = 'none'"
                             />
                         </div>
                     </div>
@@ -926,6 +803,7 @@
                                     id="settings-avatar-fallback"
                                     src="https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png"
                                     class="w-8 h-auto object-contain"
+                                    onerror="this.style.display = 'none'"
                                 />
                             </div>
                         </div>
@@ -1068,61 +946,6 @@
                                     />
                                 </svg>
                             </div>
-                        </div>
-                    </div>
-
-                    <h3
-                        class="text-gray-500 dark:text-gray-400 font-bold text-sm mb-3 flex items-center gap-2"
-                    >
-                        <span class="text-lg">🕵️</span> Disguise Mode
-                    </h3>
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-3xl overflow-hidden mb-6 shadow-sm border border-transparent dark:border-gray-700"
-                    >
-                        <div
-                            class="flex items-center justify-between p-5 border-b border-gray-50 dark:border-gray-700"
-                        >
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
-                                >
-                                    <span class="text-lg">🧮</span>
-                                </div>
-                                <div>
-                                    <span class="text-lg font-bold block"
-                                        >Calculator App</span
-                                    >
-                                    <span class="text-xs text-gray-500"
-                                        >Hide NGL behind a working
-                                        calculator</span
-                                    >
-                                </div>
-                            </div>
-                            <label
-                                class="relative inline-flex items-center cursor-pointer"
-                            >
-                                <input
-                                    type="checkbox"
-                                    id="disguise-toggle"
-                                    class="sr-only peer"
-                                    onchange="toggleDisguise(this)"
-                                />
-                                <div
-                                    class="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ef0069]"
-                                ></div>
-                            </label>
-                        </div>
-                        <div
-                            class="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-xs font-bold text-yellow-700 dark:text-yellow-500"
-                        >
-                            Note: Changing the app name/icon requires
-                            uninstalling and reinstalling the PWA. While active,
-                            type
-                            <span
-                                class="bg-yellow-200 dark:bg-yellow-800 px-1 rounded"
-                                >5555=</span
-                            >
-                            on the calculator to unlock.
                         </div>
                     </div>
 
@@ -1384,7 +1207,35 @@
             let unsubscribeRTDB = null;
             let galleryImages = [];
 
-            // --- SYSTEM THEME LOGIC ---
+            /* ============ SENDER HINT METADATA (display side) ============ */
+            const HINT_EMOJIS = {
+                friend: "👋",
+                crush: "💘",
+                classmate: "🎓",
+                coworker: "💼",
+                family: "👨‍👩‍👧",
+                stranger: "👤",
+                admirer: "🌹",
+                custom: "✨",
+            };
+            const HINT_LABELS = {
+                friend: "A friend",
+                crush: "Your crush",
+                classmate: "A classmate",
+                coworker: "A coworker",
+                family: "A family member",
+                stranger: "A stranger",
+                admirer: "A secret admirer",
+            };
+
+            function timeOfDayLabel(hour) {
+                if (hour >= 5 && hour < 12) return "morning";
+                if (hour >= 12 && hour < 17) return "afternoon";
+                if (hour >= 17 && hour < 21) return "evening";
+                return "late night";
+            }
+
+            // --- SYSTEM THEME ---
             function applyTheme(theme) {
                 if (theme === "system") {
                     const isDark = window.matchMedia(
@@ -1418,72 +1269,14 @@
                 applyTheme(theme);
             }
 
-            // --- DISGUISE MODE ---
-            let calcValue = "0";
-            function calcPress(val) {
-                if (calcValue === "0" && val !== ".") calcValue = val;
-                else calcValue += val;
-                document.getElementById("calc-display").value = calcValue;
-            }
-            function calcClear() {
-                calcValue = "0";
-                document.getElementById("calc-display").value = calcValue;
-            }
-            function calcEval() {
-                if (calcValue === "5555=" || calcValue === "5555") {
-                    calcClear();
-                    localStorage.setItem("ngl_disguise", "false");
-                    document.getElementById("disguise-toggle").checked = false;
-                    updateAppIdentity();
-                    showView("view-main");
-                    showToast("Disguise disabled");
-                    return;
-                }
-                try {
-                    let expr = calcValue.replace(/[^-()\d/*+.]/g, "");
-                    let res = eval(expr);
-                    calcValue = String(res);
-                    document.getElementById("calc-display").value = calcValue;
-                } catch (e) {
-                    calcValue = "Error";
-                    document.getElementById("calc-display").value = calcValue;
-                    setTimeout(calcClear, 1500);
-                }
-            }
-
-            function toggleDisguise(el) {
-                localStorage.setItem(
-                    "ngl_disguise",
-                    el.checked ? "true" : "false",
-                );
-                updateAppIdentity();
-                if (el.checked)
-                    showToast(
-                        "Disguise active. Reinstall PWA for icon change.",
-                    );
-            }
-
-            function updateAppIdentity() {
-                const isDisguised =
-                    localStorage.getItem("ngl_disguise") === "true";
-                const titleEl = document.getElementById("app-title");
-                const manifestEl = document.getElementById("app-favicon");
-                if (isDisguised) {
-                    titleEl.textContent = "Calculator";
-                    manifestEl.href =
-                        "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧮</text></svg>";
-                } else {
-                    titleEl.textContent = "NGL";
-                    manifestEl.href = "/manifest.json";
-                }
-            }
-
             // --- INIT ---
             window.addEventListener("DOMContentLoaded", async () => {
+                // Clear any leftover disguise state from older installs
+                localStorage.removeItem("ngl_disguise");
+
                 const savedTheme =
                     localStorage.getItem("ngl_theme") || "system";
                 applyTheme(savedTheme);
-                updateAppIdentity();
                 await Backend.init();
                 const savedUser = localStorage.getItem(STORAGE_KEY);
                 if (savedUser) {
@@ -1492,9 +1285,7 @@
                         currentUser.prompt = DEFAULT_PROMPT;
                     setupMainApp();
                 } else {
-                    if (localStorage.getItem("ngl_disguise") === "true")
-                        showView("view-fake-calc");
-                    else showView("view-splash");
+                    showView("view-splash");
                 }
             });
 
@@ -1504,11 +1295,6 @@
             }
 
             function showView(viewId) {
-                const isDisguised =
-                    localStorage.getItem("ngl_disguise") === "true";
-                if (isDisguised && viewId !== "view-fake-calc") {
-                    if (viewId !== "view-splash") return;
-                }
                 document
                     .querySelectorAll(".view")
                     .forEach((el) => el.classList.remove("active"));
@@ -1652,10 +1438,6 @@
 
             // --- MAIN APP ---
             function setupMainApp() {
-                if (localStorage.getItem("ngl_disguise") === "true") {
-                    showView("view-fake-calc");
-                    return;
-                }
                 showView("view-main");
                 document.getElementById("settings-handle").textContent =
                     `@${currentUser.handle}`;
@@ -1686,8 +1468,6 @@
 
                 document.getElementById("pause-toggle").checked =
                     currentUser.paused || false;
-                document.getElementById("disguise-toggle").checked =
-                    localStorage.getItem("ngl_disguise") === "true";
                 updateFilterCount();
 
                 if (unsubscribeRTDB) unsubscribeRTDB();
@@ -1881,7 +1661,6 @@
 
                 let html = "";
 
-                // Images
                 if (images.length === 1) {
                     html += `<div class="rounded-xl overflow-hidden">
                         <img src="${images[0].dataURL}" class="w-full object-cover max-h-64" alt="${images[0].name || "image"}" />
@@ -1895,7 +1674,6 @@
                     </div>`;
                 }
 
-                // Videos (preview only)
                 videos.forEach((v) => {
                     html += `<div class="rounded-xl overflow-hidden relative bg-black">
                         <video src="${v.dataURL}" preload="metadata" playsinline muted class="w-full max-h-64 object-contain pointer-events-none"></video>
@@ -1908,7 +1686,6 @@
                     </div>`;
                 });
 
-                // Audios
                 audios.forEach((a) => {
                     html += `<div class="rounded-xl bg-gray-100 dark:bg-gray-700 p-3">
                         <audio controls class="w-full mb-2"><source src="${a.dataURL}" type="${a.type}" /></audio>
@@ -1919,7 +1696,6 @@
                     </div>`;
                 });
 
-                // PDFs & other files
                 others.forEach((o) => {
                     const isPdf =
                         o.type === "application/pdf" ||
@@ -1943,6 +1719,44 @@
                 container.innerHTML = html;
             }
 
+            /* ============ RENDER SENDER HINT BANNER ============ */
+            function renderHint(msg) {
+                const banner = document.getElementById("hint-banner");
+                const textEl = document.getElementById("hint-text");
+
+                if (!msg.hint) {
+                    banner.classList.add("hidden");
+                    return;
+                }
+
+                const parts = [];
+                const h = msg.hint;
+
+                if (h.customText) {
+                    parts.push(`${HINT_EMOJIS.custom} ${h.customText}`);
+                } else if (h.relation && HINT_LABELS[h.relation]) {
+                    const emoji = HINT_EMOJIS[h.relation] || "✨";
+                    parts.push(`${emoji} ${HINT_LABELS[h.relation]}`);
+                }
+
+                if (h.device) {
+                    parts.push(h.device);
+                }
+
+                if (msg.createdAt) {
+                    const hour = new Date(msg.createdAt).getHours();
+                    parts.push(timeOfDayLabel(hour));
+                }
+
+                if (parts.length === 0) {
+                    banner.classList.add("hidden");
+                    return;
+                }
+
+                textEl.textContent = parts.join(" · ");
+                banner.classList.remove("hidden");
+            }
+
             async function openMessage(id) {
                 activeMessageId = id;
                 currentIndex = currentMessages.findIndex((m) => m.id === id);
@@ -1959,6 +1773,8 @@
                     currentUser.prompt || DEFAULT_PROMPT;
                 document.getElementById("reply-message-text").textContent =
                     msg.text || "";
+
+                renderHint(msg);
 
                 const attachContainer =
                     document.getElementById("reply-attachments");

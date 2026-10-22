@@ -1,11 +1,10 @@
-// server.js — Node HTTP server for NGL
-// Serves static files + a tiny local /api fallback when Firebase isn't configured.
+// server.js — Node.js HTTP server
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 const ROOT = __dirname;
 const DATA_FILE = path.join(ROOT, "data.json");
 
@@ -15,7 +14,6 @@ const MIME = {
   ".mjs": "application/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
-  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -27,9 +25,17 @@ const MIME = {
   ".woff2": "font/woff2",
   ".txt": "text/plain; charset=utf-8",
   ".map": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json",
 };
 
-// ---------- DATA (local fallback store) ----------
+// Safety guard — refuse to start if browser code was accidentally pasted
+if (typeof window !== "undefined" || typeof document !== "undefined") {
+  console.error("\n[FATAL] server.js appears to contain BROWSER code.");
+  console.error("You probably pasted backend.js into server.js by mistake.");
+  console.error("Replace server.js with the Node server version.\n");
+  process.exit(1);
+}
+
 function loadData() {
   try {
     return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
@@ -46,19 +52,11 @@ function saveData(d) {
 }
 let store = loadData();
 
-// ---------- RESPONSE HELPERS ----------
-function send(
-  res,
-  status,
-  body,
-  type = "application/json; charset=utf-8",
-  extraHeaders = {},
-) {
+function send(res, status, body, type = "application/json; charset=utf-8") {
   res.writeHead(status, {
     "Content-Type": type,
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
-    ...extraHeaders,
   });
   res.end(typeof body === "string" ? body : JSON.stringify(body));
 }
@@ -87,11 +85,9 @@ function readBody(req) {
 const cleanHandle = (h) => (h || "").trim().toLowerCase().replace(/[@\s]/g, "");
 const newId = () => crypto.randomBytes(8).toString("hex");
 
-// ---------- API (local fallback) ----------
 async function handleApi(req, res, parts) {
   const method = req.method;
 
-  // --- PROFILES ---
   if (parts[1] === "profile") {
     if (parts.length === 2 && method === "POST") {
       const body = await readBody(req);
@@ -132,7 +128,6 @@ async function handleApi(req, res, parts) {
     }
   }
 
-  // --- MESSAGES ---
   if (parts[1] === "messages") {
     const h = cleanHandle(parts[2]);
 
@@ -142,9 +137,9 @@ async function handleApi(req, res, parts) {
         id: newId(),
         text: (body.text || "").slice(0, 500),
         files: Array.isArray(body.files) ? body.files.slice(0, 5) : [],
+        hint: body.hint || null,
         reply: null,
         createdAt: Date.now(),
-        read: false,
       };
       if (!store.messages[h]) store.messages[h] = [];
       store.messages[h].unshift(msg);
@@ -178,19 +173,12 @@ async function handleApi(req, res, parts) {
   return send(res, 404, { error: "unknown endpoint" });
 }
 
-// ---------- STATIC FILES ----------
 function serveStatic(req, res, pathname) {
-  // Health check
   if (pathname === "/health" || pathname === "/_health") {
     return send(res, 200, {
       status: "ok",
       uptime: process.uptime(),
       indexHtmlExists: fs.existsSync(path.join(ROOT, "index.html")),
-      appHtmlExists: fs.existsSync(path.join(ROOT, "app.html")),
-      manifestExists: fs.existsSync(path.join(ROOT, "manifest.json")),
-      iconsExist:
-        fs.existsSync(path.join(ROOT, "icons/icon-192.png")) &&
-        fs.existsSync(path.join(ROOT, "icons/icon-512.png")),
     });
   }
 
@@ -207,7 +195,6 @@ function serveStatic(req, res, pathname) {
   if (file === "app") file = "app.html";
   if (file === "send") file = "send.html";
 
-  // Protect internal / private files
   const base = path.basename(file);
   if (
     base === "data.json" ||
@@ -224,7 +211,6 @@ function serveStatic(req, res, pathname) {
 
   fs.readFile(fullPath, (err, data) => {
     if (err) {
-      // Helpful page if index.html is missing
       if (file === "index.html") {
         let listing = "(could not read directory)";
         try {
@@ -233,7 +219,8 @@ function serveStatic(req, res, pathname) {
         return send(
           res,
           404,
-          `<!doctype html><html><head><meta charset="utf-8"><title>index.html not found</title></head>
+          `<!doctype html>
+<html><head><meta charset="utf-8"><title>index.html not found</title></head>
 <body style="font-family:system-ui,sans-serif;padding:40px;line-height:1.5;color:#111;background:#fff">
   <h1>index.html not found</h1>
   <p>Server is running fine. Missing file:</p>
@@ -245,7 +232,6 @@ function serveStatic(req, res, pathname) {
         );
       }
 
-      // SPA fallback for extensionless unknown routes
       const indexPath = path.join(ROOT, "index.html");
       if (!path.extname(file) && fs.existsSync(indexPath)) {
         return fs.readFile(indexPath, (err2, data2) => {
@@ -257,50 +243,15 @@ function serveStatic(req, res, pathname) {
       return send(res, 404, `not found: ${decoded}`);
     }
 
-    const ext = path.extname(fullPath).toLowerCase();
-
-    // ── Headers tuned for PWA ──
-    const headers = {
-      "Content-Type": MIME[ext] || "application/octet-stream",
-    };
-
-    // Manifest must be no-cache so Chrome always re-validates.
-    // Explicit CORS so a cross-context fetch never fails.
-    if (base === "manifest.json") {
-      headers["Cache-Control"] = "public, max-age=0, must-revalidate";
-      headers["Access-Control-Allow-Origin"] = "*";
-    }
-
-    // Service worker must always revalidate so new deploys activate quickly.
-    if (base === "sw.js") {
-      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-      headers["Service-Worker-Allowed"] = "/";
-    }
-
-    // HTML no-cache so re-deploys take effect immediately.
-    if (ext === ".html") {
-      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
-    }
-
-    // Icons long cache — Chrome fetches them out-of-band during WebAPK build.
-    if (
-      ext === ".png" ||
-      ext === ".jpg" ||
-      ext === ".jpeg" ||
-      ext === ".webp" ||
-      ext === ".svg" ||
-      ext === ".ico"
-    ) {
-      headers["Cache-Control"] = "public, max-age=31536000, immutable";
-      headers["Access-Control-Allow-Origin"] = "*";
-    }
-
-    res.writeHead(200, headers);
-    res.end(data);
+    send(
+      res,
+      200,
+      data,
+      MIME[path.extname(fullPath).toLowerCase()] || "application/octet-stream",
+    );
   });
 }
 
-// ---------- SERVER ----------
 const startedAt = new Date().toISOString();
 
 const server = http.createServer(async (req, res) => {
@@ -320,7 +271,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`\n  ✨ NGL running on port ${PORT} (0.0.0.0)`);
+  console.log(`\n  ✨ NGL running on port ${PORT} (bound to 0.0.0.0)`);
   console.log(`  📁 ROOT   : ${ROOT}`);
   console.log(`  🕒 Started: ${startedAt}`);
   let files = [];
@@ -329,21 +280,6 @@ server.listen(PORT, "0.0.0.0", () => {
   } catch {}
   console.log(`  📄 Files  : ${files.join(", ") || "(empty)"}`);
   console.log(
-    `  ✅ index.html       : ${fs.existsSync(path.join(ROOT, "index.html"))}`,
-  );
-  console.log(
-    `  ✅ app.html         : ${fs.existsSync(path.join(ROOT, "app.html"))}`,
-  );
-  console.log(
-    `  ✅ manifest.json    : ${fs.existsSync(path.join(ROOT, "manifest.json"))}`,
-  );
-  console.log(
-    `  ✅ sw.js            : ${fs.existsSync(path.join(ROOT, "sw.js"))}`,
-  );
-  console.log(
-    `  ✅ icons/icon-192   : ${fs.existsSync(path.join(ROOT, "icons/icon-192.png"))}`,
-  );
-  console.log(
-    `  ✅ icons/icon-512   : ${fs.existsSync(path.join(ROOT, "icons/icon-512.png"))}\n`,
+    `  ✅ index.html present: ${fs.existsSync(path.join(ROOT, "index.html"))}\n`,
   );
 });
