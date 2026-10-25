@@ -5,34 +5,74 @@ window.Backend = (function () {
     api = null;
   let isReady = false;
   let useLocalApi = false;
+  let initPromise = null;
   const CHUNK_SIZE = 80000;
 
-  async function init() {
-    if (!cfg.databaseURL) {
-      console.warn(
-        "[NGL] No FIREBASE_CONFIG.databaseURL — falling back to local /api/ endpoints",
-      );
-      useLocalApi = true;
-      isReady = true;
-      return;
+  /* =====================================================
+     RETRY HELPER — exponential backoff, 3 attempts
+  ===================================================== */
+  async function withRetry(fn, maxAttempts = 3, label = "operation") {
+    let lastErr;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await fn();
+      } catch (e) {
+        lastErr = e;
+        console.warn(
+          `[NGL] ${label} attempt ${attempt}/${maxAttempts} failed:`,
+          e?.message || e,
+        );
+        if (attempt < maxAttempts) {
+          await new Promise((r) =>
+            setTimeout(r, 300 * Math.pow(2, attempt - 1)),
+          );
+        }
+      }
     }
-    try {
-      const appMod =
-        await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js");
-      const dbMod =
-        await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js");
-      const app = appMod.getApps().length
-        ? appMod.getApp()
-        : appMod.initializeApp(cfg);
-      rtdb = dbMod.getDatabase(app);
-      api = dbMod;
-      isReady = true;
-      console.info("[NGL] Firebase RTDB Connected");
-    } catch (e) {
-      console.error("[NGL] RTDB Init Failed — using local fallback:", e);
-      useLocalApi = true;
-      isReady = true;
-    }
+    throw lastErr;
+  }
+
+  /* =====================================================
+     INIT — cached, but a FAILED init is cleared so the
+     next call retries. Never leaves you stuck in localApi
+     mode forever.
+  ===================================================== */
+  function init() {
+    if (initPromise) return initPromise;
+    initPromise = (async () => {
+      isReady = false;
+      useLocalApi = false;
+
+      if (!cfg.databaseURL) {
+        console.warn(
+          "[NGL] No FIREBASE_CONFIG.databaseURL — using local /api/ endpoints",
+        );
+        useLocalApi = true;
+        isReady = true;
+        initPromise = null; // allow retry if config is added later
+        return;
+      }
+
+      try {
+        const appMod =
+          await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js");
+        const dbMod =
+          await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js");
+        const app = appMod.getApps().length
+          ? appMod.getApp()
+          : appMod.initializeApp(cfg);
+        rtdb = dbMod.getDatabase(app);
+        api = dbMod;
+        isReady = true;
+        console.info("[NGL] Firebase RTDB Connected");
+      } catch (e) {
+        console.error("[NGL] RTDB Init Failed:", e?.message || e);
+        useLocalApi = true;
+        isReady = true;
+        initPromise = null; // ← next init() call will retry Firebase instead of being stuck
+      }
+    })();
+    return initPromise;
   }
 
   async function localFetch(pathname, opts = {}) {
@@ -49,19 +89,25 @@ window.Backend = (function () {
   }
 
   async function saveProfile(handle, profile) {
-    if (!isReady) throw new Error("Backend not initialised");
+    if (!isReady) await init();
     if (useLocalApi) {
       return localFetch("/api/profile", {
         method: "POST",
         body: JSON.stringify({ handle, ...profile }),
       });
     }
-    await api.set(api.ref(rtdb, "profiles/" + handle), profile);
-    return profile;
+    // Strip any legacy hint field
+    const { hint, ...clean } = profile || {};
+    await withRetry(
+      () => api.set(api.ref(rtdb, "profiles/" + handle), clean),
+      3,
+      "saveProfile",
+    );
+    return clean;
   }
 
   async function getProfile(handle) {
-    if (!isReady) return null;
+    if (!isReady) await init();
     if (useLocalApi) {
       try {
         return await localFetch("/api/profile/" + encodeURIComponent(handle));
@@ -69,12 +115,21 @@ window.Backend = (function () {
         return null;
       }
     }
-    const snap = await api.get(api.ref(rtdb, "profiles/" + handle));
+    const snap = await withRetry(
+      () => api.get(api.ref(rtdb, "profiles/" + handle)),
+      3,
+      "getProfile",
+    );
     return snap.exists() ? snap.val() : null;
   }
 
+  /* =====================================================
+     SEND — generate msgId ONCE, upload files, then write
+     the message. Every step is retried. If the message
+     write fails permanently, orphaned chunks are removed.
+  ===================================================== */
   async function sendMessage(handle, msg) {
-    if (!isReady) throw new Error("Backend not initialised");
+    if (!isReady) await init();
 
     if (useLocalApi) {
       const payload = {
@@ -85,68 +140,115 @@ window.Backend = (function () {
           size: f.size,
           dataURL: f.dataURL,
         })),
-        hint: msg.hint || null,
       };
-      const { id } = await localFetch(
-        "/api/messages/" + encodeURIComponent(handle),
-        { method: "POST", body: JSON.stringify(payload) },
+      const { id } = await withRetry(
+        () =>
+          localFetch("/api/messages/" + encodeURIComponent(handle), {
+            method: "POST",
+            body: JSON.stringify(payload),
+          }),
+        3,
+        "sendMessage (local)",
       );
       return id;
     }
 
     const msgId = api.push(api.ref(rtdb, "messages/" + handle)).key;
     const uploadedFilesMeta = [];
+    const writtenChunkIndices = [];
 
-    if (msg.files && msg.files.length > 0) {
-      for (let i = 0; i < msg.files.length; i++) {
-        const f = msg.files[i];
-        const chunks = [];
-        for (let offset = 0; offset < f.dataURL.length; offset += CHUNK_SIZE) {
-          chunks.push(f.dataURL.substring(offset, offset + CHUNK_SIZE));
+    try {
+      // 1. Upload file chunks (each file retried independently)
+      if (msg.files && msg.files.length > 0) {
+        for (let i = 0; i < msg.files.length; i++) {
+          const f = msg.files[i];
+          const chunks = [];
+          for (
+            let offset = 0;
+            offset < f.dataURL.length;
+            offset += CHUNK_SIZE
+          ) {
+            chunks.push(f.dataURL.substring(offset, offset + CHUNK_SIZE));
+          }
+          const chunkUpdates = {};
+          chunks.forEach((chunk, index) => {
+            chunkUpdates[`file_chunks/${msgId}/${i}/${index}`] = chunk;
+          });
+
+          await withRetry(
+            () => api.update(api.ref(rtdb), chunkUpdates),
+            3,
+            `file chunk upload (file ${i + 1}/${msg.files.length})`,
+          );
+          writtenChunkIndices.push(i);
+
+          uploadedFilesMeta.push({
+            name: f.name,
+            type: f.type,
+            size: f.size,
+            chunksCount: chunks.length,
+          });
         }
-        const chunkUpdates = {};
-        chunks.forEach((chunk, index) => {
-          chunkUpdates[`file_chunks/${msgId}/${i}/${index}`] = chunk;
-        });
-        await api.update(api.ref(rtdb), chunkUpdates);
-        uploadedFilesMeta.push({
-          name: f.name,
-          type: f.type,
-          size: f.size,
-          chunksCount: chunks.length,
-        });
       }
-    }
 
-    const finalMsg = {
-      id: msgId,
-      text: msg.text,
-      files: uploadedFilesMeta,
-      createdAt: Date.now(),
-      read: false,
-      hint: msg.hint || null,
-    };
-    await api.set(api.ref(rtdb, "messages/" + handle + "/" + msgId), finalMsg);
-    return msgId;
+      // 2. Write the message itself
+      const finalMsg = {
+        id: msgId,
+        text: msg.text || "",
+        files: uploadedFilesMeta,
+        createdAt: Date.now(),
+        read: false,
+      };
+
+      await withRetry(
+        () =>
+          api.set(api.ref(rtdb, "messages/" + handle + "/" + msgId), finalMsg),
+        3,
+        "message write",
+      );
+
+      return msgId;
+    } catch (err) {
+      // Cleanup orphaned chunks so they don't waste storage
+      for (const i of writtenChunkIndices) {
+        try {
+          await api.remove(api.ref(rtdb, `file_chunks/${msgId}/${i}`));
+        } catch {}
+      }
+      // Also remove any partial message node just in case
+      try {
+        await api.remove(api.ref(rtdb, "messages/" + handle + "/" + msgId));
+      } catch {}
+      throw err;
+    }
   }
 
   async function fetchFileChunks(msgId, fileIndex, chunksCount) {
-    if (!isReady || useLocalApi) return null;
-    const snap = await api.get(
-      api.ref(rtdb, `file_chunks/${msgId}/${fileIndex}`),
+    if (!isReady) await init();
+    if (useLocalApi) return null;
+    const snap = await withRetry(
+      () => api.get(api.ref(rtdb, `file_chunks/${msgId}/${fileIndex}`)),
+      3,
+      "fetchFileChunks",
     );
     if (!snap.exists()) return null;
     const chunkData = snap.val();
     let base64 = "";
-    for (let i = 0; i < chunksCount; i++) {
+    for (let i = 0; i < chunksCount; i++)
       if (chunkData[i]) base64 += chunkData[i];
-    }
-    await api.remove(api.ref(rtdb, `file_chunks/${msgId}/${fileIndex}`));
+    try {
+      await api.remove(api.ref(rtdb, `file_chunks/${msgId}/${fileIndex}`));
+    } catch {}
     return base64;
   }
 
   function subscribeMessages(handle, cb) {
-    if (!isReady) return () => {};
+    if (!isReady) {
+      init()
+        .then(() => subscribeMessages(handle, cb))
+        .catch(() => {});
+      return () => {};
+    }
 
     if (useLocalApi) {
       let known = new Set();
@@ -163,9 +265,7 @@ window.Backend = (function () {
           list.forEach((m) => known.add(m.id));
           cb(list, { first, newOnes });
           first = false;
-        } catch (e) {
-          // swallow polling errors
-        }
+        } catch {}
         if (!stopped) setTimeout(poll, 2500);
       }
       poll();
@@ -188,25 +288,39 @@ window.Backend = (function () {
   }
 
   async function markAsRead(handle, msgId) {
-    if (!isReady || useLocalApi) return;
-    await api.update(api.ref(rtdb, "messages/" + handle + "/" + msgId), {
-      read: true,
-    });
+    if (!isReady) await init();
+    if (useLocalApi) return;
+    await withRetry(
+      () =>
+        api.update(api.ref(rtdb, "messages/" + handle + "/" + msgId), {
+          read: true,
+        }),
+      3,
+      "markAsRead",
+    );
   }
 
   async function deleteMessage(handle, msgId, filesMeta) {
-    if (!isReady) return;
+    if (!isReady) await init();
     if (useLocalApi) {
       await localFetch(
         "/api/messages/" + encodeURIComponent(handle) + "/" + msgId,
-        { method: "DELETE" },
+        {
+          method: "DELETE",
+        },
       );
       return;
     }
-    await api.remove(api.ref(rtdb, "messages/" + handle + "/" + msgId));
+    await withRetry(
+      () => api.remove(api.ref(rtdb, "messages/" + handle + "/" + msgId)),
+      3,
+      "deleteMessage",
+    );
     if (filesMeta) {
       for (let i = 0; i < filesMeta.length; i++) {
-        await api.remove(api.ref(rtdb, `file_chunks/${msgId}/${i}`));
+        try {
+          await api.remove(api.ref(rtdb, `file_chunks/${msgId}/${i}`));
+        } catch {}
       }
     }
   }

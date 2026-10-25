@@ -668,17 +668,6 @@
                             ></h2>
                         </div>
 
-                        <!-- Sender hint banner (hidden unless a hint was attached) -->
-                        <div
-                            id="hint-banner"
-                            class="hidden bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 border-b border-purple-200 dark:border-purple-800 px-5 py-3 text-center"
-                        >
-                            <p
-                                id="hint-text"
-                                class="text-sm font-bold text-gray-700 dark:text-gray-300"
-                            ></p>
-                        </div>
-
                         <div
                             class="p-8 text-center min-h-[160px] flex flex-col items-center justify-center gap-4"
                         >
@@ -1207,34 +1196,6 @@
             let unsubscribeRTDB = null;
             let galleryImages = [];
 
-            /* ============ SENDER HINT METADATA (display side) ============ */
-            const HINT_EMOJIS = {
-                friend: "👋",
-                crush: "💘",
-                classmate: "🎓",
-                coworker: "💼",
-                family: "👨‍👩‍👧",
-                stranger: "👤",
-                admirer: "🌹",
-                custom: "✨",
-            };
-            const HINT_LABELS = {
-                friend: "A friend",
-                crush: "Your crush",
-                classmate: "A classmate",
-                coworker: "A coworker",
-                family: "A family member",
-                stranger: "A stranger",
-                admirer: "A secret admirer",
-            };
-
-            function timeOfDayLabel(hour) {
-                if (hour >= 5 && hour < 12) return "morning";
-                if (hour >= 12 && hour < 17) return "afternoon";
-                if (hour >= 17 && hour < 21) return "evening";
-                return "late night";
-            }
-
             // --- SYSTEM THEME ---
             function applyTheme(theme) {
                 if (theme === "system") {
@@ -1271,7 +1232,6 @@
 
             // --- INIT ---
             window.addEventListener("DOMContentLoaded", async () => {
-                // Clear any leftover disguise state from older installs
                 localStorage.removeItem("ngl_disguise");
 
                 const savedTheme =
@@ -1719,44 +1679,6 @@
                 container.innerHTML = html;
             }
 
-            /* ============ RENDER SENDER HINT BANNER ============ */
-            function renderHint(msg) {
-                const banner = document.getElementById("hint-banner");
-                const textEl = document.getElementById("hint-text");
-
-                if (!msg.hint) {
-                    banner.classList.add("hidden");
-                    return;
-                }
-
-                const parts = [];
-                const h = msg.hint;
-
-                if (h.customText) {
-                    parts.push(`${HINT_EMOJIS.custom} ${h.customText}`);
-                } else if (h.relation && HINT_LABELS[h.relation]) {
-                    const emoji = HINT_EMOJIS[h.relation] || "✨";
-                    parts.push(`${emoji} ${HINT_LABELS[h.relation]}`);
-                }
-
-                if (h.device) {
-                    parts.push(h.device);
-                }
-
-                if (msg.createdAt) {
-                    const hour = new Date(msg.createdAt).getHours();
-                    parts.push(timeOfDayLabel(hour));
-                }
-
-                if (parts.length === 0) {
-                    banner.classList.add("hidden");
-                    return;
-                }
-
-                textEl.textContent = parts.join(" · ");
-                banner.classList.remove("hidden");
-            }
-
             async function openMessage(id) {
                 activeMessageId = id;
                 currentIndex = currentMessages.findIndex((m) => m.id === id);
@@ -1773,8 +1695,6 @@
                     currentUser.prompt || DEFAULT_PROMPT;
                 document.getElementById("reply-message-text").textContent =
                     msg.text || "";
-
-                renderHint(msg);
 
                 const attachContainer =
                     document.getElementById("reply-attachments");

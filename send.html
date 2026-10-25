@@ -53,7 +53,6 @@
                 padding-bottom: env(safe-area-inset-bottom, 0px);
                 overflow-x: hidden;
             }
-
             @keyframes shake-expand {
                 0%,
                 100% {
@@ -82,7 +81,6 @@
             .shake-expand-once {
                 animation: shake-expand 1.2s ease-in-out 1;
             }
-
             @keyframes cardIn {
                 from {
                     opacity: 0;
@@ -95,28 +93,6 @@
             }
             .card-in {
                 animation: cardIn 0.28s ease-out;
-            }
-
-            /* Hint picker chips */
-            .hint-chip {
-                padding: 8px 14px;
-                border-radius: 9999px;
-                font-size: 13px;
-                font-weight: 700;
-                background: #f1f3f5;
-                color: #495057;
-                border: 2px solid transparent;
-                transition: all 0.15s;
-                cursor: pointer;
-                user-select: none;
-            }
-            .hint-chip:active {
-                transform: scale(0.95);
-            }
-            .hint-chip.selected {
-                background: linear-gradient(135deg, #fa0f5c, #ff5100);
-                color: #fff;
-                border-color: #fa0f5c;
             }
         </style>
     </head>
@@ -247,104 +223,6 @@
                             class="hidden"
                         />
                     </div>
-
-                    <!-- ============ SENDER HINT (OPTIONAL) ============ -->
-                    <div class="mt-1">
-                        <button
-                            type="button"
-                            id="hint-toggle"
-                            class="w-full text-left flex items-center justify-between px-1 py-1.5"
-                        >
-                            <span
-                                class="text-xs font-extrabold text-slate-500 uppercase tracking-wide"
-                                >Give a hint about you (optional)</span
-                            >
-                            <span
-                                id="hint-chevron"
-                                class="text-slate-400 transition-transform"
-                                >▼</span
-                            >
-                        </button>
-
-                        <div id="hint-panel" class="hidden mt-2">
-                            <p
-                                class="text-xs font-bold text-slate-400 mb-2 px-1"
-                            >
-                                Who are you to them?
-                            </p>
-                            <div class="flex flex-wrap gap-2 px-1">
-                                <button
-                                    type="button"
-                                    class="hint-chip"
-                                    data-relation="friend"
-                                >
-                                    👋 Friend
-                                </button>
-                                <button
-                                    type="button"
-                                    class="hint-chip"
-                                    data-relation="crush"
-                                >
-                                    💘 Crush
-                                </button>
-                                <button
-                                    type="button"
-                                    class="hint-chip"
-                                    data-relation="classmate"
-                                >
-                                    🎓 Classmate
-                                </button>
-                                <button
-                                    type="button"
-                                    class="hint-chip"
-                                    data-relation="coworker"
-                                >
-                                    💼 Coworker
-                                </button>
-                                <button
-                                    type="button"
-                                    class="hint-chip"
-                                    data-relation="family"
-                                >
-                                    👨‍👩‍👧 Family
-                                </button>
-                                <button
-                                    type="button"
-                                    class="hint-chip"
-                                    data-relation="stranger"
-                                >
-                                    👤 Stranger
-                                </button>
-                                <button
-                                    type="button"
-                                    class="hint-chip"
-                                    data-relation="admirer"
-                                >
-                                    🌹 Admirer
-                                </button>
-                            </div>
-
-                            <p
-                                class="text-xs font-bold text-slate-400 mt-4 mb-2 px-1"
-                            >
-                                Or type your own hint
-                            </p>
-                            <input
-                                type="text"
-                                id="custom-hint"
-                                maxlength="40"
-                                placeholder="e.g. someone from your chem class"
-                                class="w-full bg-[#f4f5f8] rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 placeholder:text-slate-400 outline-none border-2 border-transparent focus:border-[#fa0f5c]"
-                            />
-
-                            <p
-                                class="text-[10px] text-slate-400 font-medium mt-2 px-1 leading-relaxed"
-                            >
-                                This hint is shown to the recipient as-is. You
-                                can leave this empty for total anonymity.
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </form>
 
@@ -361,7 +239,6 @@
             >
                 0/500
             </p>
-
             <p
                 id="load-status"
                 class="text-white/90 text-xs font-bold text-center mb-3 min-h-[1em] tracking-wide"
@@ -426,8 +303,9 @@
                     href="/"
                     id="own-link-btn"
                     class="w-full bg-slate-100 text-slate-800 font-bold py-4 rounded-full text-sm text-center block shake-expand"
-                    >Get your own NGL link</a
                 >
+                    Get your own NGL link
+                </a>
             </div>
         </div>
 
@@ -443,41 +321,13 @@
             let files = [];
             let isReady = false;
             let loadId = 0;
-            let selectedRelation = null;
             const $ = (id) => document.getElementById(id);
 
             if (!targetHandle) window.location.href = "/";
 
-            /* =====================================================
-               SAFE SENDER HINT METADATA
-               Captured client-side only. Non-identifying.
-            ===================================================== */
-            function detectDeviceClass() {
-                const ua = navigator.userAgent || "";
-                if (/iPad|Tablet|PlayBook|Silk/i.test(ua)) return "tablet";
-                if (/Mobi|Android|iPhone|iPod|BlackBerry|IEMobile/i.test(ua))
-                    return "mobile";
-                return "desktop";
-            }
+            /* Pre-warm firebase so sendMessage is instant once the user taps Send */
+            const bootPromise = Backend.init();
 
-            function buildHint() {
-                const customText = ($("custom-hint").value || "").trim();
-                const hint = {};
-                if (selectedRelation) hint.relation = selectedRelation;
-                if (customText) hint.customText = customText.slice(0, 40);
-                hint.device = detectDeviceClass();
-                // Time-of-day is derived from createdAt on the recipient side,
-                // so no timezone info leaks. We only need to send the hint.
-                if (!hint.relation && !hint.customText) {
-                    // Still attach device class — free flavor, zero exposure
-                    return { device: hint.device };
-                }
-                return hint;
-            }
-
-            /* =====================================================
-               TIMEOUT
-            ===================================================== */
             function withTimeout(promise, ms, label) {
                 return Promise.race([
                     promise,
@@ -496,14 +346,13 @@
             }
 
             /* =====================================================
-               SESSION CACHE
+               CACHE — 24 h localStorage. Return visitors are instant.
             ===================================================== */
-            const CACHE_TTL = 2 * 60 * 1000;
+            const CACHE_TTL = 24 * 60 * 60 * 1000;
             const cacheKey = (h) => `ngl_profile_cache_${h}`;
-
             function readCache(handle) {
                 try {
-                    const raw = sessionStorage.getItem(cacheKey(handle));
+                    const raw = localStorage.getItem(cacheKey(handle));
                     if (!raw) return null;
                     const { data, ts } = JSON.parse(raw);
                     if (Date.now() - ts > CACHE_TTL) return null;
@@ -514,7 +363,7 @@
             }
             function writeCache(handle, data) {
                 try {
-                    sessionStorage.setItem(
+                    localStorage.setItem(
                         cacheKey(handle),
                         JSON.stringify({ data, ts: Date.now() }),
                     );
@@ -522,7 +371,7 @@
             }
             function clearCache(handle) {
                 try {
-                    sessionStorage.removeItem(cacheKey(handle));
+                    localStorage.removeItem(cacheKey(handle));
                 } catch {}
             }
 
@@ -573,8 +422,8 @@
                 canvas.style.cssText =
                     "position:fixed;inset:0;pointer-events:none;z-index:99999";
                 const DPR = window.devicePixelRatio || 1;
-                const W = window.innerWidth;
-                const H = window.innerHeight;
+                const W = window.innerWidth,
+                    H = window.innerHeight;
                 canvas.width = W * DPR;
                 canvas.height = H * DPR;
                 canvas.style.width = W + "px";
@@ -710,53 +559,12 @@
             });
 
             /* =====================================================
-               HINT PICKER
-            ===================================================== */
-            $("hint-toggle").addEventListener("click", () => {
-                const panel = $("hint-panel");
-                const chev = $("hint-chevron");
-                const open = !panel.classList.contains("hidden");
-                panel.classList.toggle("hidden", open);
-                chev.style.transform = open ? "" : "rotate(180deg)";
-            });
-
-            document.querySelectorAll(".hint-chip").forEach((chip) => {
-                chip.addEventListener("click", () => {
-                    const rel = chip.dataset.relation;
-                    if (selectedRelation === rel) {
-                        // Deselect
-                        chip.classList.remove("selected");
-                        selectedRelation = null;
-                    } else {
-                        document
-                            .querySelectorAll(".hint-chip")
-                            .forEach((c) => c.classList.remove("selected"));
-                        chip.classList.add("selected");
-                        selectedRelation = rel;
-                        // Clear custom text if a relation is picked
-                        $("custom-hint").value = "";
-                    }
-                });
-            });
-
-            $("custom-hint").addEventListener("input", () => {
-                // Clear selected relation if user types a custom hint
-                if ($("custom-hint").value.trim()) {
-                    selectedRelation = null;
-                    document
-                        .querySelectorAll(".hint-chip")
-                        .forEach((c) => c.classList.remove("selected"));
-                }
-            });
-
-            /* =====================================================
                SEND
             ===================================================== */
             $("send-btn").addEventListener("click", async () => {
                 if (!isReady) return;
 
                 const text = $("msg-input").value.trim();
-
                 if (!text && files.length === 0) {
                     $("send-btn").classList.add("shake-expand-once");
                     setTimeout(
@@ -771,11 +579,9 @@
                 $("send-btn").disabled = true;
 
                 try {
-                    const hint = buildHint();
                     await Backend.sendMessage(targetHandle, {
                         text: text.slice(0, 500),
                         files,
-                        hint,
                     });
 
                     $("sender-wrap").classList.add("hidden");
@@ -784,22 +590,45 @@
                         "@" + recipient.handle + " received your message.";
                     $("success-view").classList.remove("hidden");
                     $("success-view").classList.add("flex");
-
                     burstConfetti();
                 } catch (e) {
-                    console.error(e);
-                    alert("Failed to send. Please try again.");
+                    console.error("[NGL] send failed:", e);
+                    alert("Failed to send. Please tap Send again to retry.");
                     $("send-btn").textContent = "Send!";
                     $("send-btn").disabled = false;
+                    $("send-btn").classList.remove(
+                        "opacity-60",
+                        "cursor-not-allowed",
+                    );
                 }
             });
 
-            $("send-another-btn").addEventListener("click", () =>
-                location.reload(),
-            );
+            /* =====================================================
+               SEND ANOTHER — reset in place, no page reload
+            ===================================================== */
+            function resetSenderForm() {
+                $("msg-input").value = "";
+                $("char-count").textContent = "0/500";
+                files = [];
+                renderFiles();
+                $("file-input").value = "";
+                $("send-btn").textContent = "Send!";
+                $("send-btn").disabled = false;
+                $("send-btn").classList.remove(
+                    "opacity-60",
+                    "cursor-not-allowed",
+                );
+                $("success-view").classList.add("hidden");
+                $("success-view").classList.remove("flex");
+                $("sender-wrap").classList.remove("hidden");
+                $("sender-wrap").classList.add("flex");
+                window.scrollTo(0, 0);
+                $("msg-input").focus();
+            }
+            $("send-another-btn").addEventListener("click", resetSenderForm);
 
             /* =====================================================
-               RETRY
+               RETRY (when profile load fails)
             ===================================================== */
             function retryLoad() {
                 clearCache(targetHandle);
@@ -817,36 +646,29 @@
 
                 status.classList.remove("hidden");
                 retry.classList.add("hidden");
-                status.textContent = "Loading profile…";
 
                 const cached = readCache(targetHandle);
-                if (cached) {
+                if (cached && !cached.paused) {
                     console.info("[NGL] Cache hit for", targetHandle);
                     showRecipient(cached);
-                    (async () => {
-                        try {
-                            const fresh = await withTimeout(
-                                Backend.getProfile(targetHandle),
-                                8000,
-                                "Refresh",
-                            );
+                    bootPromise
+                        .then(() => Backend.getProfile(targetHandle))
+                        .then((fresh) => {
+                            if (!fresh) return;
                             if (
-                                fresh &&
                                 JSON.stringify(fresh) !== JSON.stringify(cached)
                             ) {
                                 writeCache(targetHandle, fresh);
                                 if (myId === loadId) showRecipient(fresh);
                             }
-                        } catch {}
-                    })();
+                        })
+                        .catch(() => {});
                     return;
                 }
 
                 status.textContent = "Connecting…";
-                const initStart = Date.now();
                 try {
-                    await withTimeout(Backend.init(), 8000, "Backend init");
-                    console.info(`[NGL] init took ${Date.now() - initStart}ms`);
+                    await withTimeout(bootPromise, 8000, "Backend init");
                 } catch (e) {
                     console.error("[NGL] init failed:", e);
                     if (myId !== loadId) return;
@@ -856,16 +678,12 @@
                 }
 
                 status.textContent = "Fetching profile…";
-                const fetchStart = Date.now();
                 let result;
                 try {
                     result = await withTimeout(
                         Backend.getProfile(targetHandle),
                         10000,
                         "Profile fetch",
-                    );
-                    console.info(
-                        `[NGL] fetch took ${Date.now() - fetchStart}ms`,
                     );
                 } catch (e) {
                     console.error("[NGL] fetch failed:", e);
@@ -884,7 +702,6 @@
                     $("error-view").classList.add("flex");
                     return;
                 }
-
                 if (result.paused) {
                     $("sender-wrap").classList.add("hidden");
                     $("sender-wrap").classList.remove("flex");
