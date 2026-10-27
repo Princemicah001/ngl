@@ -1,137 +1,105 @@
-// sw.js — NGL service worker
-// Network-first for HTML (fresh deploys activate immediately)
-// Cache-first for static assets (fast loads, offline-capable)
+// sw.js — Service Worker for NGL
+// Must be served from site root with MIME application/javascript
+// Requires HTTPS or localhost
 
-const CACHE = "ngl-v3"; // bump this to force a full cache refresh
-const CORE = [
-  "/",
-  "/index.html",
-  "/app.html",
-  "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
-];
+const CACHE_VERSION = "ngl-v3"; // ← bumped to invalidate stale cache
+const PRECACHE = ["/", "/index.html", "/app.html", "/send.html"];
 
-// ─── Install: precache the shell ─────────────────────────────
+/* ── Install ── */
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE).then((cache) =>
-      // addAll is all-or-nothing, so fall back to individual adds if any file 404s
-      cache.addAll(CORE).catch(async (err) => {
-        console.warn(
-          "[SW] addAll failed, falling back to individual adds:",
-          err?.message,
-        );
-        for (const url of CORE) {
-          try {
-            await cache.add(url);
-          } catch (e) {
-            console.warn("[SW] precache miss:", url, e?.message);
-          }
-        }
-      }),
-    ),
+    caches
+      .open(CACHE_VERSION)
+      .then((cache) => cache.addAll(PRECACHE).catch(() => {})),
   );
 });
 
-// ─── Activate: delete old caches, take control of open tabs ──
+/* ── Activate: drop old caches, take control ── */
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
       .then((keys) =>
         Promise.all(
-          keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)),
+          keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k)),
         ),
       )
       .then(() => self.clients.claim()),
   );
 });
 
-// ─── Fetch: route requests ───────────────────────────────────
+/* ── Fetch: network-first, cache fallback ── */
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-
-  // Only handle GETs, same-origin
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith("/api/")) return;
 
-  // ─── Always network for API (never cache) ───
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      fetch(req).catch(() => new Response("", { status: 503 })),
-    );
-    return;
-  }
-
-  // ─── Network-first for HTML / navigation ───
-  const isHTML =
-    req.mode === "navigate" ||
-    req.destination === "document" ||
-    url.pathname === "/" ||
-    url.pathname.endsWith(".html");
-
-  if (isHTML) {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          if (res && res.status === 200) {
-            const copy = res.clone();
-            caches
-              .open(CACHE)
-              .then((c) => c.put(req, copy))
-              .catch(() => {});
-          }
-          return res;
-        })
-        .catch(() =>
-          caches
-            .match(req)
-            .then((cached) => cached || caches.match("/index.html")),
-        ),
-    );
-    return;
-  }
-
-  // ─── Network-first for manifest + service worker metadata ───
-  // (so a changed manifest is picked up on the very next load)
-  if (url.pathname === "/manifest.json" || url.pathname === "/sw.js") {
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          if (res && res.status === 200) {
-            const copy = res.clone();
-            caches
-              .open(CACHE)
-              .then((c) => c.put(req, copy))
-              .catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => caches.match(req)),
-    );
-    return;
-  }
-
-  // ─── Cache-first for everything else (images, fonts, css, js) ───
   event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req)
-        .then((res) => {
-          // Only cache successful same-origin responses
-          if (res && res.status === 200) {
-            const copy = res.clone();
-            caches
-              .open(CACHE)
-              .then((c) => c.put(req, copy))
-              .catch(() => {});
-          }
-          return res;
-        })
-        .catch(() => cached);
+    fetch(req)
+      .then((res) => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches
+            .open(CACHE_VERSION)
+            .then((c) => c.put(req, clone))
+            .catch(() => {});
+        }
+        return res;
+      })
+      .catch(async () => {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+        return (await caches.match("/index.html")) || Response.error();
+      }),
+  );
+});
+
+/* ── Notification click → focus/open app ── */
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    (async () => {
+      const all = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const c of all) {
+        if (c.url.includes("/app.html") && "focus" in c) {
+          return c.focus();
+        }
+      }
+      for (const c of all) {
+        if ("focus" in c) return c.focus();
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow("/app.html");
+      }
+    })(),
+  );
+});
+
+/* ── Push (future-proof) ── */
+self.addEventListener("push", (event) => {
+  let payload = {
+    title: "New anonymous message!",
+    body: "You have a new message.",
+    tag: "ngl-push",
+  };
+  try {
+    if (event.data) payload = { ...payload, ...event.data.json() };
+  } catch {}
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      tag: payload.tag,
+      icon: "https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png",
+      badge:
+        "https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png",
+      vibrate: [80, 40, 80],
+      renotify: true,
     }),
   );
 });

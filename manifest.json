@@ -1,43 +1,23 @@
 {
-  "id": "/app.html",
-  "name": "NGL - anonymous q&a",
+  "name": "NGL",
   "short_name": "NGL",
-  "description": "NGL is a new way to q&a. Get anonymous messages and play q&a games with your friends.",
   "start_url": "/app.html",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
-  "orientation": "portrait",
   "background_color": "#ee0e6a",
   "theme_color": "#ee0e6a",
-  "categories": ["social", "entertainment"],
-  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-egPfodx4nCsmLZBYThD0s5mwZaFe6lM-etM2KSe-Ag&s",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "purpose": "any maskable"
     }
   ]
 }

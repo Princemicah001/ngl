@@ -1195,6 +1195,125 @@
             let currentIndex = -1;
             let unsubscribeRTDB = null;
             let galleryImages = [];
+            let swRegistration = null;
+
+            /* =====================================================
+               SERVICE WORKER REGISTRATION
+               (registered on every app.html load, not just index)
+            ===================================================== */
+            async function registerSW() {
+                if (!("serviceWorker" in navigator)) {
+                    console.info("[NGL] Service workers not supported");
+                    return null;
+                }
+                try {
+                    swRegistration = await navigator.serviceWorker.register(
+                        "/sw.js",
+                        { scope: "/" },
+                    );
+                    console.info("[NGL] SW registered:", swRegistration.scope);
+                    return swRegistration;
+                } catch (e) {
+                    console.warn("[NGL] SW registration failed:", e);
+                    return null;
+                }
+            }
+
+            /* =====================================================
+               NOTIFICATION DISPATCH — single helper used everywhere
+               Uses SW showNotification when available (required on
+               Android Chrome), falls back to new Notification()
+               on desktop if SW isn't ready.
+            ===================================================== */
+            async function showLocalNotification(title, body, tag) {
+                const options = {
+                    body: body || "You have a new message.",
+                    icon: "https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png",
+                    badge: "https://framerusercontent.com/images/I5OG1V7seR2tatnsaXFQ2fIQpHA.png",
+                    tag: tag || "ngl-msg",
+                    renotify: true,
+                    vibrate: [80, 40, 80],
+                };
+
+                // Preferred path: SW showNotification (works everywhere,
+                // required on Android Chrome)
+                if ("serviceWorker" in navigator) {
+                    try {
+                        const reg = await Promise.race([
+                            swRegistration || navigator.serviceWorker.ready,
+                            new Promise((resolve) =>
+                                setTimeout(() => resolve(null), 1500),
+                            ),
+                        ]);
+                        if (reg && typeof reg.showNotification === "function") {
+                            await reg.showNotification(title, options);
+                            return true;
+                        }
+                    } catch (e) {
+                        console.warn("[NGL] SW showNotification failed:", e);
+                    }
+                }
+
+                // Fallback: new Notification() — desktop only
+                try {
+                    new Notification(title, options);
+                    return true;
+                } catch (e) {
+                    console.warn("[NGL] Notification fallback failed:", e);
+                    return false;
+                }
+            }
+
+            /* Reflect real permission state in Settings UI */
+            function updateNotifStatusUI() {
+                const el = document.getElementById("notif-status");
+                if (!el) return;
+                if (!("Notification" in window)) {
+                    el.textContent = "Not supported";
+                    el.className = "text-sm font-bold text-gray-400";
+                    return;
+                }
+                if (Notification.permission === "granted") {
+                    el.textContent = "On";
+                    el.className = "text-sm font-bold text-green-500";
+                } else if (Notification.permission === "denied") {
+                    el.textContent = "Blocked";
+                    el.className = "text-sm font-bold text-red-500";
+                } else {
+                    el.textContent = "Off";
+                    el.className = "text-sm font-bold text-gray-400";
+                }
+            }
+
+            async function requestNotifs() {
+                if (!("Notification" in window)) {
+                    return showToast("Notifications not supported");
+                }
+                if (Notification.permission === "denied") {
+                    updateNotifStatusUI();
+                    return showToast(
+                        "Blocked in browser settings — enable NGL notifications",
+                    );
+                }
+                try {
+                    const perm = await Notification.requestPermission();
+                    updateNotifStatusUI();
+                    if (perm === "granted") {
+                        showToast("Notifications enabled ✓");
+                        // Fire a test so the user knows it works
+                        await showLocalNotification(
+                            "Notifications enabled",
+                            "You'll be alerted for every new anonymous message.",
+                            "ngl-test",
+                        );
+                    } else {
+                        showToast("Permission not granted");
+                    }
+                } catch (e) {
+                    console.error("[NGL] requestPermission failed:", e);
+                    showToast("Could not enable notifications");
+                }
+            }
 
             // --- SYSTEM THEME ---
             function applyTheme(theme) {
@@ -1237,6 +1356,11 @@
                 const savedTheme =
                     localStorage.getItem("ngl_theme") || "system";
                 applyTheme(savedTheme);
+
+                // Kick off SW registration + reflect real permission state
+                registerSW();
+                updateNotifStatusUI();
+
                 await Backend.init();
                 const savedUser = localStorage.getItem(STORAGE_KEY);
                 if (savedUser) {
@@ -1425,6 +1549,7 @@
                     `${window.location.origin}/send.html?to=${currentUser.handle}`;
 
                 updatePlayCard();
+                updateNotifStatusUI();
 
                 document.getElementById("pause-toggle").checked =
                     currentUser.paused || false;
@@ -1436,22 +1561,34 @@
                     (msgs, meta) => {
                         currentMessages = msgs;
                         renderInbox();
+
                         if (meta && meta.newOnes && meta.newOnes.length > 0) {
                             document
                                 .getElementById("inbox-dot")
                                 .classList.remove("hidden");
-                            if (
-                                "serviceWorker" in navigator &&
-                                Notification.permission === "granted"
-                            ) {
-                                navigator.serviceWorker.ready.then((reg) => {
-                                    meta.newOnes.forEach((m) =>
-                                        reg.showNotification(
-                                            "New anonymous message!",
-                                            { body: m.text || "📎 Attachment" },
-                                        ),
+
+                            // System notification (works while tab is alive)
+                            if (Notification.permission === "granted") {
+                                meta.newOnes.forEach((m) => {
+                                    const body = m.text
+                                        ? m.text.slice(0, 120)
+                                        : "📎 Attachment";
+                                    showLocalNotification(
+                                        "New anonymous message!",
+                                        body,
+                                        `ngl-msg-${m.id}`,
                                     );
                                 });
+                            }
+
+                            // In-app toast — always visible even if OS notif
+                            // permission is denied or blocked
+                            const firstNew = meta.newOnes[0];
+                            if (firstNew) {
+                                const preview = firstNew.text
+                                    ? firstNew.text.slice(0, 40)
+                                    : "📎 New attachment";
+                                showToast(`💌 ${preview}`);
                             }
                         }
                     },
@@ -1847,19 +1984,6 @@
                     );
                 else showView("view-main");
                 renderInbox();
-            }
-
-            function requestNotifs() {
-                if (!("Notification" in window))
-                    return showToast("Not supported in this browser");
-                Notification.requestPermission().then((perm) => {
-                    document.getElementById("notif-status").textContent =
-                        perm === "granted" ? "On" : "Off";
-                    document.getElementById("notif-status").className =
-                        perm === "granted"
-                            ? "text-sm font-bold text-green-500"
-                            : "text-sm font-bold text-gray-400";
-                });
             }
 
             function togglePause(el) {
